@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="baseLayout" spacing="5.0" stylesheets="@../css/style.css"
+      xmlns="http://javafx.com/javafx/9"
+      fx:controller="de.itlobby.discoverj.viewcontroller.ImageSelectionViewController">
+    <children>
+        <VBox fx:id="imgPropLayout" spacing="5.0" VBox.vgrow="NEVER">
+            <children>
+                <CheckBox fx:id="chkSquareImages" mnemonicParsing="false"
+                          text="%imageSelectionService.forceSquareRatio"/>
+                <CheckBox fx:id="chkRemoveTopBottomBorder" mnemonicParsing="false"
+                          text="%imageSelectionService.removeTopAndBottomBorder"/>
+                <CheckBox fx:id="chkRemoveLeftRightBorder" mnemonicParsing="false"
+                          text="%imageSelectionService.removeLeftAndRightBorder"/>
+                <Button fx:id="btnApply" mnemonicParsing="false" text="%Dialog.apply"/>
+            </children>
+        </VBox>
+        <ScrollPane VBox.vgrow="ALWAYS">
+            <content>
+                <FlowPane fx:id="flowPane" hgap="25.0" vgap="25.0">
+                    <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                    </padding>
+                </FlowPane>
+            </content>
+        </ScrollPane>
+    </children>
+</VBox>

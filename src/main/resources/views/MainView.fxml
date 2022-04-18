@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:id="rootLayout" maxHeight="-Infinity" maxWidth="-Infinity"
+            minHeight="-Infinity"
+            minWidth="-Infinity" prefHeight="620.0" prefWidth="640.0" styleClass="app-background"
+            stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/16"
+            fx:controller="de.itlobby.discoverj.viewcontroller.MainViewController">
+
+    <children>
+        <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+              AnchorPane.topAnchor="0.0">
+            <children>
+                <HBox fx:id="hboxMenubar" alignment="CENTER_RIGHT" maxHeight="30.0" minHeight="30.0" prefHeight="30.0"
+                      spacing="5.0" styleClass="top-bar">
+                    <children>
+                        <Button fx:id="btnSendFeedback"/>
+                        <Button fx:id="btnReportBug"/>
+                        <Button fx:id="btnHelpTranslate"/>
+                        <Button fx:id="btnDonate"/>
+                        <Button fx:id="btnOpenAbout"/>
+                        <Button fx:id="btnOpenSettings"/>
+                        <Button fx:id="btnExitApp"/>
+                    </children>
+                    <padding>
+                        <Insets left="5.0" right="5.0"/>
+                    </padding>
+                    <VBox.margin>
+                        <Insets bottom="5.0"/>
+                    </VBox.margin>
+                </HBox>
+                <HBox spacing="5.0" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="0.0"
+                      AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" VBox.vgrow="ALWAYS">
+                    <children>
+                        <VBox prefHeight="200.0" prefWidth="320.0" spacing="5.0" HBox.hgrow="ALWAYS">
+                            <children>
+                                <HBox styleClass="shadow-box">
+                                    <children>
+                                        <GridPane alignment="CENTER" HBox.hgrow="ALWAYS">
+                                            <columnConstraints>
+                                                <ColumnConstraints fillWidth="false" halignment="LEFT" hgrow="NEVER"/>
+                                                <ColumnConstraints fillWidth="false" halignment="LEFT" hgrow="ALWAYS"/>
+                                            </columnConstraints>
+                                            <rowConstraints>
+                                                <RowConstraints minHeight="20.0" prefHeight="20.0" vgrow="SOMETIMES"/>
+                                                <RowConstraints minHeight="20.0" prefHeight="20.0" vgrow="SOMETIMES"/>
+                                                <RowConstraints minHeight="20.0" prefHeight="20.0" vgrow="SOMETIMES"/>
+                                            </rowConstraints>
+                                            <children>
+                                                <Label text="%key.mainview.txtTotalMp3s" GridPane.hgrow="SOMETIMES"/>
+                                                <Label fx:id="txtTotalAudioCount" text="0" GridPane.columnIndex="1"
+                                                       GridPane.hgrow="NEVER">
+                                                    <padding>
+                                                        <Insets left="5.0"/>
+                                                    </padding>
+                                                </Label>
+                                                <Label text="%key.mainview.txtCoverExists" GridPane.rowIndex="1"/>
+                                                <Label fx:id="txtWithCoverAudioCount" text="0" GridPane.columnIndex="1"
+                                                       GridPane.rowIndex="1">
+                                                    <GridPane.margin>
+                                                        <Insets left="5.0"/>
+                                                    </GridPane.margin>
+                                                </Label>
+                                                <Label text="%key.mainview.txtNoCover" GridPane.rowIndex="2"/>
+                                                <Label fx:id="txtWithoutCoverAudioCount" text="0"
+                                                       GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                                    <GridPane.margin>
+                                                        <Insets left="5.0"/>
+                                                    </GridPane.margin>
+                                                </Label>
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                                            </padding>
+                                        </GridPane>
+                                        <Button fx:id="btnFindFolder" HBox.hgrow="NEVER"/>
+                                    </children>
+                                </HBox>
+                                <VBox styleClass="shadow-box" VBox.vgrow="ALWAYS">
+                                    <children>
+                                        <ScrollPane fx:id="spAudioList" fitToHeight="true" fitToWidth="true"
+                                                    hbarPolicy="NEVER" styleClass="transparent-background"
+                                                    VBox.vgrow="ALWAYS">
+                                            <content>
+                                                <VBox fx:id="lwAudioList" styleClass="transparent-background"
+                                                      VBox.vgrow="ALWAYS"/>
+                                            </content>
+                                        </ScrollPane>
+                                    </children>
+                                    <VBox.margin>
+                                        <Insets bottom="5.0"/>
+                                    </VBox.margin>
+                                </VBox>
+                            </children>
+                            <HBox.margin>
+                                <Insets left="5.0"/>
+                            </HBox.margin>
+                        </VBox>
+                        <VBox minWidth="250.0" spacing="5.0" HBox.hgrow="ALWAYS">
+                            <HBox.margin>
+                                <Insets right="5.0"/>
+                            </HBox.margin>
+                            <children>
+                                <VBox styleClass="shadow-box" VBox.vgrow="ALWAYS">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" maxHeight="25.0" minHeight="25.0"
+                                              prefHeight="25.0" styleClass="top-bar">
+                                            <children>
+                                                <Label text="%key.mainview.mp3Information" textFill="WHITE">
+                                                    <font>
+                                                        <Font size="14.0"/>
+                                                    </font>
+                                                    <HBox.margin>
+                                                        <Insets left="5.0"/>
+                                                    </HBox.margin>
+                                                </Label>
+                                            </children>
+                                        </HBox>
+                                        <GridPane hgap="2.0" styleClass="white-background" vgap="2.0">
+                                            <columnConstraints>
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="145.0" minWidth="10.0"
+                                                                   prefWidth="98.0"/>
+                                                <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308"
+                                                                   minWidth="10.0" prefWidth="233.0"/>
+                                            </columnConstraints>
+                                            <rowConstraints>
+                                                <RowConstraints minHeight="10.0" prefHeight="25.0" vgrow="NEVER"/>
+                                                <RowConstraints minHeight="10.0" prefHeight="25.0" vgrow="NEVER"/>
+                                                <RowConstraints minHeight="10.0" prefHeight="25.0" vgrow="NEVER"/>
+                                                <RowConstraints minHeight="10.0" prefHeight="25.0" vgrow="NEVER"/>
+                                                <RowConstraints/>
+                                            </rowConstraints>
+                                            <children>
+                                                <Label text="%key.mainview.mp3Information.filename"/>
+                                                <Label fx:id="txtFilename" GridPane.columnIndex="1"/>
+                                                <Label text="%key.mainview.mp3Information.artist"
+                                                       GridPane.rowIndex="1"/>
+                                                <Label fx:id="txtArtist" GridPane.columnIndex="1"
+                                                       GridPane.rowIndex="1"/>
+                                                <Label text="%key.mainview.mp3Information.title" GridPane.rowIndex="2"/>
+                                                <Label fx:id="txtTitle" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                                                <Label text="%key.mainview.mp3Information.album" GridPane.rowIndex="3"/>
+                                                <HBox spacing="10.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS"
+                                                      GridPane.rowIndex="3">
+                                                    <children>
+                                                        <Label fx:id="txtAlbum" HBox.hgrow="ALWAYS"/>
+                                                        <Label fx:id="txtIsMixCD" visible="false"
+                                                               HBox.hgrow="SOMETIMES"/>
+                                                    </children>
+                                                </HBox>
+                                                <VBox GridPane.rowIndex="4">
+                                                    <children>
+                                                        <Label text="%key.mainview.mp3Information.cover"/>
+                                                    </children>
+                                                </VBox>
+                                                <VBox GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                                    <GridPane.margin>
+                                                        <Insets/>
+                                                    </GridPane.margin>
+                                                    <children>
+                                                        <HBox spacing="5.0">
+                                                            <children>
+                                                                <VBox spacing="5.0">
+                                                                    <children>
+                                                                        <Button fx:id="btnRemoveCover"/>
+                                                                        <Button fx:id="btnCopyCoverToClipBrd"/>
+                                                                        <Button fx:id="btnOpenGoogleImageSearch"/>
+                                                                    </children>
+                                                                </VBox>
+                                                                <ImageView fx:id="imgCurrentCover" fitHeight="200.0"
+                                                                           fitWidth="200.0" pickOnBounds="true"
+                                                                           preserveRatio="true">
+                                                                    <cursor>
+                                                                        <Cursor fx:constant="HAND"/>
+                                                                    </cursor>
+                                                                </ImageView>
+                                                            </children>
+                                                        </HBox>
+                                                        <Label fx:id="txtCurrentAudioCoverRes" alignment="CENTER"
+                                                               contentDisplay="CENTER" styleClass="text-centered"/>
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                            <padding>
+                                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                                            </padding>
+                                        </GridPane>
+                                    </children>
+                                </VBox>
+                                <AnchorPane styleClass="shadow-box" VBox.vgrow="SOMETIMES">
+                                    <children>
+                                        <Label fx:id="txtNewCoverResolution" alignment="CENTER" contentDisplay="CENTER"
+                                               textAlignment="CENTER" AnchorPane.leftAnchor="0.0"
+                                               AnchorPane.topAnchor="0.0"/>
+                                        <ImageView fx:id="imgNewCover" fitHeight="250.0" fitWidth="250.0"
+                                                   preserveRatio="true" styleClass="material-shadow"
+                                                   AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0"/>
+                                    </children>
+                                    <VBox.margin>
+                                        <Insets bottom="5.0"/>
+                                    </VBox.margin>
+                                    <padding>
+                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                                    </padding>
+                                </AnchorPane>
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+                <AnchorPane maxHeight="25.0" minHeight="25.0" prefHeight="25.0">
+                    <children>
+                        <ProgressBar fx:id="pbStatus" maxHeight="25.0" maxWidth="Infinity" minHeight="25.0"
+                                     prefHeight="25.0" progress="0.0" AnchorPane.bottomAnchor="0.0"
+                                     AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                     AnchorPane.topAnchor="0.0"/>
+                        <Label fx:id="txtCurrentState" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" text="0"
+                               AnchorPane.leftAnchor="5.0">
+                            <rotationAxis>
+                                <Point3D z="2.0"/>
+                            </rotationAxis>
+                        </Label>
+                        <Label fx:id="txtMaxState" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" text="0"
+                               AnchorPane.rightAnchor="5.0"/>
+                    </children>
+                </AnchorPane>
+                <HBox maxHeight="25.0" minHeight="25.0" prefHeight="25.0" styleClass="bottom-bar"
+                      AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                      VBox.vgrow="NEVER">
+                    <children>
+                        <Label fx:id="txtState" maxWidth="1.7976931348623157E308" prefHeight="25.0" textFill="WHITE"
+                               HBox.hgrow="ALWAYS">
+                            <HBox.margin>
+                                <Insets left="5.0"/>
+                            </HBox.margin>
+                        </Label>
+                        <AnchorPane>
+                            <children>
+                                <ProgressBar fx:id="pbJavaMemory" progress="0.0" AnchorPane.bottomAnchor="0.0"
+                                             AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                                <Label fx:id="txtJavaCurrentMem" AnchorPane.bottomAnchor="2.0"
+                                       AnchorPane.leftAnchor="2.0" AnchorPane.topAnchor="2.0"/>
+                                <Label fx:id="txtJavaMaxMem" AnchorPane.bottomAnchor="2.0" AnchorPane.rightAnchor="2.0"
+                                       AnchorPane.topAnchor="2.0"/>
+                            </children>
+                        </AnchorPane>
+                    </children>
+                    <rotationAxis>
+                        <Point3D/>
+                    </rotationAxis>
+                </HBox>
+            </children>
+        </VBox>
+        <HBox fx:id="multiSelectionLayout" alignment="CENTER" layoutX="10.0" layoutY="10.0" prefHeight="50.0"
+              prefWidth="200.0" style="-fx-background-color: rgba(0, 0, 0, 0.8);" visible="false"
+              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0"/>
+
+        <StackPane layoutX="10.0" layoutY="10.0" AnchorPane.bottomAnchor="25.0" AnchorPane.rightAnchor="25.0">
+            <children>
+                <Button fx:id="btnActionCircle" styleClass="font-button">
+                    <graphic>
+                    </graphic>
+                </Button>
+                <Button fx:id="btnActionCircleIcon" styleClass="font-button">
+                    <graphic>
+                    </graphic>
+                </Button>
+            </children>
+        </StackPane>
+        <HBox fx:id="lightBoxLayout" alignment="CENTER" style="-fx-background-color: rgba(0, 0, 0, 0.8);"
+              visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+              AnchorPane.topAnchor="0.0"/>
+
+    </children>
+</AnchorPane>

@@ -1,0 +1,12 @@
+# Folder
+.idea
+out
+target
+binary
+setup
+jdeploy*
+
+# File types
+*.orig
+*.log
+*.iml

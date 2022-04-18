@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" prefHeight="250.0" prefWidth="300.0" spacing="5.0"
+      styleClass="white-background"
+      stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/16"
+      fx:controller="de.itlobby.discoverj.viewcontroller.UpdateViewController">
+    <children>
+        <TextFlow VBox.vgrow="NEVER">
+            <children>
+                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%MainController.updateMessage"/>
+            </children>
+            <VBox.margin>
+                <Insets left="5.0" right="5.0"/>
+            </VBox.margin>
+        </TextFlow>
+        <TextFlow VBox.vgrow="ALWAYS">
+            <VBox.margin>
+                <Insets left="5.0" right="5.0"/>
+            </VBox.margin>
+            <children>
+                <Text fx:id="txtChangelog" strokeType="OUTSIDE" strokeWidth="0.0"/>
+            </children>
+        </TextFlow>
+        <VBox VBox.vgrow="NEVER">
+            <children>
+                <ProgressBar fx:id="pbDownloadStatus" prefHeight="25.0" prefWidth="Infinity" progress="0.0"/>
+                <HBox fx:id="buttonLayout" alignment="CENTER">
+                    <children>
+                        <Button fx:id="btnNo" cancelButton="true" mnemonicParsing="false" styleClass="dialog-button"
+                                text="%dialog.no" HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="btnYes" defaultButton="true" mnemonicParsing="false" styleClass="dialog-button"
+                                text="%dialog.yes" HBox.hgrow="ALWAYS"/>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</VBox>

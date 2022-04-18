@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            prefHeight="635.0" prefWidth="648.0" styleClass="app-background"
+            stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/16"
+            fx:controller="de.itlobby.discoverj.viewcontroller.SettingsViewController">
+    <children>
+        <TabPane layoutX="5.0" layoutY="55.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0"
+                 AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <tabs>
+                <Tab text="%key.settingsview.tabs.General">
+                    <content>
+                        <GridPane layoutX="29.0" layoutY="52.0" style="-fx-background-color: white;" vgap="5.0"
+                                  AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="5.0"
+                                  AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="55.0">
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="356.0" minWidth="10.0"
+                                                   prefWidth="294.0"/>
+                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0"
+                                                   prefWidth="296.0"/>
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="80.0"
+                                                vgrow="ALWAYS"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="56.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="115.0" minHeight="10.0" prefHeight="40.0"/>
+                                <RowConstraints maxHeight="115.0" minHeight="10.0" prefHeight="61.0"/>
+                                <RowConstraints maxHeight="98.0" minHeight="10.0" prefHeight="40.0"/>
+                                <RowConstraints maxHeight="98.0" minHeight="10.0" prefHeight="40.0"/>
+                                <RowConstraints maxHeight="98.0" minHeight="10.0" prefHeight="40.0"/>
+                            </rowConstraints>
+                            <children>
+                                <Label text="%key.settingsview.settings.general.overwriteCovers"/>
+                                <CheckBox fx:id="chkOverwriteCover" mnemonicParsing="false" GridPane.columnIndex="1"/>
+                                <Label text="%key.settingsview.settings.general.minCoverSize" GridPane.rowIndex="2"/>
+                                <TextField fx:id="txtMinCoverSize" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                                <Label text="%key.settingsview.settings.general.searchEngineOrder"
+                                       GridPane.rowIndex="4"/>
+                                <FlowPane fx:id="flowPaneSettingsSearchMachineOrder" prefHeight="100.0"
+                                          prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                                <Label text="%key.settingsview.settings.general.language" GridPane.rowIndex="5"/>
+                                <ComboBox fx:id="cmbLanguage" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                                <Label text="%key.settingsview.settings.general.searchTimeout" GridPane.rowIndex="6"/>
+                                <TextField fx:id="txtSearchTimeout" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+                                <Label text="%key.settingsview.settings.general.maxCoverSize" GridPane.rowIndex="3"/>
+                                <Label text="%key.settingsview.settings.general.overwriteOnlyHigher"
+                                       GridPane.rowIndex="1"/>
+                                <CheckBox fx:id="chkOverwriteOnlyHigher" mnemonicParsing="false"
+                                          GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                                <Label text="%key.settingsview.settings.google.manualSearch" GridPane.rowIndex="7"/>
+                                <CheckBox fx:id="chkGeneralManualImageSelection" mnemonicParsing="false"
+                                          GridPane.columnIndex="1" GridPane.rowIndex="7"/>
+                                <Label text="%key.settingsview.settings.autoLastMp3" wrapText="true"
+                                       GridPane.rowIndex="9"/>
+                                <CheckBox fx:id="chkGeneralAutoLastAudio" mnemonicParsing="false"
+                                          GridPane.columnIndex="1" GridPane.rowIndex="9"/>
+                                <Label text="%key.settingsview.settings.general.primarySingleCover" wrapText="true"
+                                       GridPane.rowIndex="8"/>
+                                <CheckBox fx:id="chkGeneralPrimarySingleCover" mnemonicParsing="false"
+                                          GridPane.columnIndex="1" GridPane.rowIndex="8"/>
+                                <TextField fx:id="txtMaxCoverSize" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                            </children>
+                            <padding>
+                                <Insets bottom="30.0" left="5.0" right="5.0" top="5.0"/>
+                            </padding>
+                        </GridPane>
+                    </content>
+                </Tab>
+                <Tab text="%key.settingsview.tabs.searX">
+                    <content>
+                        <GridPane style="-fx-background-color: white;" vgap="5.0">
+                            <children>
+                                <Label text="%key.settingsview.settings.searx.searchPattern" GridPane.rowIndex="1"/>
+                                <TextField fx:id="txtGoogleSearchPattern" GridPane.columnIndex="1"
+                                           GridPane.rowIndex="1"/>
+                                <Label text="%key.settingsview.settings.google.pattern.description"
+                                       GridPane.columnSpan="2" GridPane.rowIndex="2" GridPane.rowSpan="3"/>
+                                <Label fx:id="txtFindCustomSearxInstance"
+                                       text="%key.settingsview.settings.searx.customHostEnabled" underline="true"
+                                       GridPane.rowIndex="5">
+                                    <cursor>
+                                        <Cursor fx:constant="HAND"/>
+                                    </cursor>
+                                </Label>
+                                <CheckBox fx:id="chkUseCustomSearxInstance" mnemonicParsing="false"
+                                          GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                                <Label text="%key.settingsview.settings.searx.customHost" GridPane.rowIndex="6"/>
+                                <HBox spacing="10.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS"
+                                      GridPane.rowIndex="6">
+                                    <children>
+                                        <TextField fx:id="txtCustomSearxInstance" HBox.hgrow="ALWAYS"/>
+                                        <Button fx:id="btnCheckHoster" mnemonicParsing="false"/>
+                                    </children>
+                                    <GridPane.margin>
+                                        <Insets left="5.0" right="5.0"/>
+                                    </GridPane.margin>
+                                </HBox>
+                                <TextFlow prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1"
+                                          GridPane.hgrow="ALWAYS" GridPane.rowIndex="7">
+                                    <children>
+                                        <Text fx:id="txtSearxHosterValid" strokeType="OUTSIDE" strokeWidth="0.0"/>
+                                    </children>
+                                </TextFlow>
+                            </children>
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="270.0" minWidth="10.0"
+                                                   prefWidth="270.0"/>
+                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0"
+                                                   prefWidth="368.0"/>
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="200.0" minHeight="10.0" prefHeight="200.0" vgrow="NEVER"/>
+                            </rowConstraints>
+                            <padding>
+                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                            </padding>
+                        </GridPane>
+                    </content>
+                </Tab>
+                <Tab text="%key.settingsview.tabs.discogs">
+                    <content>
+                        <GridPane style="-fx-background-color: white;" vgap="5.0">
+                            <children>
+                                <Label text="%key.settingsview.settings.discogs.useCountry" GridPane.rowIndex="1"/>
+                                <CheckBox fx:id="chkDiscogsUseYear" mnemonicParsing="false" GridPane.columnIndex="1"/>
+                                <Label text="%key.settingsview.settings.discogs.useYear"/>
+                                <CheckBox fx:id="chkDiscogsUseCountry" mnemonicParsing="false" GridPane.columnIndex="1"
+                                          GridPane.rowIndex="1"/>
+                                <Label text="%key.settingsview.settings.discogs.country" GridPane.rowIndex="2"/>
+                                <TextField fx:id="txtDiscogsCountry" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                            </children>
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="415.0" minWidth="10.0"
+                                                   prefWidth="303.0"/>
+                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0"
+                                                   prefWidth="287.0"/>
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                            </rowConstraints>
+                            <padding>
+                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                            </padding>
+                        </GridPane>
+                    </content>
+                </Tab>
+                <Tab text="%key.settingsview.tabs.Local">
+                    <content>
+                        <GridPane style="-fx-background-color: white;" vgap="5.0">
+                            <children>
+                                <Label text="%key.settingsview.settings.local.additionalPath" GridPane.rowIndex="1"/>
+                                <TextField fx:id="txtLocalAdditionalFolderPath" GridPane.columnIndex="1"
+                                           GridPane.rowIndex="1"/>
+                                <Label text="%key.settingsview.settings.local.namePattern" GridPane.rowIndex="2"/>
+                                <TextField fx:id="txtLocalNamePattern" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                                <Label text="%key.settingsview.settings.local.description"
+                                       GridPane.columnSpan="2147483647" GridPane.rowIndex="3" GridPane.rowSpan="3"/>
+                                <Label text="%key.settingsview.settings.local.scan.audio.files" wrapText="true"
+                                       GridPane.rowIndex="6"/>
+                                <Label text="%key.settingsview.settings.local.match.audiofiles.with.tag" wrapText="true"
+                                       GridPane.rowIndex="7"/>
+                                <VBox fx:id="layoutAudioFileMatch" alignment="CENTER_LEFT" spacing="5.0"
+                                      GridPane.columnIndex="1" GridPane.rowIndex="7">
+                                    <children>
+                                        <CheckBox fx:id="chkLocalMatchAlbum" mnemonicParsing="false"
+                                                  text="%key.settingsview.settings.local.album"/>
+                                        <CheckBox fx:id="chkLocalMatchAlbumArtist" mnemonicParsing="false"
+                                                  text="%key.settingsview.settings.local.album.artist"/>
+                                        <CheckBox fx:id="chkLocalMatchYear" mnemonicParsing="false"
+                                                  text="%key.settingsview.settings.local.year"/>
+                                    </children>
+                                </VBox>
+                                <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0"
+                                      GridPane.columnIndex="1" GridPane.rowIndex="6">
+                                    <children>
+                                        <CheckBox fx:id="chkLocalScanAudiofiles" mnemonicParsing="false"/>
+                                        <Label text="%key.settingsview.settings.local.match.audio.warning"
+                                               textFill="RED" wrapText="true"/>
+                                    </children>
+                                </HBox>
+                            </children>
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="215.0" minWidth="10.0"
+                                                   prefWidth="201.0"/>
+                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0"
+                                                   prefWidth="289.0"/>
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="80.0" minHeight="10.0" prefHeight="80.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="0.0" prefHeight="0.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                            </rowConstraints>
+                            <padding>
+                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                            </padding>
+                        </GridPane>
+                    </content>
+                </Tab>
+                <Tab text="%key.settingsview.tabs.Proxy">
+                    <content>
+                        <GridPane style="-fx-background-color: white;" vgap="5.0">
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.0" minWidth="10.0"
+                                                   prefWidth="200.0"/>
+                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0"/>
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                                <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="NEVER"/>
+                            </rowConstraints>
+                            <children>
+                                <Label text="%key.settingsview.settings.proxy.activate"/>
+                                <CheckBox fx:id="chkProxyActive" mnemonicParsing="false" GridPane.columnIndex="1"/>
+                                <Label text="%key.settingsview.settings.proxy.serverUrl" GridPane.rowIndex="1"/>
+                                <TextField fx:id="txtProxyUrl" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                                <Label text="%key.settingsview.settings.proxy.port" GridPane.rowIndex="2"/>
+                                <TextField fx:id="txtProxyPort" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                                <Label text="%key.settingsview.settings.proxy.username" GridPane.rowIndex="3"/>
+                                <TextField fx:id="txtProxyUser" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                                <Label text="%key.settingsview.settings.proxy.password" GridPane.rowIndex="4"/>
+                                <PasswordField fx:id="txtProxyPassword" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                            </children>
+                            <padding>
+                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                            </padding>
+                        </GridPane>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+        <HBox fx:id="buttonLayout" alignment="CENTER" prefHeight="30.0" AnchorPane.bottomAnchor="0.0"
+              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+            <children>
+                <Button fx:id="btnCancel" mnemonicParsing="false" styleClass="dialog-button"
+                        text="%key.settingsview.btnCancel" HBox.hgrow="ALWAYS"/>
+                <Button fx:id="btnSave" minWidth="-Infinity" mnemonicParsing="false" styleClass="dialog-button"
+                        text="%key.settingsview.btnSave" HBox.hgrow="ALWAYS">
+                    <HBox.margin>
+                        <Insets/>
+                    </HBox.margin>
+                </Button>
+            </children>
+        </HBox>
+    </children>
+</AnchorPane>

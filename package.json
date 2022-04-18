@@ -1,0 +1,31 @@
+{
+  "bin": {
+    "disCoverJ": "jdeploy-bundle/jdeploy.js"
+  },
+  "author": "Rouven Himmelstein",
+  "description": "With disCoverJ you can add cover images from various search engines to your audio files. Just drag and drop the files into the program and press the search button. disCoverJ saves the images directly in the meta data storage of the audio file.",
+  "main": "index.js",
+  "preferGlobal": true,
+  "repository": "",
+  "version": "2.0.1",
+  "jdeploy": {
+    "jdk": false,
+    "javaVersion": "17",
+    "jar": "target/disCoverJ.jar",
+    "javafx": true,
+    "title": "disCoverJ"
+  },
+  "dependencies": {
+    "njre": "^0.3.0",
+    "shelljs": "^0.8.4"
+  },
+  "license": "GPL-2.0 License",
+  "name": "discoverj",
+  "files": [
+    "jdeploy-bundle"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "homepage": "https://github.com/RouHim/disCoverJ"
+}

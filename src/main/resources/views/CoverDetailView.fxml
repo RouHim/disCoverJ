@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.TextFlow?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/16"
+            fx:controller="de.itlobby.discoverj.viewcontroller.CoverDetailViewController">
+    <children>
+        <TextFlow fx:id="txtCoverInfo" maxHeight="25.0" minHeight="25.0" prefHeight="25.0" textAlignment="CENTER"
+                  AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0"/>
+        <HBox fx:id="layoutCoverImage" alignment="TOP_CENTER" layoutX="-5.0" layoutY="73.0"
+              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+              AnchorPane.topAnchor="25.0">
+            <children>
+                <ImageView fx:id="imgCover" fitHeight="240.0" fitWidth="240.0" preserveRatio="true"
+                           pickOnBounds="true" styleClass="material-shadow" AnchorPane.bottomAnchor="0.0"
+                           AnchorPane.leftAnchor="0.0"
+                           AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="75.0" HBox.hgrow="ALWAYS"/>
+            </children>
+        </HBox>
+    </children>
+</AnchorPane>
