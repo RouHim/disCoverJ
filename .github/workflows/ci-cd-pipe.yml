@@ -4,9 +4,7 @@ on:
   push:
   pull_request:
   workflow_dispatch:
-  schedule:
-  - cron: "0 0 * * 0" # weekly at sunday night
-
+  
 env:
   VERSION: ${{ github.run_number }}.0.0
 
@@ -61,7 +59,7 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: Set up Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
