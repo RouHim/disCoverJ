@@ -1,33 +1,27 @@
-# disCoverJ
+<p align="center">
+  <img src="https://github.com/RouHim/disCoverJ/raw/main/icon.png" width="200">
+</p>
 
-With disCoverJ you can add cover images from various search engines to your audio files.
-Simply drag and drop the files into the application and press the search button.
-disCoverJ will store the images directly in the metadata of the audio file.
+<p align="center">
+    <a href="https://github.com/RouHim/disCoverJ/actions/workflows/ci-cd-pipe.yml"><img src="https://github.com/RouHim/disCoverJ/actions/workflows/ci-cd-pipe.yml/badge.svg" alt="CI"></a>
+    <a href="https://www.jdeploy.com/~discoverj"><img alt="npm download count" src="https://img.shields.io/npm/dt/discoverj?label=Downloads"></a>
+    <a href="https://www.jdeploy.com/~discoverj"><img alt="npm version" src="https://img.shields.io/npm/v/discoverj?label=Version"></a>    
+</p>
 
-Supported audio types:
-mp3, mp4, m4a, m4r, ogg, oga, flac, wma, ra
+<p align="center">
+  <a href="https://www.jdeploy.com/~discoverj">Download</a>
+  | <a href="https://github.com/RouHim/disCoverJ/issues">Issue Tracker</a>
+  | <a href="https://github.com/RouHim/disCoverJ/discussions">Discussions</a>
+  | <a href="https://crowdin.com/project/discoverj/invite">Help translate</a>
+  | <a href="https://www.paypal.me/disCoverJ">Donate me</a>
+</p>
 
-### Help me translating
-https://crowdin.com/project/discoverj/invite
+<p align="center">
+    <i>A simple tool that allows you to automatically embed cover images into your audio files.</i>
+</p>
 
-# How to get the latest version
-Download and install [from here](https://www.jdeploy.com/~discoverj)
-  
-# Usage
-- Drag audio files into the program. disCoverJ starts the analysis automatically.
-- When the analysis is complete, the files appear in the list on the left.
-- Now press the magnifying glass at the bottom right.
-- You can get information about the current status by looking at the progress bar and the status bar below.
+## Features
 
-# Available search engines
-- iTunes
-- Deezer
-- searX
-- Discogs
-- Spotify
-- Musicbrainz
-- Local search
+**Supported audio types:** mp3, mp4, m4a, m4r, ogg, oga, flac, wma, ra
 
-# Open topics
-* Resolve open todos
-** reimplement manual cover selection
+**Search engines:** iTunes, Deezer, searX, Discogs, Spotify, Musicbrainz, Local search
