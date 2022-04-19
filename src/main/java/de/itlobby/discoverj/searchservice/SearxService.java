@@ -52,7 +52,7 @@ public class SearxService implements SearchService {
                 .limit(MAX_RESULTS)
                 .map(result -> result.getString("img_src"))
                 .parallel()
-                .map(ImageUtil::getMaybeImage)
+                .map(ImageUtil::readRGBImageFromUrl)
                 .flatMap(Optional::stream)
                 .filter(SearchService::reachesMinRequiredCoverSize)
                 .collect(Collectors.toList());

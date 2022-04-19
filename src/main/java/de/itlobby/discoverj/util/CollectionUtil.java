@@ -2,7 +2,11 @@ package de.itlobby.discoverj.util;
 
 import de.itlobby.discoverj.models.SearchEngine;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Rouven Himmelstein on 02.08.2016.

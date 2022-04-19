@@ -2,7 +2,11 @@ package de.itlobby.discoverj.services;
 
 import de.itlobby.discoverj.framework.AsyncAction;
 import de.itlobby.discoverj.framework.ServiceLocator;
-import de.itlobby.discoverj.models.*;
+import de.itlobby.discoverj.models.AudioWrapper;
+import de.itlobby.discoverj.models.ProgressInterruptedException;
+import de.itlobby.discoverj.models.ScanResultData;
+import de.itlobby.discoverj.models.SearchEngine;
+import de.itlobby.discoverj.models.SimpleAudioWrapper;
 import de.itlobby.discoverj.settings.AppConfig;
 import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.tasks.SearchTask;
@@ -20,8 +24,17 @@ import org.jaudiotagger.audio.AudioFile;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 

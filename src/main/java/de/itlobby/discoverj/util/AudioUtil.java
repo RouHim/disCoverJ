@@ -29,7 +29,13 @@ import org.jaudiotagger.tag.reference.PictureTypes;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 

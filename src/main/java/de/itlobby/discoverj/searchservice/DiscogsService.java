@@ -85,7 +85,7 @@ public class DiscogsService implements SearchService {
                     .map(result -> new JSONObject((Map) result))
                     .filter(result -> result.getString("type").equals("primary") && correctResolution(result))
                     .map(result -> result.getString("uri"))
-                    .map(ImageUtil::getMaybeImage)
+                    .map(ImageUtil::readRGBImageFromUrl)
                     .flatMap(Optional::stream)
                     .filter(SearchService::reachesMinRequiredCoverSize)
                     .collect(Collectors.toList());

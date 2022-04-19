@@ -6,7 +6,10 @@ import javafx.animation.ScaleTransition;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
-import javafx.scene.image.*;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
@@ -48,29 +51,6 @@ public class ImageUtil {
         }
 
         return outputImage;
-    }
-
-    public static Color getAverangeColorFromImage(Image image) {
-        PixelReader pixelReader = image.getPixelReader();
-
-        double sumR = 0;
-        double sumG = 0;
-        double sumB = 0;
-        double count = image.getHeight() * image.getWidth();
-
-        for (int i = 0; i < image.getHeight(); i++) {
-            for (int j = 0; j < image.getWidth(); j++) {
-                sumR += pixelReader.getColor(j, i).getRed();
-                sumG += pixelReader.getColor(j, i).getGreen();
-                sumB += pixelReader.getColor(j, i).getBlue();
-            }
-        }
-
-        double avgR = sumR / count;
-        double avgG = sumG / count;
-        double avgB = sumB / count;
-
-        return new Color(avgR, avgG, avgB, 1);
     }
 
     public static byte[] toJpgByteArray(BufferedImage inputImage) {
@@ -372,42 +352,21 @@ public class ImageUtil {
         return squaredImage;
     }
 
-    public static BufferedImage getImage(URL imgUrl) {
-        return getImage(imgUrl.toString());
-    }
-
-    public static BufferedImage getImage(String imgUrl) {
-        BufferedImage image;
+    public static Optional<BufferedImage> readRGBImageFromUrl(String imgUrl) {
         try {
-            image = ImageIO.read(new URL(imgUrl));
-            return image;
-        } catch (Exception e) {
-            log.error(String.format("%s from url %s", e.getMessage(), imgUrl), e);
-        }
+            BufferedImage urlImage = ImageIO.read(new URL(imgUrl));
+            if (urlImage == null) {
+                return Optional.empty();
+            }
 
-        return null;
-    }
-
-    public static Optional<BufferedImage> getMaybeImage(String imgUrl) {
-        Optional<BufferedImage> image = Optional.empty();
-        try {
-            image = Optional.ofNullable(ImageIO.read(new URL(imgUrl)));
+            BufferedImage rgbImage = new BufferedImage(urlImage.getWidth(), urlImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+            rgbImage.createGraphics().drawImage(urlImage, 0, 0, null);
+            return Optional.of(rgbImage);
         } catch (IOException e) {
             log.error("{} from url {}", e.getMessage(), imgUrl);
         }
 
-        return image;
-    }
-
-    public static Optional<BufferedImage> getMaybeImage(File file) {
-        Optional<BufferedImage> image = Optional.empty();
-        try {
-            image = Optional.ofNullable(ImageIO.read(file));
-        } catch (IOException e) {
-            log.error("{} from pa {}", e.getMessage(), file.getAbsolutePath());
-        }
-
-        return image;
+        return Optional.empty();
     }
 
     public static Image resize(Image inputImage, int targetWidth, int scaledHeight) {
@@ -469,7 +428,7 @@ public class ImageUtil {
         return writableImage;
     }
 
-    public static BufferedImage fixBitmapImageType(BufferedImage src) {
+    public static BufferedImage fixColorModel(BufferedImage src) {
         BufferedImage img = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_BGR);
         Graphics2D g2d = img.createGraphics();
         g2d.drawImage(src, 0, 0, null);
@@ -482,15 +441,19 @@ public class ImageUtil {
             return Optional.empty();
         }
 
-        Optional<Image> image = Optional.empty();
         try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
             BufferedImage bufferedImage = ImageIO.read(inputStream);
-            image = Optional.ofNullable(toFXImage(bufferedImage, width, height));
+
+            BufferedImage rgbImage = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+            rgbImage.createGraphics().drawImage(bufferedImage, 0, 0, null);
+
+            return Optional.ofNullable(toFXImage(rgbImage, width, height));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-        return image;
+
+        return Optional.empty();
     }
 
     public static Optional<Image> getFxImageFromBytes(byte[] data) {
@@ -498,14 +461,36 @@ public class ImageUtil {
             return Optional.empty();
         }
 
-        Optional<Image> image = Optional.empty();
         try {
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
-            BufferedImage bufferedImage = ImageIO.read(inputStream);
-            image = Optional.ofNullable(toFXImage(bufferedImage, bufferedImage.getWidth(), bufferedImage.getHeight()));
+            BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(data));
+
+            BufferedImage rgbImage = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+            rgbImage.createGraphics().drawImage(bufferedImage, 0, 0, null);
+
+            return Optional.ofNullable(toFXImage(rgbImage, rgbImage.getWidth(), rgbImage.getHeight()));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-        return image;
+
+        return Optional.empty();
+    }
+
+    /**
+     * Reads an image as RGB from a file.
+     *
+     * @param file to read
+     * @return the read rgb image
+     */
+    public static Optional<BufferedImage> readRGBImage(File file) {
+        try {
+            BufferedImage read = ImageIO.read(file);
+            BufferedImage rgbImage = new BufferedImage(read.getWidth(), read.getHeight(), BufferedImage.TYPE_INT_RGB);
+            rgbImage.createGraphics().drawImage(read, 0, 0, null);
+            return Optional.of(rgbImage);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+
+        return Optional.empty();
     }
 }

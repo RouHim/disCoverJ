@@ -33,7 +33,7 @@ public class DeezerService implements SearchService {
                 .map(this::findCoverUrl)
                 .flatMap(Optional::stream)
                 .parallel()
-                .map(ImageUtil::getMaybeImage)
+                .map(ImageUtil::readRGBImageFromUrl)
                 .flatMap(Optional::stream)
                 .filter(SearchService::reachesMinRequiredCoverSize)
                 .collect(Collectors.toList());

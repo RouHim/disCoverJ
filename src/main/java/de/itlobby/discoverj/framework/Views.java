@@ -1,6 +1,12 @@
 package de.itlobby.discoverj.framework;
 
-import de.itlobby.discoverj.viewcontroller.*;
+import de.itlobby.discoverj.viewcontroller.CoverDetailViewController;
+import de.itlobby.discoverj.viewcontroller.ImageSelectionViewController;
+import de.itlobby.discoverj.viewcontroller.MainViewController;
+import de.itlobby.discoverj.viewcontroller.MultiselectionLayoutViewController;
+import de.itlobby.discoverj.viewcontroller.OpenFileViewController;
+import de.itlobby.discoverj.viewcontroller.SettingsViewController;
+import de.itlobby.discoverj.viewcontroller.ViewController;
 
 public enum Views {
     MAIN_VIEW("views/MainView.fxml", "views.mainView", MainViewController.class),

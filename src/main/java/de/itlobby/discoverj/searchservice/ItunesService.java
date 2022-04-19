@@ -41,7 +41,7 @@ public class ItunesService implements SearchService {
                 .filter(imgUrl -> !imgUrl.contains("mza_"))
                 .map(imgUrl -> imgUrl.replace("100x100", "1200x1200"))
                 .parallel()
-                .map(ImageUtil::getMaybeImage)
+                .map(ImageUtil::readRGBImageFromUrl)
                 .flatMap(Optional::stream)
                 .filter(SearchService::reachesMinRequiredCoverSize)
                 .collect(Collectors.toList());

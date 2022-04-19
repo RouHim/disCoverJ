@@ -86,7 +86,7 @@ public class MusicbrainzService implements SearchService {
                 .filter(image -> image.getBoolean("front"))
                 .map(image -> image.getString("image"))
                 // download the cover
-                .map(ImageUtil::getMaybeImage)
+                .map(ImageUtil::readRGBImageFromUrl)
                 .flatMap(Optional::stream)
                 .filter(SearchService::reachesMinRequiredCoverSize);
     }

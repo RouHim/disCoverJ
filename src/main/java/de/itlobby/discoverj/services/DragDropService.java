@@ -7,7 +7,11 @@ import de.itlobby.discoverj.framework.Views;
 import de.itlobby.discoverj.listeners.ActionListener;
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.SimpleAudioWrapper;
-import de.itlobby.discoverj.util.*;
+import de.itlobby.discoverj.util.AudioUtil;
+import de.itlobby.discoverj.util.GlyphsDude;
+import de.itlobby.discoverj.util.ImageUtil;
+import de.itlobby.discoverj.util.LanguageUtil;
+import de.itlobby.discoverj.util.SystemUtil;
 import de.itlobby.discoverj.viewcontroller.OpenFileViewController;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.animation.ScaleTransition;
@@ -24,12 +28,12 @@ import org.apache.logging.log4j.Logger;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 
 public class DragDropService implements Service {
     private static final Logger LOG = LogManager.getLogger(DragDropService.class);
@@ -79,14 +83,11 @@ public class DragDropService implements Service {
 
     private void addCoverToEntries(File imgFile, List<AudioListEntry> selectedEntries, ActionListener threadFinishedListener) {
         try {
-            //TODO read file correct from bmp temp file
-            BufferedImage img = ImageIO.read(imgFile);
+            Optional<BufferedImage> img = ImageUtil.readRGBImage(imgFile);
 
-            if (imgFile.getAbsolutePath().toLowerCase().endsWith(".bmp")) {
-                img = ImageUtil.fixBitmapImageType(img);
+            if (img.isEmpty()) {
+                return;
             }
-
-            BufferedImage finalImg = img;
 
             getMainViewController().setTotalAudioCountToLoad(selectedEntries.size());
 
@@ -97,17 +98,16 @@ public class DragDropService implements Service {
 
                 List<SimpleAudioWrapper> audioList = ServiceLocator.get(DataService.class).getAudioList();
 
-                audioList
-                        .stream()
+                audioList.stream()
                         .filter(x -> x.getId().equals(audioWrapper.getId()))
-                        .forEach(x -> AudioUtil.saveCoverToAudioFile(audioFile, finalImg));
+                        .forEach(x -> AudioUtil.saveCoverToAudioFile(audioFile, img.get()));
 
                 getMainViewController().lwAudioList.getChildren()
                         .stream()
-                        .filter(x -> x instanceof AudioListEntry)
-                        .map(x -> (AudioListEntry) x)
-                        .filter(x -> x.getSimpleAudioWrapper().getId().equals(audioWrapper.getId()))
-                        .forEach((x) -> x.replaceCover(finalImg));
+                        .filter(AudioListEntry.class::isInstance)
+                        .map(AudioListEntry.class::cast)
+                        .filter(audioEntry -> audioEntry.getSimpleAudioWrapper().getId().equals(audioWrapper.getId()))
+                        .forEach(wrapper -> wrapper.replaceCover(img.get()));
             }
 
             getMainViewController().showAudioInfo(new AudioWrapper(selectedEntries.get(0).getSimpleAudioWrapper()));
@@ -119,22 +119,16 @@ public class DragDropService implements Service {
     }
 
     void initDragAndDrop() {
-        getMainViewController().rootLayout
-                .setOnDragOver
-                        (
-                                event ->
-                                {
-                                    Dragboard db = event.getDragboard();
-                                    if (db.hasFiles() || db.hasUrl()) {
-                                        event.acceptTransferModes(TransferMode.ANY);
-                                    }
-                                    event.consume();
-                                }
-                        );
+        getMainViewController().rootLayout.setOnDragOver(event -> {
+                    Dragboard db = event.getDragboard();
+                    if (db.hasFiles() || db.hasUrl()) {
+                        event.acceptTransferModes(TransferMode.ANY);
+                    }
+                    event.consume();
+                }
+        );
 
-        getMainViewController().rootLayout.setOnDragEntered(
-                event ->
-                {
+        getMainViewController().rootLayout.setOnDragEntered(event -> {
                     Dragboard db = event.getDragboard();
                     List<File> files = db.getFiles();
 

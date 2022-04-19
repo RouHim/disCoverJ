@@ -14,10 +14,21 @@ import org.jaudiotagger.audio.AudioFileIO;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static de.itlobby.discoverj.util.AudioUtil.*;
+import static de.itlobby.discoverj.util.AudioUtil.VALID_AUDIO_FILE_EXTENSION;
+import static de.itlobby.discoverj.util.AudioUtil.VALID_IMAGE_FILE_EXTENSION;
+import static de.itlobby.discoverj.util.AudioUtil.getAlbum;
+import static de.itlobby.discoverj.util.AudioUtil.getAlbumArtist;
+import static de.itlobby.discoverj.util.AudioUtil.getYear;
+import static de.itlobby.discoverj.util.AudioUtil.haveCover;
 
 public class LocalService implements SearchService {
     private static final Map<String, List<LocalMatchInfo>> scanInfoCache = new HashMap<>();
@@ -26,19 +37,24 @@ public class LocalService implements SearchService {
     @Override
     public List<BufferedImage> searchCover(AudioWrapper audioWrapper) {
         AudioFile audioFile = audioWrapper.getAudioFile();
+        File currentAudioFile = audioFile.getFile();
         AppConfig config = Settings.getInstance().getConfig();
 
+        // check if we should use the cover from a custom audio folder
+        // if so, we only this folder
         if (new File(config.getLocalAdditionalFolderPath()).exists()) {
             return getCoverFromCustomFolder(audioWrapper);
         }
 
-        File currentAudioFile = audioFile.getFile();
-        List<BufferedImage> coverImagesFromSameFolder = getCoverFromAudioFolder(currentAudioFile);
+        // First check if we have image files in the same folder
+        List<BufferedImage> coverImagesFound = new ArrayList<>(getCoverFromAudioFolder(currentAudioFile));
+
+        // Additionally add images from the other audio files in the folder, if enabled in the settings
         if (config.isLocalScanAudioFiles()) {
-            coverImagesFromSameFolder.addAll(getCoverImagesFromOtherAudioFiles(audioFile, currentAudioFile));
+            coverImagesFound.addAll(getCoverImagesFromOtherAudioFiles(audioFile, currentAudioFile));
         }
 
-        return coverImagesFromSameFolder;
+        return coverImagesFound;
     }
 
     private List<BufferedImage> getCoverImagesFromOtherAudioFiles(AudioFile audioFile, File currentAudio) {
@@ -65,7 +81,7 @@ public class LocalService implements SearchService {
         }
 
         s = System.currentTimeMillis();
-        List<BufferedImage> bla = scanInfoCache.get(parentFilePath)
+        List<BufferedImage> foundImages = scanInfoCache.get(parentFilePath)
                 .parallelStream()
                 .filter(LocalMatchInfo::isHaveCover)
                 .filter(otherFile -> matchesCriteria(currentMatchInfos, otherFile, config))
@@ -74,9 +90,9 @@ public class LocalService implements SearchService {
                 .map(AudioUtil::getCoverAsBufImg)
                 .flatMap(Optional::stream)
                 .filter(SearchService::reachesMinRequiredCoverSize)
-                .collect(Collectors.toList());
+                .toList();
         log.info("Matched in: {}ms", System.currentTimeMillis() - s);
-        return bla;
+        return foundImages;
     }
 
     private boolean matchesCriteria(LocalMatchInfo currentFile, LocalMatchInfo otherFile, AppConfig config) {
@@ -109,22 +125,28 @@ public class LocalService implements SearchService {
         return FileUtils.listFiles(customDir, VALID_IMAGE_FILE_EXTENSION, false).stream()
                 .filter(imageFile -> imageFile.getName().toLowerCase().contains(coverFileName.toLowerCase()))
                 .parallel()
-                .map(ImageUtil::getMaybeImage)
+                .map(ImageUtil::readRGBImage)
                 .flatMap(Optional::stream)
                 .filter(SearchService::reachesMinRequiredCoverSize)
                 .sorted(imageSizeComparator()) // biggest image first
                 .collect(Collectors.toList());
     }
 
-    private List<BufferedImage> getCoverFromAudioFolder(File currentAudioFile) {
-        File parentDir = new File(currentAudioFile.getParent());
+    /**
+     * Load images located in the same folder as the audio file.
+     *
+     * @param audioFile to get the folder from
+     * @return the found list of images
+     */
+    private List<BufferedImage> getCoverFromAudioFolder(File audioFile) {
+        File parentDir = audioFile.getParentFile();
         return FileUtils.listFiles(parentDir, VALID_IMAGE_FILE_EXTENSION, false).stream()
                 .parallel()
-                .map(ImageUtil::getMaybeImage)
+                .map(ImageUtil::readRGBImage)
                 .flatMap(Optional::stream)
                 .filter(SearchService::reachesMinRequiredCoverSize)
                 .sorted(imageSizeComparator()) // biggest image first
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private Comparator<BufferedImage> imageSizeComparator() {
