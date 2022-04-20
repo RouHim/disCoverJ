@@ -1,8 +1,8 @@
 package de.itlobby.discoverj.services;
 
-import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.settings.AppConfig;
 import de.itlobby.discoverj.settings.Settings;
+import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.util.AudioUtil;
 import de.itlobby.discoverj.util.StringUtil;
 import org.jaudiotagger.audio.AudioFile;

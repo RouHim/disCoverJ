@@ -12,6 +12,10 @@ import java.util.Map;
  * Created by Rouven Himmelstein on 02.08.2016.
  */
 public class CollectionUtil {
+    private CollectionUtil() {
+        // hide constructor
+    }
+
     public static <K, V extends Comparable<? super V>> Map.Entry<K, V> sortByValueDescAndGetFirst(Map<K, V> map) {
         List<Map.Entry<K, V>> list = new LinkedList<>(map.entrySet());
         Collections.sort(list, (o1, o2) -> (o1.getValue()).compareTo(o2.getValue()));

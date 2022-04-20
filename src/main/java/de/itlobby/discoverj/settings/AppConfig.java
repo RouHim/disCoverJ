@@ -43,6 +43,7 @@ public class AppConfig implements Serializable {
     private boolean searxCustomInstanceActive = false;
 
     public AppConfig() {
+        // empty constructor for jackson
     }
 
     public boolean isOverwriteCover() {

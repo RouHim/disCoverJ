@@ -14,7 +14,7 @@ import java.awt.datatransfer.Transferable;
  * Created by Rouven Himmelstein on 27.01.2016.
  */
 public class ImageClipboardUtil implements ClipboardOwner {
-    private final Logger LOG = LogManager.getLogger(this.getClass());
+    private static final Logger log = LogManager.getLogger(ImageClipboardUtil.class);
 
     public void copyImage(javafx.scene.image.Image bi) {
         try {
@@ -22,12 +22,12 @@ public class ImageClipboardUtil implements ClipboardOwner {
             Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
             c.setContents(trans, this);
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
     @Override
     public void lostOwnership(Clipboard clipboard, Transferable contents) {
-        LOG.error("Lost ClipBrd ownership");
+        log.error("Lost ClipBrd ownership");
     }
 }

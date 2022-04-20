@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Optional;
 
 public class ImageUtil {
@@ -346,15 +347,37 @@ public class ImageUtil {
     public static Optional<BufferedImage> readRGBImageFromUrl(String imgUrl) {
         try {
             BufferedImage urlImage = ImageIO.read(new URL(imgUrl));
+
             if (urlImage == null) {
                 return Optional.empty();
             }
 
+            // Convert to RGB
             BufferedImage rgbImage = new BufferedImage(urlImage.getWidth(), urlImage.getHeight(), BufferedImage.TYPE_INT_RGB);
             rgbImage.createGraphics().drawImage(urlImage, 0, 0, null);
+
             return Optional.of(rgbImage);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("{} from url {}", e.getMessage(), imgUrl);
+        }
+
+        return Optional.empty();
+    }
+
+    public static Optional<BufferedImage> readRGBImageFromBase64String(String imageData) {
+        try {
+            BufferedImage read = ImageIO.read(new ByteArrayInputStream(Base64.getDecoder().decode(imageData)));
+            if (read == null) {
+                return Optional.empty();
+            }
+
+            // Convert to RGB
+            BufferedImage rgbImage = new BufferedImage(read.getWidth(), read.getHeight(), BufferedImage.TYPE_INT_RGB);
+            rgbImage.createGraphics().drawImage(read, 0, 0, null);
+
+            return Optional.of(rgbImage);
+        } catch (Exception e) {
+            log.error(e.getMessage());
         }
 
         return Optional.empty();

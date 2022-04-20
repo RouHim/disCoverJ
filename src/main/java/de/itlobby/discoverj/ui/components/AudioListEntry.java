@@ -1,9 +1,9 @@
 package de.itlobby.discoverj.ui.components;
 
-import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.models.FlatAudioWrapper;
 import de.itlobby.discoverj.services.InitialService;
 import de.itlobby.discoverj.settings.Settings;
+import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.LanguageUtil;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;

@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static de.itlobby.discoverj.util.AudioUtil.getYear;
 import static de.itlobby.discoverj.util.WSUtil.getJsonFromUrl;
@@ -73,7 +72,7 @@ public class DiscogsService implements SearchService {
                 .map(result -> new JSONObject((Map) result))
                 .map(result -> result.getInt("id"))
                 .flatMap(releaseId -> getCoverByReleaseId(releaseId).stream())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private List<BufferedImage> getCoverByReleaseId(Integer releaseId) {
@@ -88,7 +87,7 @@ public class DiscogsService implements SearchService {
                     .map(ImageUtil::readRGBImageFromUrl)
                     .flatMap(Optional::stream)
                     .filter(SearchService::reachesMinRequiredCoverSize)
-                    .collect(Collectors.toList());
+                    .toList();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }

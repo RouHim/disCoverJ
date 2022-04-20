@@ -6,19 +6,20 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class StringUtil {
-    public static final List<String> ARTISTS_SEPARATOR_KEYWORDS = Stream.of("&amp;", "+", "&", "feat", "ft", "featuring", "vs", "versus")
-            .flatMap(entry -> mutate(entry).stream())
-            .collect(Collectors.toList());
     public static final String EMPTY_STRING = "";
+    protected static final List<String> ARTISTS_SEPARATOR_KEYWORDS = Stream.of("&amp;", "+", "&", "feat", "ft", "featuring", "vs", "versus")
+            .flatMap(entry -> mutate(entry).stream())
+            .toList();
     private static final Logger log = LogManager.getLogger(StringUtil.class);
+
+    private StringUtil() {
+        // Static class
+    }
 
     public static String encodeRfc3986(String input) {
         return URLEncoder.encode(input, StandardCharsets.UTF_8)
@@ -48,23 +49,6 @@ public class StringUtil {
         return text;
     }
 
-    public static String getBetween(String text, String start, String end) {
-        int first = text.indexOf(start) + start.length();
-        int last = text.indexOf(end);
-        int diff = last - first;
-
-        if (diff > 0) {
-            return getStringSeq(text, first, last);
-        }
-
-        return text;
-    }
-
-    public static String dateToString(Date releaseDate) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
-        return simpleDateFormat.format(releaseDate);
-    }
-
     public static String getFileExtension(File file) {
         String fileName = file.getName();
         return getFileExtension(fileName);
@@ -78,16 +62,6 @@ public class StringUtil {
         }
 
         return extension;
-    }
-
-    public static String removeFileExtension(String fileName) {
-        String fileExtension = getFileExtension(fileName);
-
-        if (!isNullOrEmpty(fileExtension)) {
-            return fileName.replace("." + fileExtension, "");
-        }
-
-        return fileName;
     }
 
     public static String removeBrackets(String query) {
@@ -148,8 +122,8 @@ public class StringUtil {
         }
     }
 
-    public static String sizeToHumanReadable(Long byteLenght) {
-        Double calc = byteLenght.doubleValue();
+    public static String sizeToHumanReadable(long byteLength) {
+        double calc = byteLength;
         int unit = 0;
 
         while (calc > 1024) {
@@ -157,26 +131,15 @@ public class StringUtil {
             unit++;
         }
 
-        String unitString = "";
+        String unitString = switch (unit) {
+            case 0 -> "Byte";
+            case 1 -> "KB";
+            case 2 -> "MB";
+            case 3 -> "GB";
+            case 4 -> "TB";
+            default -> "";
+        };
 
-        switch (unit) {
-            case 0:
-                unitString = " Byte";
-                break;
-            case 1:
-                unitString = " KB";
-                break;
-            case 2:
-                unitString = " MB";
-                break;
-            case 3:
-                unitString = " GB";
-                break;
-            case 4:
-                unitString = " TB";
-                break;
-        }
-
-        return Math.round(calc) + unitString;
+        return "%d %s".formatted(Math.round(calc), unitString);
     }
 }

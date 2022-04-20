@@ -1,17 +1,17 @@
 package de.itlobby.discoverj.services;
 
-import de.itlobby.discoverj.ui.core.ServiceLocator;
-import de.itlobby.discoverj.ui.core.ViewManager;
-import de.itlobby.discoverj.ui.core.Views;
 import de.itlobby.discoverj.listeners.ListenerStateProvider;
 import de.itlobby.discoverj.models.Language;
 import de.itlobby.discoverj.settings.AppConfig;
 import de.itlobby.discoverj.settings.Settings;
+import de.itlobby.discoverj.ui.core.ServiceLocator;
+import de.itlobby.discoverj.ui.core.ViewManager;
+import de.itlobby.discoverj.ui.core.Views;
+import de.itlobby.discoverj.ui.viewcontroller.SettingsViewController;
 import de.itlobby.discoverj.util.ConfigUtil;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.LanguageUtil;
 import de.itlobby.discoverj.util.SystemUtil;
-import de.itlobby.discoverj.ui.viewcontroller.SettingsViewController;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 

@@ -1,11 +1,11 @@
 package de.itlobby.discoverj.searchservice;
 
-import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.SearchTagWrapper;
 import de.itlobby.discoverj.services.DataService;
 import de.itlobby.discoverj.services.SearchModelQueryService;
 import de.itlobby.discoverj.settings.Settings;
+import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.util.AudioUtil;
 import de.itlobby.discoverj.util.ImageUtil;
 import org.apache.logging.log4j.LogManager;
@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static de.itlobby.discoverj.util.WSUtil.getJsonFromUrl;
@@ -41,7 +40,7 @@ public class MusicbrainzService implements SearchService {
         Optional<String> musicbrainzReleaseId = AudioUtil.getMusicbrainzReleaseId(audioWrapper.getAudioFile());
 
         if (musicbrainzReleaseId.isPresent()) {
-            return getCoversById(musicbrainzReleaseId.get()).collect(Collectors.toList());
+            return getCoversById(musicbrainzReleaseId.get()).toList();
         }
 
         String searchQuery = buildSearchQuery(audioWrapper);
@@ -70,7 +69,7 @@ public class MusicbrainzService implements SearchService {
                 .filter(entry -> entry.getJSONObject("cover-art-archive").getInt("count") > 0)
                 // find their front cover urls and download them
                 .flatMap(entry -> getCoversById(entry.getString("id")))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private Stream<BufferedImage> getCoversById(String id) {
@@ -92,8 +91,6 @@ public class MusicbrainzService implements SearchService {
     }
 
     private String buildSearchQuery(AudioWrapper audioWrapper) {
-        String query = null;
-
         SearchTagWrapper searchTag = SearchModelQueryService.createSearchModel(audioWrapper.getAudioFile());
         searchTag.escapeFields();
 
@@ -105,6 +102,7 @@ public class MusicbrainzService implements SearchService {
         boolean hasTitle = searchTag.hasTitle();
         boolean hasAlbum = searchTag.hasAlbum();
 
+        String query = null;
         if (primarySingleCover) {
             if (hasArtist && hasTitle) {
                 query = escape(format("release:\"{0}\" AND artist:\"{1}\"", searchTag.getTitle(), searchTag.getArtist()));
@@ -120,10 +118,9 @@ public class MusicbrainzService implements SearchService {
                 query = escape(format("release:\"{0}\" AND artist:\"{1}\"", searchTag.getTitle(), searchTag.getArtist()));
             } else if (searchTag.hasFileName()) {
                 query = escape(format("release:\"{0}\"", searchTag.getFileName()));
-            } else {
-                query = null;
             }
         }
+
         return query;
     }
 

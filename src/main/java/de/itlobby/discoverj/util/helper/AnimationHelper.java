@@ -9,6 +9,9 @@ import javafx.util.Duration;
  * Created by Rouven on 17.09.2016.
  */
 public class AnimationHelper {
+    private AnimationHelper() {
+    }
+
     public static void slide(Node node, int fromValue, int toValue, int by, int to) {
         Duration duration = Duration.millis(500);
 

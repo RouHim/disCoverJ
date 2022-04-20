@@ -1,14 +1,13 @@
 package de.itlobby.discoverj.ui.viewtask;
 
-import de.itlobby.discoverj.ui.components.AudioListEntry;
 import de.itlobby.discoverj.models.AudioWrapper;
-import de.itlobby.discoverj.models.ScanResultData;
 import de.itlobby.discoverj.models.FlatAudioWrapper;
-import de.itlobby.discoverj.settings.AppConfig;
+import de.itlobby.discoverj.models.ScanResultData;
 import de.itlobby.discoverj.settings.Settings;
+import de.itlobby.discoverj.ui.components.AudioListEntry;
+import de.itlobby.discoverj.ui.viewcontroller.MainViewController;
 import de.itlobby.discoverj.util.AudioUtil;
 import de.itlobby.discoverj.util.SystemUtil;
-import de.itlobby.discoverj.ui.viewcontroller.MainViewController;
 import javafx.scene.image.Image;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,7 +32,6 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
     private final int totalAudioCountToLoad;
     private final List<AudioWrapper> audioWrapperList;
     private final ScanResultData scanResultData;
-    private final AppConfig config;
     private Map<String, List<FlatAudioWrapper>> audioData;
     private Integer idCount;
     private int withCover;
@@ -49,8 +47,6 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
 
         audioWrapperList = new ArrayList<>();
         audioData = new HashMap<>();
-
-        config = Settings.getInstance().getConfig();
     }
 
     @Override
@@ -134,8 +130,8 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
 
             mainViewController.lwAudioList.getChildren()
                     .stream()
-                    .filter(x -> x instanceof AudioListEntry)
-                    .map(x -> (AudioListEntry) x)
+                    .filter(AudioListEntry.class::isInstance)
+                    .map(AudioListEntry.class::cast)
                     .filter(x -> x.getSimpleAudioWrapper().getId().equals(audioWrapper.getId()))
                     .findFirst()
                     .ifPresent(audioListEntry ->

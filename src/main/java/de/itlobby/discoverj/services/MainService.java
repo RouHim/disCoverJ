@@ -1,15 +1,15 @@
 package de.itlobby.discoverj.services;
 
-import de.itlobby.discoverj.ui.core.ServiceLocator;
-import de.itlobby.discoverj.ui.core.ViewManager;
-import de.itlobby.discoverj.ui.core.Views;
 import de.itlobby.discoverj.listeners.ActionListener;
 import de.itlobby.discoverj.listeners.ListenerStateProvider;
 import de.itlobby.discoverj.settings.Settings;
+import de.itlobby.discoverj.ui.core.ServiceLocator;
+import de.itlobby.discoverj.ui.core.ViewManager;
+import de.itlobby.discoverj.ui.core.Views;
+import de.itlobby.discoverj.ui.viewcontroller.MainViewController;
 import de.itlobby.discoverj.util.LanguageUtil;
 import de.itlobby.discoverj.util.SystemUtil;
 import de.itlobby.discoverj.util.helper.ImageCache;
-import de.itlobby.discoverj.ui.viewcontroller.MainViewController;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.layout.HBox;
@@ -41,7 +41,7 @@ public class MainService implements Service {
         viewController.btnHelpTranslate.setOnAction(event -> helpTranslate());
         viewController.btnSendFeedback.setOnAction(event -> sendFeedback());
         viewController.btnReportBug.setOnAction(event -> reportBug());
-        ListenerStateProvider.getInstance().setSettingsSavedListener(() -> SystemUtil.setProxy());
+        ListenerStateProvider.getInstance().setSettingsSavedListener(SystemUtil::setProxy);
 
         //actions of audio detail
         InitialService initialService = ServiceLocator.get(InitialService.class);

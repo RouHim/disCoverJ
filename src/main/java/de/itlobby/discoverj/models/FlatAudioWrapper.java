@@ -15,6 +15,7 @@ public class FlatAudioWrapper {
     private boolean readOnly;
 
     public FlatAudioWrapper() {
+        // Constructor for Jackson
     }
 
     public String getPath() {

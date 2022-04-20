@@ -1,9 +1,9 @@
 package de.itlobby.discoverj.services;
 
 import de.itlobby.discoverj.listeners.ActionListener;
+import de.itlobby.discoverj.ui.viewcontroller.MainViewController;
 import de.itlobby.discoverj.util.LanguageUtil;
 import de.itlobby.discoverj.util.UIUtil;
-import de.itlobby.discoverj.ui.viewcontroller.MainViewController;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -22,14 +22,14 @@ public class LightBoxService implements Service {
     private static final int DEFAULT_WIDTH = 350;
 
     public void showDialog(String title, Parent content, ActionListener cancelListener, ActionListener okListener, boolean isFullscreen, boolean hideButtons) {
-        _show(title, content, cancelListener, okListener, isFullscreen, hideButtons);
+        showInternal(title, content, cancelListener, okListener, isFullscreen, hideButtons);
     }
 
     public void showDialog(String title, Parent content, ActionListener cancelListener, ActionListener okListener, boolean hideButtons) {
-        _show(title, content, cancelListener, okListener, false, hideButtons);
+        showInternal(title, content, cancelListener, okListener, false, hideButtons);
     }
 
-    private void _show(String title, Parent content, ActionListener cancelListener, ActionListener okListener, boolean isFullscreen, boolean hideButtons) {
+    private void showInternal(String title, Parent content, ActionListener cancelListener, ActionListener okListener, boolean isFullscreen, boolean hideButtons) {
         if (okListener == null && cancelListener == null) {
             cancelListener = this::hideDialog;
         }

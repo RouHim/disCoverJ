@@ -1,15 +1,15 @@
 package de.itlobby.discoverj.services;
 
-import de.itlobby.discoverj.ui.helper.AsyncAction;
-import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.models.AudioWrapper;
+import de.itlobby.discoverj.models.FlatAudioWrapper;
 import de.itlobby.discoverj.models.ProgressInterruptedException;
 import de.itlobby.discoverj.models.ScanResultData;
 import de.itlobby.discoverj.models.SearchEngine;
-import de.itlobby.discoverj.models.FlatAudioWrapper;
 import de.itlobby.discoverj.settings.AppConfig;
 import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.tasks.SearchTask;
+import de.itlobby.discoverj.ui.core.ServiceLocator;
+import de.itlobby.discoverj.ui.helper.AsyncAction;
 import de.itlobby.discoverj.util.AudioUtil;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.LanguageUtil;
@@ -36,7 +36,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 public class SearchService implements Service {
     private static final Logger log = LogManager.getLogger(SearchService.class);
@@ -74,6 +73,7 @@ public class SearchService implements Service {
                     .andThen(this::finishTotal)
                     .begin();
         } catch (ProgressInterruptedException ignored) {
+            // ignore
         }
     }
 
@@ -110,8 +110,8 @@ public class SearchService implements Service {
     /**
      * Resizes and saves the found cover for the current audio file
      *
-     * @param newCover           to set
-     * @param audioWrapper       to set the new cover to
+     * @param newCover         to set
+     * @param audioWrapper     to set the new cover to
      * @param flatAudioWrapper to set the new cover to
      */
     private void saveCoverToFile(BufferedImage newCover, AudioWrapper audioWrapper, FlatAudioWrapper flatAudioWrapper) {
@@ -271,7 +271,7 @@ public class SearchService implements Service {
         List<SearchEngine> activeSearchEngines = config.getSearchEngineList()
                 .stream()
                 .filter(SearchEngine::isEnabled)
-                .collect(Collectors.toList());
+                .toList();
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         List<Future<List<BufferedImage>>> searchFutures = new ArrayList<>();
@@ -312,7 +312,7 @@ public class SearchService implements Service {
         List<SearchEngine> activeSearchEngines = config.getSearchEngineList()
                 .stream()
                 .filter(SearchEngine::isEnabled)
-                .collect(Collectors.toList());
+                .toList();
 
         ExecutorService executorService = Executors.newFixedThreadPool(activeSearchEngines.size());
         List<Future<List<BufferedImage>>> searchFutures = new ArrayList<>();
@@ -326,7 +326,7 @@ public class SearchService implements Service {
             try {
                 allCovers.addAll(searchFuture.get(searchTimeout, TimeUnit.SECONDS));
             } catch (TimeoutException e) {
-                log.error(searchTimeout + " seconds Timout for searchengine", e);
+                log.error("{} seconds Timout for searching", searchTimeout, e);
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }

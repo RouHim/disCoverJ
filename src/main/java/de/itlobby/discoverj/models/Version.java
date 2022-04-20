@@ -26,7 +26,7 @@ public class Version implements Comparable<Version> {
             minor = Integer.parseInt(parts[1]);
             revision = Integer.parseInt(parts[2]);
         } else {
-            log.error("not a valid version: " + version);
+            log.error("not a valid version: {}", version);
         }
     }
 

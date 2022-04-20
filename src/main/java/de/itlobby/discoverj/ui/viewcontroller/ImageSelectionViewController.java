@@ -40,7 +40,7 @@ public class ImageSelectionViewController implements ViewController {
         double ratio = (double) image.getWidth() / (double) image.getHeight();
 
         int fitHeight = 250;
-        double fitWidth = (double) 250 * ratio;
+        double fitWidth = 250 * ratio;
 
         ImageView imageView = new ImageView(ImageUtil.toFXImage(image, (int) fitWidth, fitHeight));
 

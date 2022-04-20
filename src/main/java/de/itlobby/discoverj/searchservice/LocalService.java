@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static de.itlobby.discoverj.util.AudioUtil.VALID_AUDIO_FILE_EXTENSION;
 import static de.itlobby.discoverj.util.AudioUtil.VALID_IMAGE_FILE_EXTENSION;
@@ -129,7 +128,7 @@ public class LocalService implements SearchService {
                 .flatMap(Optional::stream)
                 .filter(SearchService::reachesMinRequiredCoverSize)
                 .sorted(imageSizeComparator()) // biggest image first
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -163,7 +162,7 @@ public class LocalService implements SearchService {
                 .filter(file -> !file.equals(audioFile.getFile()))
                 .map(this::buildCriteriaMatcher)
                 .flatMap(Optional::stream)
-                .collect(Collectors.toList());
+                .toList();
 
         scanInfoCache.put(parent.getAbsolutePath(), scanInfoList);
     }

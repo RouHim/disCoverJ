@@ -1,10 +1,10 @@
 package de.itlobby.discoverj.services;
 
+import de.itlobby.discoverj.listeners.ListenerStateProvider;
+import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.ui.components.AudioListEntry;
 import de.itlobby.discoverj.ui.components.FolderListEntry;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
-import de.itlobby.discoverj.listeners.ListenerStateProvider;
-import de.itlobby.discoverj.models.AudioWrapper;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 
@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 public class SelectionService implements Service {
     private final AtomicReference<AudioListEntry> lastSelected = new AtomicReference<>();
@@ -25,9 +24,8 @@ public class SelectionService implements Service {
         } else {
             AudioListEntry lastAudioListEntry;
 
-            if (lastEntry instanceof AudioListEntry) {
-                lastAudioListEntry = (AudioListEntry) lastEntry;
-
+            if (lastEntry instanceof AudioListEntry typedLastAudioListEntry) {
+                lastAudioListEntry = typedLastAudioListEntry;
             } else {
                 lastAudioListEntry = getLastFromFolder((FolderListEntry) lastEntry);
             }
@@ -49,9 +47,9 @@ public class SelectionService implements Service {
         List<AudioListEntry> allEntries = getMainViewController().lwAudioList
                 .getChildren()
                 .stream()
-                .filter(x -> x instanceof AudioListEntry)
-                .map(x -> (AudioListEntry) x)
-                .collect(Collectors.toList());
+                .filter(AudioListEntry.class::isInstance)
+                .map(AudioListEntry.class::cast)
+                .toList();
 
         selectedEntries.clear();
         selectedEntries.addAll(allEntries);
@@ -79,10 +77,10 @@ public class SelectionService implements Service {
     }
 
     public void addSelection(Node entry) {
-        if (entry instanceof AudioListEntry) {
-            addSelection((AudioListEntry) entry);
-        } else if (entry instanceof FolderListEntry) {
-            addSelection((FolderListEntry) entry);
+        if (entry instanceof AudioListEntry audioListEntry) {
+            addSelection(audioListEntry);
+        } else if (entry instanceof FolderListEntry folderListEntry) {
+            addSelection(folderListEntry);
         }
 
         showInfo();
@@ -150,37 +148,37 @@ public class SelectionService implements Service {
 
     public void selectFirst() {
         ObservableList<Node> children = getMainViewController().lwAudioList.getChildren();
-        if (children.size() > 0) {
-            Node first = children.stream().filter(x -> x instanceof AudioListEntry).findFirst().orElse(null);
+        if (!children.isEmpty()) {
+            Node first = children.stream().filter(AudioListEntry.class::isInstance).findFirst().orElse(null);
             selectNode(first);
         }
     }
 
     public void selectLast() {
         ObservableList<Node> children = getMainViewController().lwAudioList.getChildren();
-        if (children.size() > 0) {
+        if (!children.isEmpty()) {
             selectNode(children.get(children.size() - 1));
         }
     }
 
     public void selectRangeToHome() {
         ObservableList<Node> children = getMainViewController().lwAudioList.getChildren();
-        if (children.size() > 0 && lastSelected.get() != null) {
-            Node first = children.stream().filter(x -> x instanceof AudioListEntry).findFirst().orElse(null);
+        if (!children.isEmpty() && lastSelected.get() != null) {
+            Node first = children.stream().filter(AudioListEntry.class::isInstance).findFirst().orElse(null);
             rangeSelection(first);
         }
     }
 
     public void selectRangeToEnd() {
         ObservableList<Node> children = getMainViewController().lwAudioList.getChildren();
-        if (children.size() > 0 && lastSelected.get() != null) {
+        if (!children.isEmpty() && lastSelected.get() != null) {
             rangeSelection(children.get(children.size() - 1));
         }
     }
 
     public void selectUp() {
         ObservableList<Node> children = getMainViewController().lwAudioList.getChildren();
-        if (children.size() > 0 && lastSelected.get() != null) {
+        if (!children.isEmpty() && lastSelected.get() != null) {
             int i = children.indexOf(lastSelected.get());
             i--;
 
@@ -191,10 +189,10 @@ public class SelectionService implements Service {
     }
 
     public void selectNode(Node node) {
-        if (node instanceof AudioListEntry) {
-            selectAudio((AudioListEntry) node);
-        } else if (node instanceof FolderListEntry) {
-            selectFolder((FolderListEntry) node);
+        if (node instanceof AudioListEntry audioListEntry) {
+            selectAudio(audioListEntry);
+        } else if (node instanceof FolderListEntry folderListEntry) {
+            selectFolder(folderListEntry);
         }
 
         showInfo();
@@ -216,23 +214,21 @@ public class SelectionService implements Service {
                 .get(folder.getPath())
                 .stream()
                 .map(simpleAudioWrapper -> getMainViewController().getAudioListEntry(simpleAudioWrapper))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public void selectDown() {
         ObservableList<Node> children = getMainViewController().lwAudioList.getChildren();
-        if (children.size() > 0 && lastSelected.get() != null) {
-            int i = children.indexOf(lastSelected.get());
-            i++;
-
-            if (i < children.size()) {
-                selectNode(children.get(i));
-            }
+        if (children.isEmpty() || lastSelected.get() == null) {
+            return;
         }
-    }
 
-    public boolean isMultiSelectionMode() {
-        return multiSelectionMode;
+        int i = children.indexOf(lastSelected.get());
+        i++;
+
+        if (i < children.size()) {
+            selectNode(children.get(i));
+        }
     }
 
     public AudioListEntry getLastSelected() {

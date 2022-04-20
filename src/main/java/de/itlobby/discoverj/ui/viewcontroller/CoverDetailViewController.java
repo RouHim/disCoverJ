@@ -1,8 +1,8 @@
 package de.itlobby.discoverj.ui.viewcontroller;
 
+import de.itlobby.discoverj.models.FlatAudioWrapper;
 import de.itlobby.discoverj.ui.core.ViewManager;
 import de.itlobby.discoverj.ui.core.Views;
-import de.itlobby.discoverj.models.FlatAudioWrapper;
 import de.itlobby.discoverj.util.ImageUtil;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -21,11 +21,8 @@ public class CoverDetailViewController implements ViewController {
     public void initialize() {
         MainViewController viewController = ViewManager.getInstance().getViewController(Views.MAIN_VIEW);
 
-        viewController.lightBoxLayout.heightProperty().addListener(
-                (observable, oldValue, newValue) ->
-                {
-                    onSizeChanged(viewController.lightBoxLayout);
-                }
+        viewController.lightBoxLayout.heightProperty().addListener((observable, oldValue, newValue) ->
+                onSizeChanged(viewController.lightBoxLayout)
         );
     }
 

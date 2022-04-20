@@ -1,12 +1,12 @@
 package de.itlobby.discoverj.services;
 
+import de.itlobby.discoverj.listeners.ActionParamListener;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.ui.core.ViewManager;
 import de.itlobby.discoverj.ui.core.Views;
-import de.itlobby.discoverj.listeners.ActionParamListener;
+import de.itlobby.discoverj.ui.viewcontroller.ImageSelectionViewController;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.SystemUtil;
-import de.itlobby.discoverj.ui.viewcontroller.ImageSelectionViewController;
 import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.input.MouseEvent;

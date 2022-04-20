@@ -2,15 +2,17 @@ package de.itlobby.discoverj.util;
 
 import de.itlobby.discoverj.models.SearchEngine;
 import de.itlobby.discoverj.models.SearchEngineType;
-import de.itlobby.discoverj.settings.Settings;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ConfigUtil {
+    private ConfigUtil() {
+        // hide constructor
+    }
+
     public static List<SearchEngine> imageToSearchEngine(ObservableList<Node> children) {
         List<SearchEngine> ret = new ArrayList<>();
 
@@ -39,11 +41,5 @@ public class ConfigUtil {
         }
 
         return ret;
-    }
-
-    public static List<SearchEngine> getActiveSearchEngines() {
-        List<SearchEngine> searchEnginePriority = Settings.getInstance().getConfig().getSearchEngineList();
-
-        return searchEnginePriority.stream().filter(SearchEngine::isEnabled).collect(Collectors.toList());
     }
 }

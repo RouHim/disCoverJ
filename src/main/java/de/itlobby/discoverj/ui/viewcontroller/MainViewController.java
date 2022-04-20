@@ -1,20 +1,20 @@
 package de.itlobby.discoverj.ui.viewcontroller;
 
+import de.itlobby.discoverj.listeners.ListenerStateProvider;
+import de.itlobby.discoverj.listeners.MultipleSelectionListener;
+import de.itlobby.discoverj.listeners.ParentKeyDeletedListener;
+import de.itlobby.discoverj.models.AudioWrapper;
+import de.itlobby.discoverj.models.FlatAudioWrapper;
+import de.itlobby.discoverj.models.ScanResultData;
+import de.itlobby.discoverj.services.InitialService;
+import de.itlobby.discoverj.services.LightBoxService;
+import de.itlobby.discoverj.services.SearchService;
+import de.itlobby.discoverj.services.SelectionService;
 import de.itlobby.discoverj.ui.components.AudioListEntry;
 import de.itlobby.discoverj.ui.components.FolderListEntry;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.ui.core.ViewManager;
 import de.itlobby.discoverj.ui.core.Views;
-import de.itlobby.discoverj.listeners.ListenerStateProvider;
-import de.itlobby.discoverj.listeners.MultipleSelectionListener;
-import de.itlobby.discoverj.listeners.ParentKeyDeletedListener;
-import de.itlobby.discoverj.models.AudioWrapper;
-import de.itlobby.discoverj.models.ScanResultData;
-import de.itlobby.discoverj.models.FlatAudioWrapper;
-import de.itlobby.discoverj.services.InitialService;
-import de.itlobby.discoverj.services.LightBoxService;
-import de.itlobby.discoverj.services.SearchService;
-import de.itlobby.discoverj.services.SelectionService;
 import de.itlobby.discoverj.util.AudioUtil;
 import de.itlobby.discoverj.util.GlyphsDude;
 import de.itlobby.discoverj.util.ImageUtil;
@@ -67,10 +67,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class MainViewController implements ViewController, MultipleSelectionListener, ParentKeyDeletedListener {
     private static final Logger log = LogManager.getLogger(MainViewController.class);
+    private static final String MENU_ICON = "menu-icon";
+    private static final String DEFAULT_ICON = "default-icon";
+    private static final String DEFAULT_ICON_TEXT = "default-icon-text";
+    private static final String AUDIO_LINE_SELECTED = "audio-line-selected";
 
     public AnchorPane rootLayout;
     public Button btnFindFolder;
@@ -262,27 +265,26 @@ public class MainViewController implements ViewController, MultipleSelectionList
     }
 
     private void createIconButtons() {
-        AwesomeHelper.createIconButton(btnOpenAbout, FontAwesomeIcon.INFO_CIRCLE, "menu-icon", LanguageUtil.getString("key.mainview.menu.about"), "24px");
-        AwesomeHelper.createIconButton(btnReportBug, FontAwesomeIcon.BUG, "menu-icon", LanguageUtil.getString("key.mainview.menu.reportbug"), "24px");
-        AwesomeHelper.createIconButton(btnHelpTranslate, FontAwesomeIcon.LANGUAGE, "menu-icon", LanguageUtil.getString("key.mainview.menu.helpTranslate"), "24px");
-        AwesomeHelper.createIconButton(btnSendFeedback, FontAwesomeIcon.ENVELOPE, "menu-icon", LanguageUtil.getString("key.mainview.menu.feedback"), "24px");
-        AwesomeHelper.createIconButton(btnDonate, FontAwesomeIcon.HEART, "menu-icon", LanguageUtil.getString("key.mainview.menu.donate"), "24px");
-        AwesomeHelper.createIconButton(btnOpenSettings, FontAwesomeIcon.GEAR, "menu-icon", LanguageUtil.getString("key.mainview.menu.program.settings"), "24px");
-        AwesomeHelper.createIconButton(btnExitApp, FontAwesomeIcon.TIMES, "menu-icon", LanguageUtil.getString("key.mainview.menu.program.shutdown"), "24px");
+        AwesomeHelper.createIconButton(btnOpenAbout, FontAwesomeIcon.INFO_CIRCLE, MENU_ICON, LanguageUtil.getString("key.mainview.menu.about"), "24px");
+        AwesomeHelper.createIconButton(btnReportBug, FontAwesomeIcon.BUG, MENU_ICON, LanguageUtil.getString("key.mainview.menu.reportbug"), "24px");
+        AwesomeHelper.createIconButton(btnHelpTranslate, FontAwesomeIcon.LANGUAGE, MENU_ICON, LanguageUtil.getString("key.mainview.menu.helpTranslate"), "24px");
+        AwesomeHelper.createIconButton(btnSendFeedback, FontAwesomeIcon.ENVELOPE, MENU_ICON, LanguageUtil.getString("key.mainview.menu.feedback"), "24px");
+        AwesomeHelper.createIconButton(btnDonate, FontAwesomeIcon.HEART, MENU_ICON, LanguageUtil.getString("key.mainview.menu.donate"), "24px");
+        AwesomeHelper.createIconButton(btnOpenSettings, FontAwesomeIcon.GEAR, MENU_ICON, LanguageUtil.getString("key.mainview.menu.program.settings"), "24px");
+        AwesomeHelper.createIconButton(btnExitApp, FontAwesomeIcon.TIMES, MENU_ICON, LanguageUtil.getString("key.mainview.menu.program.shutdown"), "24px");
 
-        AwesomeHelper.createIconButton(btnFindFolder, FontAwesomeIcon.FOLDER_OPEN, "default-icon", LanguageUtil.getString("key.mainview.open.folder"), "24px");
+        AwesomeHelper.createIconButton(btnFindFolder, FontAwesomeIcon.FOLDER_OPEN, DEFAULT_ICON, LanguageUtil.getString("key.mainview.open.folder"), "24px");
 
-        AwesomeHelper.createIconButton(btnRemoveCover, FontAwesomeIcon.TRASH, "default-icon", LanguageUtil.getString("key.mainview.remove.cover"), "24px");
-        AwesomeHelper.createIconButton(btnCopyCoverToClipBrd, FontAwesomeIcon.CLIPBOARD, "default-icon", LanguageUtil.getString("key.mainview.copy.clipbrd.cover"), "20px");
-        AwesomeHelper.createIconButton(btnOpenGoogleImageSearch, FontAwesomeIcon.GOOGLE, "default-icon", LanguageUtil.getString("key.mainview.cm.google.image.search"), "20px");
+        AwesomeHelper.createIconButton(btnRemoveCover, FontAwesomeIcon.TRASH, DEFAULT_ICON, LanguageUtil.getString("key.mainview.remove.cover"), "24px");
+        AwesomeHelper.createIconButton(btnCopyCoverToClipBrd, FontAwesomeIcon.CLIPBOARD, DEFAULT_ICON, LanguageUtil.getString("key.mainview.copy.clipbrd.cover"), "20px");
+        AwesomeHelper.createIconButton(btnOpenGoogleImageSearch, FontAwesomeIcon.GOOGLE, DEFAULT_ICON, LanguageUtil.getString("key.mainview.cm.google.image.search"), "20px");
 
-        AwesomeHelper.createTextIcon(txtIsMixCD, FontAwesomeIcon.RANDOM, "default-icon-text", LanguageUtil.getString("key.mainview.isMixCD"), "15px");
+        AwesomeHelper.createTextIcon(txtIsMixCD, FontAwesomeIcon.RANDOM, DEFAULT_ICON_TEXT, LanguageUtil.getString("key.mainview.isMixCD"), "15px");
     }
 
     private void registerGeneralListener() {
-        lwAudioList.getChildren().addListener((ListChangeListener<Node>) c ->
-        {
-            if (lwAudioList.getChildren().size() > 0) {
+        lwAudioList.getChildren().addListener((ListChangeListener<Node>) c -> {
+            if (!lwAudioList.getChildren().isEmpty()) {
                 if (currentIcon != FontAwesomeIcon.SEARCH) {
                     activateActionButton(event -> ServiceLocator.get(SearchService.class).search(), FontAwesomeIcon.SEARCH);
                 }
@@ -388,16 +390,15 @@ public class MainViewController implements ViewController, MultipleSelectionList
         Map<String, List<FlatAudioWrapper>> audioMap = scanResultData.getAudioMap();
 
         int iParent = 0;
-        for (String parent : audioMap.keySet()) {
-
-            FolderListEntry folderEntry = new FolderListEntry(parent);
+        for (Map.Entry<String, List<FlatAudioWrapper>> entry : audioMap.entrySet()) {
+            FolderListEntry folderEntry = new FolderListEntry(entry.getKey());
             lwAudioList.getChildren().add(folderEntry);
 
             if (iParent > 0) {
                 VBox.setMargin(folderEntry, new Insets(10, 0, 0, 0));
             }
 
-            for (FlatAudioWrapper flatAudioWrapper : audioMap.get(parent)) {
+            for (FlatAudioWrapper flatAudioWrapper : entry.getValue()) {
                 lwAudioList.getChildren().add(new AudioListEntry(flatAudioWrapper));
             }
 
@@ -498,14 +499,14 @@ public class MainViewController implements ViewController, MultipleSelectionList
     public void highlightInList(FlatAudioWrapper flatAudioWrapper) {
         Platform.runLater(() -> {
             int i = lwAudioList.getChildren().indexOf(getAudioListEntry(flatAudioWrapper));
-            lwAudioList.getChildren().get(i).getStyleClass().add("audio-line-selected");
+            lwAudioList.getChildren().get(i).getStyleClass().add(AUDIO_LINE_SELECTED);
         });
     }
 
     public void highlightInList(AudioListEntry currentAudio) {
         Platform.runLater(() -> {
             int i = lwAudioList.getChildren().indexOf(currentAudio);
-            lwAudioList.getChildren().get(i).getStyleClass().add("audio-line-selected");
+            lwAudioList.getChildren().get(i).getStyleClass().add(AUDIO_LINE_SELECTED);
         });
     }
 
@@ -518,9 +519,9 @@ public class MainViewController implements ViewController, MultipleSelectionList
             boolean isInRange = false;
             List<AudioListEntry> children = lwAudioList
                     .getChildren()
-                    .stream().filter(x -> x instanceof AudioListEntry)
-                    .map(x -> (AudioListEntry) x)
-                    .collect(Collectors.toList());
+                    .stream().filter(AudioListEntry.class::isInstance)
+                    .map(AudioListEntry.class::cast)
+                    .toList();
 
             int fromIndex = children.indexOf(from);
             int toIndex = children.indexOf(to);
@@ -535,13 +536,13 @@ public class MainViewController implements ViewController, MultipleSelectionList
                     isInRange = true;
                 }
                 if (entry.getSimpleAudioWrapper().getId().equals(toWrapper.getId())) {
-                    entry.getStyleClass().add("audio-line-selected");
+                    entry.getStyleClass().add(AUDIO_LINE_SELECTED);
                     selectedEntries.add(entry);
                     isInRange = false;
                 }
 
                 if (isInRange) {
-                    entry.getStyleClass().add("audio-line-selected");
+                    entry.getStyleClass().add(AUDIO_LINE_SELECTED);
                     selectedEntries.add(entry);
                 }
             }
@@ -553,12 +554,12 @@ public class MainViewController implements ViewController, MultipleSelectionList
     public void unHighlightInList(FlatAudioWrapper currentAudio) {
         Platform.runLater(() -> {
             lwAudioList.getChildren().stream()
-                    .filter(x -> x instanceof AudioListEntry)
-                    .map(x -> ((AudioListEntry) x))
+                    .filter(AudioListEntry.class::isInstance)
+                    .map(AudioListEntry.class::cast)
                     .filter(
                             x -> x.getSimpleAudioWrapper().getId().equals(currentAudio.getId())
                     )
-                    .forEach(x -> x.getStyleClass().removeAll("audio-line-selected"));
+                    .forEach(x -> x.getStyleClass().removeAll(AUDIO_LINE_SELECTED));
 
             resetAudioInformation();
         });
@@ -568,7 +569,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
         Platform.runLater(() ->
                 lwAudioList.getChildren().stream()
                         .map(x -> ((HBox) x))
-                        .forEach(x -> x.getStyleClass().removeAll("audio-line-selected")));
+                        .forEach(x -> x.getStyleClass().removeAll(AUDIO_LINE_SELECTED)));
     }
 
     public void highlightAll() {
@@ -576,7 +577,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
                 lwAudioList.getChildren().stream()
                         .filter(x -> x instanceof AudioListEntry)
                         .map(x -> ((AudioListEntry) x))
-                        .forEach(x -> x.getStyleClass().add("audio-line-selected"))
+                        .forEach(x -> x.getStyleClass().add(AUDIO_LINE_SELECTED))
         );
     }
 
@@ -669,7 +670,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
                 .filter(x -> x instanceof FolderListEntry)
                 .map(x -> ((FolderListEntry) x))
                 .filter(x -> x.getPath().equalsIgnoreCase(key))
-                .collect(Collectors.toList());
+                .toList();
 
         lwAudioList.getChildren().removeAll(entriesToRemove);
     }

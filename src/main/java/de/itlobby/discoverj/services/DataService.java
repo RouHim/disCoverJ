@@ -1,15 +1,14 @@
 package de.itlobby.discoverj.services;
 
 import de.itlobby.discoverj.listeners.ListenerStateProvider;
-import de.itlobby.discoverj.models.ScanResultData;
 import de.itlobby.discoverj.models.FlatAudioWrapper;
+import de.itlobby.discoverj.models.ScanResultData;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class DataService implements Service {
     private final Map<String, Boolean> mixCDMap = new HashMap<>();
@@ -70,7 +69,7 @@ public class DataService implements Service {
                 .stream()
                 .filter(x -> x.getValue().isEmpty())
                 .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
+                .toList();
 
 
         for (String key : emptyKeyList) {

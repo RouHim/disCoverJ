@@ -1,9 +1,9 @@
 package de.itlobby.discoverj.util;
 
 import de.itlobby.discoverj.Main;
-import de.itlobby.discoverj.ui.core.ViewManager;
 import de.itlobby.discoverj.models.Version;
 import de.itlobby.discoverj.settings.Settings;
+import de.itlobby.discoverj.ui.core.ViewManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,7 +14,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
-import java.util.stream.Collectors;
 
 public class VersionDetector {
     private static final Logger log = LogManager.getLogger(VersionDetector.class);
@@ -34,7 +33,7 @@ public class VersionDetector {
                             .stream()
                             .map(url -> toManifest(url).getMainAttributes())
                             .filter(manifestAttributes -> manifestAttributes.containsValue(Main.class.getName()))
-                            .collect(Collectors.toList());
+                            .toList();
 
             attributes.stream()
                     .map(manifestAttributes -> manifestAttributes.getValue(DISCOVERJ_VERSION))

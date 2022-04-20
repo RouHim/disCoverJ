@@ -1,8 +1,8 @@
 package de.itlobby.discoverj.ui.viewcontroller;
 
-import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.models.Language;
 import de.itlobby.discoverj.searchservice.SearxService;
+import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.util.helper.AwesomeHelper;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.scene.control.Button;
@@ -126,10 +126,9 @@ public class SettingsViewController implements ViewController {
         layoutAudioFileMatch.disableProperty().bind(chkLocalScanAudiofiles.selectedProperty().not());
 
         chkOverwriteOnlyHigher.disableProperty().bind(chkOverwriteCover.selectedProperty().not());
-        chkOverwriteCover.selectedProperty().addListener(
-                (observable, oldValue, newValue) ->
+        chkOverwriteCover.selectedProperty().addListener((observable, oldValue, newValue) ->
                 {
-                    if (!newValue) {
+                    if (Boolean.FALSE.equals(newValue)) {
                         chkOverwriteOnlyHigher.setSelected(false);
                     }
                 }
@@ -137,7 +136,7 @@ public class SettingsViewController implements ViewController {
     }
 
     private void checkHoster() {
-        Optional<String> errorMessage = ServiceLocator.get(SearxService.class).checkHoster(txtCustomSearxInstance.getText());
+        Optional<String> errorMessage = ServiceLocator.get(SearxService.class).checkInstance(txtCustomSearxInstance.getText());
 
         if (errorMessage.isEmpty()) {
             txtSearxHosterValid.setText(getString("key.settingsview.settings.searx.validHoster"));

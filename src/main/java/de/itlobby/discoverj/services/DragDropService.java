@@ -1,18 +1,18 @@
 package de.itlobby.discoverj.services;
 
+import de.itlobby.discoverj.listeners.ActionListener;
+import de.itlobby.discoverj.models.AudioWrapper;
+import de.itlobby.discoverj.models.FlatAudioWrapper;
 import de.itlobby.discoverj.ui.components.AudioListEntry;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.ui.core.ViewManager;
 import de.itlobby.discoverj.ui.core.Views;
-import de.itlobby.discoverj.listeners.ActionListener;
-import de.itlobby.discoverj.models.AudioWrapper;
-import de.itlobby.discoverj.models.FlatAudioWrapper;
+import de.itlobby.discoverj.ui.viewcontroller.OpenFileViewController;
 import de.itlobby.discoverj.util.AudioUtil;
 import de.itlobby.discoverj.util.GlyphsDude;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.LanguageUtil;
 import de.itlobby.discoverj.util.SystemUtil;
-import de.itlobby.discoverj.ui.viewcontroller.OpenFileViewController;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.animation.ScaleTransition;
 import javafx.scene.Node;
@@ -135,7 +135,7 @@ public class DragDropService implements Service {
                     int audioCount = (int) files.stream().filter(AudioUtil::isAudioFile).count();
                     int dirCount = (int) files.stream().filter(File::isDirectory).count();
                     int imgCount = (int) files.stream().filter(SystemUtil::isImageFile).count();
-                    //TODO: add html google parsing
+
                     boolean isLink = db.hasUrl() && db.getUrl().startsWith("http") && SystemUtil.isImage(db.getUrl());
 
                     if (audioCount > 0 || dirCount > 0) {

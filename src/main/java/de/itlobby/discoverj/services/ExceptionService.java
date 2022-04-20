@@ -1,9 +1,9 @@
 package de.itlobby.discoverj.services;
 
 import de.itlobby.discoverj.ui.core.ServiceLocator;
+import de.itlobby.discoverj.ui.viewcontroller.MainViewController;
 import de.itlobby.discoverj.util.LanguageUtil;
 import de.itlobby.discoverj.util.SystemUtil;
-import de.itlobby.discoverj.ui.viewcontroller.MainViewController;
 import javafx.application.Platform;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -45,8 +45,7 @@ public class ExceptionService implements Service, Thread.UncaughtExceptionHandle
                 new TextFlow(new Text(msg)),
                 lightBoxService::hideDialog,
                 () -> {
-                    //TODO: neue anleitung finden
-                    SystemUtil.browseUrl("www.it-lobby.de/discoverj-anpassung-der-ram-zuweisung/");
+                    SystemUtil.browseUrl("https://stackoverflow.com/questions/2294268/how-can-i-increase-the-jvm-memory");
                     lightBoxService.hideDialog();
                 },
                 false

@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static de.itlobby.discoverj.util.WSUtil.getJsonFromUrl;
 
@@ -36,7 +35,7 @@ public class DeezerService implements SearchService {
                 .map(ImageUtil::readRGBImageFromUrl)
                 .flatMap(Optional::stream)
                 .filter(SearchService::reachesMinRequiredCoverSize)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private Optional<String> findCoverUrl(JSONObject jsonObject) {

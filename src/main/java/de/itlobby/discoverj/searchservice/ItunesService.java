@@ -3,8 +3,6 @@ package de.itlobby.discoverj.searchservice;
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.services.SearchQueryService;
 import de.itlobby.discoverj.util.ImageUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import java.awt.image.BufferedImage;
@@ -13,23 +11,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static de.itlobby.discoverj.util.WSUtil.getJsonFromUrl;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.text.MessageFormat.format;
 
 public class ItunesService implements SearchService {
-    private final Logger log = LogManager.getLogger(this.getClass());
+    private static final String ITUNES_SEARCH_QUERY = "https://itunes.apple.com/search?limit=5&term={0}";
 
     @Override
     public List<BufferedImage> searchCover(AudioWrapper audioWrapper) {
         String searchString = URLEncoder.encode(SearchQueryService.createSearchString(audioWrapper.getAudioFile()), UTF_8);
 
-
         Optional<JSONObject> jsonFromUrl = getJsonFromUrl(
-                format("https://itunes.apple.com/search?limit=5&term={0}", searchString)
+                format(ITUNES_SEARCH_QUERY, searchString)
         );
+
         if (jsonFromUrl.isEmpty()) {
             return Collections.emptyList();
         }
@@ -44,6 +41,6 @@ public class ItunesService implements SearchService {
                 .map(ImageUtil::readRGBImageFromUrl)
                 .flatMap(Optional::stream)
                 .filter(SearchService::reachesMinRequiredCoverSize)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

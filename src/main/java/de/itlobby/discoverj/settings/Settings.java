@@ -46,21 +46,21 @@ public class Settings {
     }
 
     private AppConfig loadConfig() {
-        AppConfig appConfig = new AppConfig();
+        AppConfig localAppConfig = new AppConfig();
 
         try {
             File propFile = getPropertiesFile();
 
             if (propFile.exists()) {
-                appConfig = readProperties(propFile);
+                localAppConfig = readProperties(propFile);
             } else {
-                saveConfig(appConfig);
+                saveConfig(localAppConfig);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
 
-        return appConfig;
+        return localAppConfig;
     }
 
     private AppConfig readProperties(File propFile) throws IOException {

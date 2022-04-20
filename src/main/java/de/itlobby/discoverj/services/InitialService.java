@@ -1,24 +1,24 @@
 package de.itlobby.discoverj.services;
 
+import de.itlobby.discoverj.models.AudioWrapper;
+import de.itlobby.discoverj.models.FlatAudioWrapper;
+import de.itlobby.discoverj.models.ScanResultData;
+import de.itlobby.discoverj.settings.AppConfig;
+import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.ui.components.AudioListEntry;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.ui.core.ViewManager;
 import de.itlobby.discoverj.ui.core.Views;
-import de.itlobby.discoverj.models.AudioWrapper;
-import de.itlobby.discoverj.models.ScanResultData;
-import de.itlobby.discoverj.models.FlatAudioWrapper;
-import de.itlobby.discoverj.settings.AppConfig;
-import de.itlobby.discoverj.settings.Settings;
-import de.itlobby.discoverj.util.ImageClipboardUtil;
-import de.itlobby.discoverj.util.LanguageUtil;
-import de.itlobby.discoverj.util.StringUtil;
-import de.itlobby.discoverj.util.SystemUtil;
-import de.itlobby.discoverj.util.helper.ImageCache;
 import de.itlobby.discoverj.ui.viewcontroller.CoverDetailViewController;
 import de.itlobby.discoverj.ui.viewcontroller.MainViewController;
 import de.itlobby.discoverj.ui.viewcontroller.OpenFileViewController;
 import de.itlobby.discoverj.ui.viewtask.PreCountViewTask;
 import de.itlobby.discoverj.ui.viewtask.ScanFileViewTask;
+import de.itlobby.discoverj.util.ImageClipboardUtil;
+import de.itlobby.discoverj.util.LanguageUtil;
+import de.itlobby.discoverj.util.StringUtil;
+import de.itlobby.discoverj.util.SystemUtil;
+import de.itlobby.discoverj.util.helper.ImageCache;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -31,7 +31,6 @@ import java.io.File;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static de.itlobby.discoverj.util.AudioUtil.removeCover;
 
@@ -219,8 +218,8 @@ public class InitialService implements Service {
 
         getMainViewController().lwAudioList.getChildren()
                 .stream()
-                .filter(x -> x instanceof AudioListEntry)
-                .map(x -> (AudioListEntry) x)
+                .filter(AudioListEntry.class::isInstance)
+                .map(AudioListEntry.class::cast)
                 .filter(x -> x.getSimpleAudioWrapper().getId().equals(audioWrapper.getId()))
                 .forEach(AudioListEntry::removeCover);
 
@@ -241,8 +240,8 @@ public class InitialService implements Service {
                     dataService.updateResultEntry(entry);
                     getMainViewController().lwAudioList.getChildren()
                             .stream()
-                            .filter(x -> x instanceof AudioListEntry)
-                            .map(x -> (AudioListEntry) x)
+                            .filter(AudioListEntry.class::isInstance)
+                            .map(AudioListEntry.class::cast)
                             .filter(x -> x.getSimpleAudioWrapper().getId().equals(entry.getId()))
                             .forEach(AudioListEntry::removeCover);
                 });
@@ -269,7 +268,7 @@ public class InitialService implements Service {
                     selectedEntries
                             .stream()
                             .map(AudioListEntry::getSimpleAudioWrapper)
-                            .collect(Collectors.toList()));
+                            .toList());
 
             getMainViewController().lwAudioList.getChildren().removeAll(selectedEntries);
             ServiceLocator.get(SelectionService.class).clearAll();

@@ -5,7 +5,7 @@ public abstract class ViewTask<T> implements Runnable {
     private FinishedListener<T> finishedListener;
     private volatile boolean cancelled;
 
-    public ViewTask() {
+    protected ViewTask() {
     }
 
     @Override

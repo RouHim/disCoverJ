@@ -111,7 +111,7 @@ public class FileDownloader implements Runnable {
     }
 
     public double getCurrentProgress() {
-        double value = downloadedBytes / (double) contentLength;
+        double value = downloadedBytes / contentLength;
 
         if (value >= 0.0 && value <= 1.0) {
             return value;

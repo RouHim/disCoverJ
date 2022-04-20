@@ -4,6 +4,8 @@ import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.services.SearchQueryService;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.StringUtil;
+import kong.unirest.HttpResponse;
+import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,13 +18,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class SpotifyService implements SearchService {
-    private static final String clientId = "ba25a9ff00bc4e19bf598dbe55c041ea";
-    private static final String clientSecret = "0465053e651b4dfb87a0b60571c5aea1";
+    private static final String CLIENT_ID = "ba25a9ff00bc4e19bf598dbe55c041ea";
+    private static final String CLIENT_SECRET = "0465053e651b4dfb87a0b60571c5aea1";
     private static final Logger log = LogManager.getLogger(SpotifyService.class);
     private String authToken;
 
@@ -64,7 +65,7 @@ public class SpotifyService implements SearchService {
                     .map(ImageUtil::readRGBImageFromUrl)
                     .flatMap(Optional::stream)
                     .filter(SearchService::reachesMinRequiredCoverSize)
-                    .collect(Collectors.toList());
+                    .toList();
         } catch (Exception e) {
             log.debug(e.getMessage(), e);
         }
@@ -74,11 +75,13 @@ public class SpotifyService implements SearchService {
 
     private void auth() {
         try {
-            this.authToken = Unirest.post("https://accounts.spotify.com/api/token")
-                    .basicAuth(clientId, clientSecret)
+            HttpResponse<JsonNode> jsonNodeHttpResponse = Unirest.post("https://accounts.spotify.com/api/token")
+                    .basicAuth(CLIENT_ID, CLIENT_SECRET)
                     .header("Content-Type", "application/x-www-form-urlencoded")
                     .field("grant_type", "client_credentials")
-                    .asJson()
+                    .asJson();
+
+            this.authToken = jsonNodeHttpResponse
                     .getBody()
                     .getObject()
                     .getString("access_token");

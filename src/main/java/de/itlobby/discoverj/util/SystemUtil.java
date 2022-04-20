@@ -15,7 +15,6 @@ import org.apache.logging.log4j.Logger;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
@@ -43,18 +42,6 @@ public class SystemUtil {
 
         return searchService;
 
-    }
-
-    public static <T> Object getPrivateField(T targetObject, String fieldName) {
-        try {
-            Field field = targetObject.getClass().getDeclaredField(fieldName);
-            field.setAccessible(true);
-            return field.get(targetObject);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-
-        return null;
     }
 
     public static Node getChildrenById(FlowPane flowPane, String nodeName) {
