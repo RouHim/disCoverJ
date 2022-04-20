@@ -1,4 +1,4 @@
-package de.itlobby.discoverj.viewtask;
+package de.itlobby.discoverj.ui.viewtask;
 
 public abstract class ViewTask<T> implements Runnable {
     private T result;

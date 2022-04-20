@@ -1,12 +1,12 @@
 package de.itlobby.discoverj.services;
 
-import de.itlobby.discoverj.framework.AsyncAction;
-import de.itlobby.discoverj.framework.ServiceLocator;
+import de.itlobby.discoverj.ui.helper.AsyncAction;
+import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ProgressInterruptedException;
 import de.itlobby.discoverj.models.ScanResultData;
 import de.itlobby.discoverj.models.SearchEngine;
-import de.itlobby.discoverj.models.SimpleAudioWrapper;
+import de.itlobby.discoverj.models.FlatAudioWrapper;
 import de.itlobby.discoverj.settings.AppConfig;
 import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.tasks.SearchTask;
@@ -82,7 +82,7 @@ public class SearchService implements Service {
      *
      * @param audioMap
      */
-    private void setManualCover(Map<String, List<SimpleAudioWrapper>> audioMap) {
+    private void setManualCover(Map<String, List<FlatAudioWrapper>> audioMap) {
         if (!Settings.getInstance().getConfig().isGeneralManualImageSelection()) {
             return;
         }
@@ -112,15 +112,15 @@ public class SearchService implements Service {
      *
      * @param newCover           to set
      * @param audioWrapper       to set the new cover to
-     * @param simpleAudioWrapper to set the new cover to
+     * @param flatAudioWrapper to set the new cover to
      */
-    private void saveCoverToFile(BufferedImage newCover, AudioWrapper audioWrapper, SimpleAudioWrapper simpleAudioWrapper) {
+    private void saveCoverToFile(BufferedImage newCover, AudioWrapper audioWrapper, FlatAudioWrapper flatAudioWrapper) {
         AppConfig config = Settings.getInstance().getConfig();
         AudioFile audioFile = audioWrapper.getAudioFile();
 
         if (newCover == null) {
             getMainViewController().setState(LanguageUtil.getString("SearchController.noFittingCover"));
-            getMainViewController().unHighlightInList(simpleAudioWrapper);
+            getMainViewController().unHighlightInList(flatAudioWrapper);
         } else {
             newCover = resizeIfNeed(newCover);
             Optional<BufferedImage> oldCover = AudioUtil.getCoverAsBufImg(audioFile);
@@ -133,26 +133,26 @@ public class SearchService implements Service {
             ) {
                 getMainViewController().setState(LanguageUtil.getString("SearchController.oldResHigher"));
             } else {
-                flushCoverImageToFile(newCover, simpleAudioWrapper, audioFile);
+                flushCoverImageToFile(newCover, flatAudioWrapper, audioFile);
             }
         }
 
         lastAudioCover.set(newCover);
         lastAudioFile = audioFile.getFile();
 
-        getMainViewController().unHighlightInList(simpleAudioWrapper);
+        getMainViewController().unHighlightInList(flatAudioWrapper);
         getMainViewController().setState("");
     }
 
-    private void flushCoverImageToFile(BufferedImage newCover, SimpleAudioWrapper simpleAudioWrapper, AudioFile audioFile) {
+    private void flushCoverImageToFile(BufferedImage newCover, FlatAudioWrapper flatAudioWrapper, AudioFile audioFile) {
         if (!audioFile.getFile().canWrite()) {
-            AudioUtil.showCannotWriteError(audioFile);
+            AudioUtil.showCannotWriteError(audioFile.getFile().getAbsolutePath());
             return;
         }
 
         WritableImage fxImage = SwingFXUtils.toFXImage(newCover, null);
         getMainViewController().showNewCover(newCover, fxImage);
-        getMainViewController().updateListItem(simpleAudioWrapper, fxImage);
+        getMainViewController().updateListItem(flatAudioWrapper, fxImage);
         getMainViewController().setState(LanguageUtil.getString("SearchController.saveingMp3"));
 
         AudioUtil.saveCoverToAudioFile(audioFile, newCover);
@@ -164,39 +164,39 @@ public class SearchService implements Service {
      * - wenn das erste cover eines albums gefunden wurde, setzt es für alle nachfolgenden tracks das gleiche cover autom.
      * - Von manual image selection wird das cover gesetzt
      *
-     * @param simpleAudioWrapper to set the cover to
+     * @param flatAudioWrapper to set the cover to
      */
-    private void setCover(SimpleAudioWrapper simpleAudioWrapper) {
+    private void setCover(FlatAudioWrapper flatAudioWrapper) {
         if (interruptProgress) {
             throw new ProgressInterruptedException();
         }
 
         Settings settings = Settings.getInstance();
         AppConfig config = settings.getConfig();
-        AudioWrapper audioWrapper = new AudioWrapper(simpleAudioWrapper);
+        AudioWrapper audioWrapper = new AudioWrapper(flatAudioWrapper);
         CoverPersistentService coverPersistentService = ServiceLocator.get(CoverPersistentService.class);
 
         getMainViewController().showAudioInfo(audioWrapper);
-        getMainViewController().highlightInList(simpleAudioWrapper);
-        getMainViewController().setAudioLineBusy(simpleAudioWrapper, true);
+        getMainViewController().highlightInList(flatAudioWrapper);
+        getMainViewController().setAudioLineBusy(flatAudioWrapper, true);
 
-        if (!simpleAudioWrapper.isReadOnly() && (config.isOverwriteCover() || !audioWrapper.hasCover())) {
+        if (!flatAudioWrapper.isReadOnly() && (config.isOverwriteCover() || !audioWrapper.hasCover())) {
             boolean canLoadCoverFromLastFile = canLoadCoverFromLastFile(config, audioWrapper);
 
             if (canLoadCoverFromLastFile) {
-                saveCoverToFile(lastAudioCover.get(), audioWrapper, simpleAudioWrapper);
+                saveCoverToFile(lastAudioCover.get(), audioWrapper, flatAudioWrapper);
             } else {
                 List<BufferedImage> covers = coverPersistentService.getCoversForAudioFile(audioWrapper);
                 BufferedImage newCover = selectImageFromResultView(audioWrapper, covers);
-                saveCoverToFile(newCover, audioWrapper, simpleAudioWrapper);
+                saveCoverToFile(newCover, audioWrapper, flatAudioWrapper);
             }
         } else {
             getMainViewController().setState(LanguageUtil.getString("SearchController.mp3CoverAlreadyExists"));
             Platform.runLater(() -> getMainViewController().imgNewCover.setImage(null));
         }
 
-        getMainViewController().unHighlightInList(simpleAudioWrapper);
-        getMainViewController().setAudioLineBusy(simpleAudioWrapper, false);
+        getMainViewController().unHighlightInList(flatAudioWrapper);
+        getMainViewController().setAudioLineBusy(flatAudioWrapper, false);
     }
 
     private boolean canLoadCoverFromLastFile(AppConfig config, AudioWrapper audioWrapper) {
@@ -207,15 +207,15 @@ public class SearchService implements Service {
                 lastAudioFile.canWrite();
     }
 
-    private void searchCover(SimpleAudioWrapper simpleAudioWrapper) {
+    private void searchCover(FlatAudioWrapper flatAudioWrapper) {
         if (interruptProgress) {
             throw new ProgressInterruptedException();
         }
 
         AppConfig config = Settings.getInstance().getConfig();
-        AudioWrapper audioWrapper = new AudioWrapper(simpleAudioWrapper);
+        AudioWrapper audioWrapper = new AudioWrapper(flatAudioWrapper);
 
-        getMainViewController().setEntryToProcessingState(audioWrapper, simpleAudioWrapper);
+        getMainViewController().setEntryToProcessingState(audioWrapper, flatAudioWrapper);
 
         if (!audioWrapper.hasCover() || config.isOverwriteCover()) {
             boolean canLoadCoverFromLastFile = canLoadCoverFromLastFile(config, audioWrapper);
@@ -225,18 +225,18 @@ public class SearchService implements Service {
                     collectAllCoverForAudioFile(audioWrapper);
                 } else {
                     setFirstCoverForAudioFile(audioWrapper);
-                    setCover(simpleAudioWrapper);
+                    setCover(flatAudioWrapper);
                 }
             }
 
             if (canLoadCoverFromLastFile && !config.isGeneralManualImageSelection()) {
-                saveCoverToFile(lastAudioCover.get(), audioWrapper, simpleAudioWrapper);
+                saveCoverToFile(lastAudioCover.get(), audioWrapper, flatAudioWrapper);
             }
         } else {
             Platform.runLater(() -> getMainViewController().imgNewCover.setImage(null));
         }
 
-        getMainViewController().setEntryToFinishedState(simpleAudioWrapper);
+        getMainViewController().setEntryToFinishedState(flatAudioWrapper);
 
         lastAudioFile = audioWrapper.getFile();
     }

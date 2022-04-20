@@ -22,7 +22,7 @@ public class AudioWrapper implements Comparable<AudioWrapper> {
     public AudioWrapper() {
     }
 
-    public AudioWrapper(SimpleAudioWrapper simpleWrapper) {
+    public AudioWrapper(FlatAudioWrapper simpleWrapper) {
         try {
             audioFile = AudioFileIO.read(new File(simpleWrapper.getPath()));
             hasCover = simpleWrapper.isHasCover();

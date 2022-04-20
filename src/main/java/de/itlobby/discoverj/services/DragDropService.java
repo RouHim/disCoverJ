@@ -1,18 +1,18 @@
 package de.itlobby.discoverj.services;
 
-import de.itlobby.discoverj.components.AudioListEntry;
-import de.itlobby.discoverj.framework.ServiceLocator;
-import de.itlobby.discoverj.framework.ViewManager;
-import de.itlobby.discoverj.framework.Views;
+import de.itlobby.discoverj.ui.components.AudioListEntry;
+import de.itlobby.discoverj.ui.core.ServiceLocator;
+import de.itlobby.discoverj.ui.core.ViewManager;
+import de.itlobby.discoverj.ui.core.Views;
 import de.itlobby.discoverj.listeners.ActionListener;
 import de.itlobby.discoverj.models.AudioWrapper;
-import de.itlobby.discoverj.models.SimpleAudioWrapper;
+import de.itlobby.discoverj.models.FlatAudioWrapper;
 import de.itlobby.discoverj.util.AudioUtil;
 import de.itlobby.discoverj.util.GlyphsDude;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.LanguageUtil;
 import de.itlobby.discoverj.util.SystemUtil;
-import de.itlobby.discoverj.viewcontroller.OpenFileViewController;
+import de.itlobby.discoverj.ui.viewcontroller.OpenFileViewController;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.animation.ScaleTransition;
 import javafx.scene.Node;
@@ -93,10 +93,10 @@ public class DragDropService implements Service {
 
             for (AudioListEntry selectedEntry : selectedEntries) {
                 getMainViewController().countIndicatorUp();
-                SimpleAudioWrapper audioWrapper = selectedEntry.getSimpleAudioWrapper();
+                FlatAudioWrapper audioWrapper = selectedEntry.getSimpleAudioWrapper();
                 AudioFile audioFile = AudioFileIO.read(new File(audioWrapper.getPath()));
 
-                List<SimpleAudioWrapper> audioList = ServiceLocator.get(DataService.class).getAudioList();
+                List<FlatAudioWrapper> audioList = ServiceLocator.get(DataService.class).getAudioList();
 
                 audioList.stream()
                         .filter(x -> x.getId().equals(audioWrapper.getId()))

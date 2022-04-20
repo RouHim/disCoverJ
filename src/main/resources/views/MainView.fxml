@@ -20,7 +20,7 @@
             minHeight="-Infinity"
             minWidth="-Infinity" prefHeight="620.0" prefWidth="640.0" styleClass="app-background"
             stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/16"
-            fx:controller="de.itlobby.discoverj.viewcontroller.MainViewController">
+            fx:controller="de.itlobby.discoverj.ui.viewcontroller.MainViewController">
 
     <children>
         <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"

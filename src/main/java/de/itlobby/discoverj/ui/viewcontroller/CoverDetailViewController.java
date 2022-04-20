@@ -1,8 +1,8 @@
-package de.itlobby.discoverj.viewcontroller;
+package de.itlobby.discoverj.ui.viewcontroller;
 
-import de.itlobby.discoverj.framework.ViewManager;
-import de.itlobby.discoverj.framework.Views;
-import de.itlobby.discoverj.models.SimpleAudioWrapper;
+import de.itlobby.discoverj.ui.core.ViewManager;
+import de.itlobby.discoverj.ui.core.Views;
+import de.itlobby.discoverj.models.FlatAudioWrapper;
 import de.itlobby.discoverj.util.ImageUtil;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -51,7 +51,7 @@ public class CoverDetailViewController implements ViewController {
         }
     }
 
-    public void createCoverInfo(SimpleAudioWrapper wrapper) {
+    public void createCoverInfo(FlatAudioWrapper wrapper) {
         Optional<Image> maybeImage = wrapper.getImage();
 
         if (wrapper.isHasCover() && maybeImage.isPresent()) {

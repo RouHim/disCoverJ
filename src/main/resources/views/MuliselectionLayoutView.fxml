@@ -8,7 +8,7 @@
 <?import java.lang.String?>
 <HBox xmlns:fx="http://javafx.com/fxml/1" fx:id="rootLayout" alignment="CENTER" prefHeight="50.0" prefWidth="200.0"
       spacing="10.0" xmlns="http://javafx.com/javafx/8.0.60"
-      fx:controller="de.itlobby.discoverj.viewcontroller.MultiselectionLayoutViewController">
+      fx:controller="de.itlobby.discoverj.ui.viewcontroller.MultiselectionLayoutViewController">
     <children>
         <Button fx:id="btnClearCover" HBox.hgrow="ALWAYS"/>
         <VBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">

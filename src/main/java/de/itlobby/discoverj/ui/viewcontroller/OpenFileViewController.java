@@ -1,4 +1,4 @@
-package de.itlobby.discoverj.viewcontroller;
+package de.itlobby.discoverj.ui.viewcontroller;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;

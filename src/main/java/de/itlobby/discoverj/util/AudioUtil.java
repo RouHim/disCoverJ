@@ -1,10 +1,10 @@
 package de.itlobby.discoverj.util;
 
-import de.itlobby.discoverj.framework.ServiceLocator;
 import de.itlobby.discoverj.models.AudioWrapper;
-import de.itlobby.discoverj.models.SimpleAudioWrapper;
+import de.itlobby.discoverj.models.FlatAudioWrapper;
 import de.itlobby.discoverj.services.DataService;
 import de.itlobby.discoverj.services.LightBoxService;
+import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.util.helper.ImageCache;
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -52,7 +52,7 @@ public class AudioUtil {
                     .toArray(String[]::new);
     public static final List<String> VALID_AUDIO_FILE_EXTENSION_LIST =
             Arrays.stream(VALID_AUDIO_FILE_EXTENSION).toList();
-    private static final Logger LOG = LogManager.getLogger(AudioUtil.class);
+    private static final Logger log = LogManager.getLogger(AudioUtil.class);
 
     private AudioUtil() {
     }
@@ -77,7 +77,7 @@ public class AudioUtil {
             return Optional.ofNullable(getCoverData(audioFile))
                     .map(data -> ImageCache.getInstance().getBuffImage(data));
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
 
         return Optional.empty();
@@ -97,7 +97,7 @@ public class AudioUtil {
         try {
             return readFieldValue(audioFile, FieldKey.ALBUM);
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
 
         return "";
@@ -107,7 +107,7 @@ public class AudioUtil {
         try {
             return readFieldValue(audioFile, FieldKey.ALBUM_ARTIST);
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
 
         return "";
@@ -132,7 +132,7 @@ public class AudioUtil {
         try {
             return readFieldValue(audioFile, FieldKey.TITLE);
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
 
         return "";
@@ -142,7 +142,7 @@ public class AudioUtil {
         try {
             return readFieldValue(audioFile, FieldKey.ARTIST);
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
 
         return "";
@@ -156,14 +156,14 @@ public class AudioUtil {
         return Arrays.stream(readFieldValue(audioFile, FieldKey.ARTIST)
                         .split(artistSeparators))
                 .map(String::trim)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public static String getYear(AudioFile audioFile) {
         try {
             return readFieldValue(audioFile, FieldKey.YEAR);
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
 
         return "";
@@ -173,7 +173,7 @@ public class AudioUtil {
         try {
             return readFieldValue(audioFile, FieldKey.TRACK);
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
 
         return null;
@@ -198,19 +198,17 @@ public class AudioUtil {
     }
 
     public static void saveCoverToAudioFile(AudioFile audioFile, BufferedImage cover) {
-        try {
-            if (cover == null) {
-                audioFile.getTag().deleteArtworkField();
-                return;
-            } else {
-                writeAudioTag(audioFile, cover);
-            }
+        if (cover == null) {
+            return;
+        }
 
+        try {
+            writeAudioTag(audioFile, cover);
             audioFile.commit();
         } catch (CannotWriteException e) {
-            showCannotWriteError(audioFile);
+            showCannotWriteError(audioFile.getFile().getAbsolutePath());
         } catch (Exception e) {
-            LOG.error("Error while proccessing file: " + audioFile.getFile().getAbsolutePath(), e);
+            log.error("Error while processing file: {}", audioFile.getFile().getAbsolutePath(), e);
         }
     }
 
@@ -247,7 +245,7 @@ public class AudioUtil {
                 audioFile.setTag(new ID3v23Tag(id3v1Tag));
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -270,25 +268,27 @@ public class AudioUtil {
             AudioFile lastAudioFile = AudioFileIO.read(lastAudio);
             String lastAlbum = AudioUtil.getAlbum(lastAudioFile);
 
-            if (StringUtil.isNullOrEmpty(currentAlbum) || StringUtil.isNullOrEmpty(lastAlbum)) {
-                equalAlbum = false;
-            } else {
+            if (!StringUtil.isNullOrEmpty(currentAlbum) && !StringUtil.isNullOrEmpty(lastAlbum)) {
                 equalAlbum = currentAlbum.equals(lastAlbum);
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
 
         return equalFolder && equalAlbum;
     }
 
-    public static void removeCover(SimpleAudioWrapper simpleWrapper) {
-        simpleWrapper.setHasCover(false);
-
+    public static void removeCover(FlatAudioWrapper flatWrapper) {
+        String filePath = flatWrapper.getPath();
         try {
-            saveCoverToAudioFile(AudioFileIO.read(new File(simpleWrapper.getPath())), null);
+            AudioFile audioFile = AudioFileIO.read(new File(filePath));
+            audioFile.getTag().deleteArtworkField();
+            audioFile.commit();
+            flatWrapper.setHasCover(false);
+        } catch (CannotWriteException e) {
+            showCannotWriteError(filePath);
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -322,7 +322,7 @@ public class AudioUtil {
         try {
             return AudioFileIO.read(file.getAbsoluteFile());
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
         return null;
     }
@@ -356,7 +356,7 @@ public class AudioUtil {
         boolean isMixCD = artistOfTotalPercentage < 0.50;
         dataService.getMixCDMap().put(absoluteParentPath, isMixCD);
 
-        LOG.debug("IsMixCD: {} ({})", isMixCD, artistOfTotalPercentage);
+        log.debug("IsMixCD: {} ({})", isMixCD, artistOfTotalPercentage);
         return isMixCD;
     }
 
@@ -374,14 +374,14 @@ public class AudioUtil {
         return Optional.empty();
     }
 
-    public static void showCannotWriteError(AudioFile audioFile) {
+    public static void showCannotWriteError(String absolutePath) {
         Platform.runLater(() -> ServiceLocator.get(LightBoxService.class)
                 .showTextDialog(
                         LanguageUtil.getString("InitialController.warning"),
                         MessageFormat.format(
                                 "{0}\n\n{1}",
                                 LanguageUtil.getString("SearchController.cannotWriteFile"),
-                                audioFile.getFile().getAbsolutePath())
+                                absolutePath)
                 )
         );
     }

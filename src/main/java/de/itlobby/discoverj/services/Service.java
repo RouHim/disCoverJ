@@ -1,9 +1,9 @@
 package de.itlobby.discoverj.services;
 
-import de.itlobby.discoverj.framework.ViewManager;
-import de.itlobby.discoverj.framework.Views;
-import de.itlobby.discoverj.viewcontroller.MainViewController;
-import de.itlobby.discoverj.viewcontroller.SettingsViewController;
+import de.itlobby.discoverj.ui.core.ViewManager;
+import de.itlobby.discoverj.ui.core.Views;
+import de.itlobby.discoverj.ui.viewcontroller.MainViewController;
+import de.itlobby.discoverj.ui.viewcontroller.SettingsViewController;
 
 public interface Service {
     default MainViewController getMainViewController() {

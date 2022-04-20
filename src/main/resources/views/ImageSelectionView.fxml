@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="baseLayout" spacing="5.0" stylesheets="@../css/style.css"
       xmlns="http://javafx.com/javafx/9"
-      fx:controller="de.itlobby.discoverj.viewcontroller.ImageSelectionViewController">
+      fx:controller="de.itlobby.discoverj.ui.viewcontroller.ImageSelectionViewController">
     <children>
         <VBox fx:id="imgPropLayout" spacing="5.0" VBox.vgrow="NEVER">
             <children>

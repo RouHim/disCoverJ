@@ -1,14 +1,14 @@
-package de.itlobby.discoverj.viewtask;
+package de.itlobby.discoverj.ui.viewtask;
 
-import de.itlobby.discoverj.components.AudioListEntry;
+import de.itlobby.discoverj.ui.components.AudioListEntry;
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ScanResultData;
-import de.itlobby.discoverj.models.SimpleAudioWrapper;
+import de.itlobby.discoverj.models.FlatAudioWrapper;
 import de.itlobby.discoverj.settings.AppConfig;
 import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.util.AudioUtil;
 import de.itlobby.discoverj.util.SystemUtil;
-import de.itlobby.discoverj.viewcontroller.MainViewController;
+import de.itlobby.discoverj.ui.viewcontroller.MainViewController;
 import javafx.scene.image.Image;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,7 +34,7 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
     private final List<AudioWrapper> audioWrapperList;
     private final ScanResultData scanResultData;
     private final AppConfig config;
-    private Map<String, List<SimpleAudioWrapper>> audioData;
+    private Map<String, List<FlatAudioWrapper>> audioData;
     private Integer idCount;
     private int withCover;
     private File parentFileLastScanning;
@@ -70,14 +70,14 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
         for (AudioWrapper audioWrapper : audioWrapperList) {
             File file = audioWrapper.getAudioFile().getFile();
 
-            SimpleAudioWrapper simpleAudioWrapper = new SimpleAudioWrapper();
-            simpleAudioWrapper.setHasCover(audioWrapper.hasCover());
-            simpleAudioWrapper.setPath(file.getAbsolutePath());
-            simpleAudioWrapper.setDisplayValue(AudioUtil.buildDisplayValue(audioWrapper));
-            simpleAudioWrapper.setReadOnly(!audioWrapper.getAudioFile().getFile().canWrite());
-            simpleAudioWrapper.setId(audioWrapper.getId());
+            FlatAudioWrapper flatAudioWrapper = new FlatAudioWrapper();
+            flatAudioWrapper.setHasCover(audioWrapper.hasCover());
+            flatAudioWrapper.setPath(file.getAbsolutePath());
+            flatAudioWrapper.setDisplayValue(AudioUtil.buildDisplayValue(audioWrapper));
+            flatAudioWrapper.setReadOnly(!audioWrapper.getAudioFile().getFile().canWrite());
+            flatAudioWrapper.setId(audioWrapper.getId());
 
-            addAudioData(audioWrapper.getFile().getParent(), simpleAudioWrapper);
+            addAudioData(audioWrapper.getFile().getParent(), flatAudioWrapper);
         }
 
         audioData = sortByKey(audioData);
@@ -97,19 +97,19 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
         setResult(scanResultData);
     }
 
-    private Map<String, List<SimpleAudioWrapper>> sortByKey(Map<String, List<SimpleAudioWrapper>> audioData) {
+    private Map<String, List<FlatAudioWrapper>> sortByKey(Map<String, List<FlatAudioWrapper>> audioData) {
         return audioData.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                         (oldValue, newValue) -> oldValue, LinkedHashMap::new));
     }
 
-    private void addAudioData(String parent, SimpleAudioWrapper simpleAudioWrapper) {
+    private void addAudioData(String parent, FlatAudioWrapper flatAudioWrapper) {
         try {
             if (audioData.containsKey(parent)) {
-                audioData.get(parent).add(simpleAudioWrapper);
+                audioData.get(parent).add(flatAudioWrapper);
             } else {
-                audioData.put(parent, new ArrayList<>(Collections.singletonList(simpleAudioWrapper)));
+                audioData.put(parent, new ArrayList<>(Collections.singletonList(flatAudioWrapper)));
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);

@@ -7,14 +7,14 @@ import javafx.scene.image.Image;
 import java.util.Objects;
 import java.util.Optional;
 
-public class SimpleAudioWrapper {
+public class FlatAudioWrapper {
     private Integer id;
     private String path;
     private String displayValue;
     private boolean hasCover;
     private boolean readOnly;
 
-    public SimpleAudioWrapper() {
+    public FlatAudioWrapper() {
     }
 
     public String getPath() {
@@ -73,7 +73,7 @@ public class SimpleAudioWrapper {
             return false;
         }
 
-        SimpleAudioWrapper that = (SimpleAudioWrapper) o;
+        FlatAudioWrapper that = (FlatAudioWrapper) o;
 
         if (!Objects.equals(id, that.id)) {
             return false;

@@ -1,7 +1,7 @@
-package de.itlobby.discoverj.components;
+package de.itlobby.discoverj.ui.components;
 
-import de.itlobby.discoverj.framework.ServiceLocator;
-import de.itlobby.discoverj.models.SimpleAudioWrapper;
+import de.itlobby.discoverj.ui.core.ServiceLocator;
+import de.itlobby.discoverj.models.FlatAudioWrapper;
 import de.itlobby.discoverj.services.InitialService;
 import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.util.ImageUtil;
@@ -25,19 +25,19 @@ import java.awt.image.BufferedImage;
 import java.util.Objects;
 
 public class AudioListEntry extends HBox {
-    private final SimpleAudioWrapper simpleAudioWrapper;
+    private final FlatAudioWrapper flatAudioWrapper;
     private ImageView imageView;
     private FontAwesomeIconView iconView;
     private Label txtPath;
     private RotateTransition rotateTransition;
 
-    public AudioListEntry(SimpleAudioWrapper simpleAudioWrapper) {
-        this.simpleAudioWrapper = simpleAudioWrapper;
+    public AudioListEntry(FlatAudioWrapper flatAudioWrapper) {
+        this.flatAudioWrapper = flatAudioWrapper;
         createLayout();
     }
 
     private void createLayout() {
-        txtPath = new Label(simpleAudioWrapper.getDisplayValue());
+        txtPath = new Label(flatAudioWrapper.getDisplayValue());
         iconView = new FontAwesomeIconView();
 
         updateStatusIcon();
@@ -78,8 +78,8 @@ public class AudioListEntry extends HBox {
         initAnimation();
     }
 
-    public SimpleAudioWrapper getSimpleAudioWrapper() {
-        return simpleAudioWrapper;
+    public FlatAudioWrapper getSimpleAudioWrapper() {
+        return flatAudioWrapper;
     }
 
     public ImageView getImageView() {
@@ -95,14 +95,14 @@ public class AudioListEntry extends HBox {
             imageView.setImage(null);
         }
         iconView.setIcon(FontAwesomeIcon.TIMES);
-        simpleAudioWrapper.setHasCover(false);
+        flatAudioWrapper.setHasCover(false);
     }
 
     public void replaceCover(BufferedImage img) {
         WritableImage fxImg = ImageUtil.toFXImage(img, (int) imageView.getFitWidth(), (int) imageView.getFitHeight());
         imageView.setImage(fxImg);
         iconView.setIcon(FontAwesomeIcon.CHECK);
-        simpleAudioWrapper.setHasCover(true);
+        flatAudioWrapper.setHasCover(true);
     }
 
     @Override
@@ -116,16 +116,16 @@ public class AudioListEntry extends HBox {
 
         AudioListEntry that = (AudioListEntry) o;
 
-        if (!Objects.equals(simpleAudioWrapper, that.simpleAudioWrapper)) {
+        if (!Objects.equals(flatAudioWrapper, that.flatAudioWrapper)) {
             return false;
         }
 
-        return simpleAudioWrapper.equals(((AudioListEntry) o).getSimpleAudioWrapper());
+        return flatAudioWrapper.equals(((AudioListEntry) o).getSimpleAudioWrapper());
     }
 
     @Override
     public int hashCode() {
-        int result = simpleAudioWrapper != null ? simpleAudioWrapper.hashCode() : 0;
+        int result = flatAudioWrapper != null ? flatAudioWrapper.hashCode() : 0;
         result = 31 * result + (imageView != null ? imageView.hashCode() : 0);
         result = 31 * result + (iconView != null ? iconView.hashCode() : 0);
         result = 31 * result + (txtPath != null ? txtPath.hashCode() : 0);
@@ -145,12 +145,12 @@ public class AudioListEntry extends HBox {
     private void updateStatusIcon() {
         FontAwesomeIcon icon;
 
-        if (simpleAudioWrapper.isHasCover()) {
+        if (flatAudioWrapper.isHasCover()) {
             icon = FontAwesomeIcon.CHECK;
         } else {
             icon = FontAwesomeIcon.TIMES;
         }
-        if (simpleAudioWrapper.isReadOnly()) {
+        if (flatAudioWrapper.isReadOnly()) {
             icon = FontAwesomeIcon.LOCK;
             Tooltip.install(iconView, new Tooltip(LanguageUtil.getString("audiofile.readonly")));
         }

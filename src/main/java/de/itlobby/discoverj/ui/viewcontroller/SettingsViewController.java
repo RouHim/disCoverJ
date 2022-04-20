@@ -1,6 +1,6 @@
-package de.itlobby.discoverj.viewcontroller;
+package de.itlobby.discoverj.ui.viewcontroller;
 
-import de.itlobby.discoverj.framework.ServiceLocator;
+import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.models.Language;
 import de.itlobby.discoverj.searchservice.SearxService;
 import de.itlobby.discoverj.util.helper.AwesomeHelper;

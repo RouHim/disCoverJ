@@ -1,4 +1,4 @@
-package de.itlobby.discoverj.viewcontroller;
+package de.itlobby.discoverj.ui.viewcontroller;
 
 import de.itlobby.discoverj.util.GlyphsDude;
 import de.itlobby.discoverj.util.ImageUtil;

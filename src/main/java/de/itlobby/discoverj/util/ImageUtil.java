@@ -15,7 +15,6 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -215,14 +214,6 @@ public class ImageUtil {
         );
     }
 
-    public static String colorToHexString(Color color) {
-        return String.format("#%02X%02X%02X",
-                (int) (color.getRed() * 255),
-                (int) (color.getGreen() * 255),
-                (int) (color.getBlue() * 255)
-        );
-    }
-
     public static String createImageResolutionString(double width, double height) {
         return String.format("(%sx%s)", (int) width, (int) height);
     }
@@ -345,7 +336,7 @@ public class ImageUtil {
         int width = input.getWidth();
 
         if (height != width) {
-            int targetSize = height > width ? width : height;
+            int targetSize = Math.min(height, width);
             squaredImage = ImageUtil.resize(input, targetSize, targetSize);
         }
 
@@ -426,14 +417,6 @@ public class ImageUtil {
         }
 
         return writableImage;
-    }
-
-    public static BufferedImage fixColorModel(BufferedImage src) {
-        BufferedImage img = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_BGR);
-        Graphics2D g2d = img.createGraphics();
-        g2d.drawImage(src, 0, 0, null);
-        g2d.dispose();
-        return img;
     }
 
     public static Optional<Image> getFxImageFromBytes(byte[] data, int width, int height) {

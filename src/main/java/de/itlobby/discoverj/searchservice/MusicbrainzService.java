@@ -1,6 +1,6 @@
 package de.itlobby.discoverj.searchservice;
 
-import de.itlobby.discoverj.framework.ServiceLocator;
+import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.SearchTagWrapper;
 import de.itlobby.discoverj.services.DataService;

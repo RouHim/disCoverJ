@@ -1,4 +1,4 @@
-package de.itlobby.discoverj.viewtask;
+package de.itlobby.discoverj.ui.viewtask;
 
 import de.itlobby.discoverj.util.AudioUtil;
 import org.apache.commons.io.FileUtils;

@@ -23,7 +23,7 @@
             minWidth="-Infinity"
             prefHeight="635.0" prefWidth="648.0" styleClass="app-background"
             stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/16"
-            fx:controller="de.itlobby.discoverj.viewcontroller.SettingsViewController">
+            fx:controller="de.itlobby.discoverj.ui.viewcontroller.SettingsViewController">
     <children>
         <TabPane layoutX="5.0" layoutY="55.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0"
                  AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">

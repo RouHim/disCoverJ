@@ -1,7 +1,7 @@
 package de.itlobby.discoverj.util;
 
 import de.itlobby.discoverj.Main;
-import de.itlobby.discoverj.framework.ViewManager;
+import de.itlobby.discoverj.ui.core.ViewManager;
 import de.itlobby.discoverj.models.Version;
 import de.itlobby.discoverj.settings.Settings;
 import org.apache.logging.log4j.LogManager;

@@ -5,15 +5,15 @@ import java.util.List;
 import java.util.Map;
 
 public class ScanResultData {
-    private Map<String, List<SimpleAudioWrapper>> audioMap = new HashMap<>();
+    private Map<String, List<FlatAudioWrapper>> audioMap = new HashMap<>();
     private int audioFilesCount;
     private int withCover;
 
-    public Map<String, List<SimpleAudioWrapper>> getAudioMap() {
+    public Map<String, List<FlatAudioWrapper>> getAudioMap() {
         return audioMap;
     }
 
-    public void setAudioMap(Map<String, List<SimpleAudioWrapper>> audioMap) {
+    public void setAudioMap(Map<String, List<FlatAudioWrapper>> audioMap) {
         this.audioMap = audioMap;
     }
 

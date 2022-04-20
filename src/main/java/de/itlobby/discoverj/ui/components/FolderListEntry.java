@@ -1,6 +1,6 @@
-package de.itlobby.discoverj.components;
+package de.itlobby.discoverj.ui.components;
 
-import de.itlobby.discoverj.framework.ServiceLocator;
+import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.services.InitialService;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;

@@ -1,9 +1,9 @@
 package de.itlobby.discoverj.services;
 
-import de.itlobby.discoverj.framework.ServiceLocator;
+import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.util.LanguageUtil;
 import de.itlobby.discoverj.util.SystemUtil;
-import de.itlobby.discoverj.viewcontroller.MainViewController;
+import de.itlobby.discoverj.ui.viewcontroller.MainViewController;
 import javafx.application.Platform;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;

@@ -1,4 +1,4 @@
-package de.itlobby.discoverj.framework;
+package de.itlobby.discoverj.ui.core;
 
 import java.util.HashMap;
 

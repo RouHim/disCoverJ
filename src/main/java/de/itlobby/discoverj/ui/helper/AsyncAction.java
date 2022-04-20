@@ -1,6 +1,7 @@
-package de.itlobby.discoverj.framework;
+package de.itlobby.discoverj.ui.helper;
 
 import de.itlobby.discoverj.services.ExceptionService;
+import de.itlobby.discoverj.ui.core.ServiceLocator;
 
 import java.util.ArrayList;
 import java.util.List;

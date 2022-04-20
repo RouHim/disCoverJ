@@ -1,16 +1,16 @@
-package de.itlobby.discoverj.viewcontroller;
+package de.itlobby.discoverj.ui.viewcontroller;
 
-import de.itlobby.discoverj.components.AudioListEntry;
-import de.itlobby.discoverj.components.FolderListEntry;
-import de.itlobby.discoverj.framework.ServiceLocator;
-import de.itlobby.discoverj.framework.ViewManager;
-import de.itlobby.discoverj.framework.Views;
+import de.itlobby.discoverj.ui.components.AudioListEntry;
+import de.itlobby.discoverj.ui.components.FolderListEntry;
+import de.itlobby.discoverj.ui.core.ServiceLocator;
+import de.itlobby.discoverj.ui.core.ViewManager;
+import de.itlobby.discoverj.ui.core.Views;
 import de.itlobby.discoverj.listeners.ListenerStateProvider;
 import de.itlobby.discoverj.listeners.MultipleSelectionListener;
 import de.itlobby.discoverj.listeners.ParentKeyDeletedListener;
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ScanResultData;
-import de.itlobby.discoverj.models.SimpleAudioWrapper;
+import de.itlobby.discoverj.models.FlatAudioWrapper;
 import de.itlobby.discoverj.services.InitialService;
 import de.itlobby.discoverj.services.LightBoxService;
 import de.itlobby.discoverj.services.SearchService;
@@ -385,7 +385,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
     private void setAudioList(ScanResultData scanResultData) {
         lwAudioList.getChildren().clear();
 
-        Map<String, List<SimpleAudioWrapper>> audioMap = scanResultData.getAudioMap();
+        Map<String, List<FlatAudioWrapper>> audioMap = scanResultData.getAudioMap();
 
         int iParent = 0;
         for (String parent : audioMap.keySet()) {
@@ -397,8 +397,8 @@ public class MainViewController implements ViewController, MultipleSelectionList
                 VBox.setMargin(folderEntry, new Insets(10, 0, 0, 0));
             }
 
-            for (SimpleAudioWrapper simpleAudioWrapper : audioMap.get(parent)) {
-                lwAudioList.getChildren().add(new AudioListEntry(simpleAudioWrapper));
+            for (FlatAudioWrapper flatAudioWrapper : audioMap.get(parent)) {
+                lwAudioList.getChildren().add(new AudioListEntry(flatAudioWrapper));
             }
 
             iParent++;
@@ -495,9 +495,9 @@ public class MainViewController implements ViewController, MultipleSelectionList
         });
     }
 
-    public void highlightInList(SimpleAudioWrapper simpleAudioWrapper) {
+    public void highlightInList(FlatAudioWrapper flatAudioWrapper) {
         Platform.runLater(() -> {
-            int i = lwAudioList.getChildren().indexOf(getAudioListEntry(simpleAudioWrapper));
+            int i = lwAudioList.getChildren().indexOf(getAudioListEntry(flatAudioWrapper));
             lwAudioList.getChildren().get(i).getStyleClass().add("audio-line-selected");
         });
     }
@@ -512,8 +512,8 @@ public class MainViewController implements ViewController, MultipleSelectionList
     public void highlightRangeInList(AudioListEntry from, AudioListEntry to) {
         Platform.runLater(() -> {
             ArrayList<AudioListEntry> selectedEntries = new ArrayList<>();
-            SimpleAudioWrapper fromWrapper = from.getSimpleAudioWrapper();
-            SimpleAudioWrapper toWrapper = to.getSimpleAudioWrapper();
+            FlatAudioWrapper fromWrapper = from.getSimpleAudioWrapper();
+            FlatAudioWrapper toWrapper = to.getSimpleAudioWrapper();
 
             boolean isInRange = false;
             List<AudioListEntry> children = lwAudioList
@@ -550,7 +550,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
         });
     }
 
-    public void unHighlightInList(SimpleAudioWrapper currentAudio) {
+    public void unHighlightInList(FlatAudioWrapper currentAudio) {
         Platform.runLater(() -> {
             lwAudioList.getChildren().stream()
                     .filter(x -> x instanceof AudioListEntry)
@@ -580,7 +580,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
         );
     }
 
-    public void updateListItem(SimpleAudioWrapper currentAudio, WritableImage newCover) {
+    public void updateListItem(FlatAudioWrapper currentAudio, WritableImage newCover) {
         AudioListEntry listEntry = getAudioListEntry(currentAudio);
 
         if (listEntry == null) {
@@ -606,7 +606,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
         });
     }
 
-    public AudioListEntry getAudioListEntry(SimpleAudioWrapper currentAudio) {
+    public AudioListEntry getAudioListEntry(FlatAudioWrapper currentAudio) {
         return lwAudioList.getChildren()
                 .stream()
                 .filter(x -> x instanceof AudioListEntry)
@@ -616,7 +616,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
                 .orElse(null);
     }
 
-    public void scrollToNodeInList(SimpleAudioWrapper currentAudio) {
+    public void scrollToNodeInList(FlatAudioWrapper currentAudio) {
         Platform.runLater(() -> {
             scrollTo(getAudioListEntry(currentAudio));
             ServiceLocator.get(SelectionService.class).addSelection(getAudioListEntry(currentAudio));
@@ -674,19 +674,19 @@ public class MainViewController implements ViewController, MultipleSelectionList
         lwAudioList.getChildren().removeAll(entriesToRemove);
     }
 
-    public void setAudioLineBusy(SimpleAudioWrapper simpleAudioWrapper, boolean isBusy) {
-        getAudioListEntry(simpleAudioWrapper).setBusy(isBusy);
+    public void setAudioLineBusy(FlatAudioWrapper flatAudioWrapper, boolean isBusy) {
+        getAudioListEntry(flatAudioWrapper).setBusy(isBusy);
     }
 
-    public void setEntryToProcessingState(AudioWrapper audioWrapper, SimpleAudioWrapper simpleAudioWrapper) {
+    public void setEntryToProcessingState(AudioWrapper audioWrapper, FlatAudioWrapper flatAudioWrapper) {
         showAudioInfo(audioWrapper);
-        highlightInList(simpleAudioWrapper);
-        setAudioLineBusy(simpleAudioWrapper, true);
+        highlightInList(flatAudioWrapper);
+        setAudioLineBusy(flatAudioWrapper, true);
     }
 
-    public void setEntryToFinishedState(SimpleAudioWrapper simpleAudioWrapper) {
-        unHighlightInList(simpleAudioWrapper);
-        setAudioLineBusy(simpleAudioWrapper, false);
+    public void setEntryToFinishedState(FlatAudioWrapper flatAudioWrapper) {
+        unHighlightInList(flatAudioWrapper);
+        setAudioLineBusy(flatAudioWrapper, false);
         increaseProgress();
     }
 }

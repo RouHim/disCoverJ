@@ -1,9 +1,9 @@
-package de.itlobby.discoverj.framework;
+package de.itlobby.discoverj.ui.core;
 
 
 import de.itlobby.discoverj.util.LanguageUtil;
 import de.itlobby.discoverj.util.SystemUtil;
-import de.itlobby.discoverj.viewcontroller.ViewController;
+import de.itlobby.discoverj.ui.viewcontroller.ViewController;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;

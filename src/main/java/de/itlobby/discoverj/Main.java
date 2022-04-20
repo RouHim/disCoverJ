@@ -1,7 +1,7 @@
 package de.itlobby.discoverj;
 
-import de.itlobby.discoverj.framework.ServiceLocator;
-import de.itlobby.discoverj.framework.ViewManager;
+import de.itlobby.discoverj.ui.core.ServiceLocator;
+import de.itlobby.discoverj.ui.core.ViewManager;
 import de.itlobby.discoverj.services.InitialService;
 import de.itlobby.discoverj.services.MainService;
 import de.itlobby.discoverj.settings.Settings;

@@ -1,12 +1,12 @@
 package de.itlobby.discoverj.services;
 
-import de.itlobby.discoverj.components.AudioListEntry;
-import de.itlobby.discoverj.framework.ServiceLocator;
-import de.itlobby.discoverj.framework.ViewManager;
-import de.itlobby.discoverj.framework.Views;
+import de.itlobby.discoverj.ui.components.AudioListEntry;
+import de.itlobby.discoverj.ui.core.ServiceLocator;
+import de.itlobby.discoverj.ui.core.ViewManager;
+import de.itlobby.discoverj.ui.core.Views;
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ScanResultData;
-import de.itlobby.discoverj.models.SimpleAudioWrapper;
+import de.itlobby.discoverj.models.FlatAudioWrapper;
 import de.itlobby.discoverj.settings.AppConfig;
 import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.util.ImageClipboardUtil;
@@ -14,11 +14,11 @@ import de.itlobby.discoverj.util.LanguageUtil;
 import de.itlobby.discoverj.util.StringUtil;
 import de.itlobby.discoverj.util.SystemUtil;
 import de.itlobby.discoverj.util.helper.ImageCache;
-import de.itlobby.discoverj.viewcontroller.CoverDetailViewController;
-import de.itlobby.discoverj.viewcontroller.MainViewController;
-import de.itlobby.discoverj.viewcontroller.OpenFileViewController;
-import de.itlobby.discoverj.viewtask.PreCountViewTask;
-import de.itlobby.discoverj.viewtask.ScanFileViewTask;
+import de.itlobby.discoverj.ui.viewcontroller.CoverDetailViewController;
+import de.itlobby.discoverj.ui.viewcontroller.MainViewController;
+import de.itlobby.discoverj.ui.viewcontroller.OpenFileViewController;
+import de.itlobby.discoverj.ui.viewtask.PreCountViewTask;
+import de.itlobby.discoverj.ui.viewtask.ScanFileViewTask;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -167,7 +167,7 @@ public class InitialService implements Service {
             return;
         }
 
-        SimpleAudioWrapper audioWrapper = audioListEntry.getSimpleAudioWrapper();
+        FlatAudioWrapper audioWrapper = audioListEntry.getSimpleAudioWrapper();
         String title = MessageFormat.format(LanguageUtil.getString("cover.von.0"), audioWrapper.getDisplayValue());
 
         ServiceLocator.get(LightBoxService.class).showDialog(
@@ -207,7 +207,7 @@ public class InitialService implements Service {
 
     public void removeLastSelectedCover() {
         AudioListEntry audioListEntry = ServiceLocator.get(SelectionService.class).getLastSelected();
-        SimpleAudioWrapper audioWrapper = audioListEntry.getSimpleAudioWrapper();
+        FlatAudioWrapper audioWrapper = audioListEntry.getSimpleAudioWrapper();
 
         if (!audioWrapper.isHasCover()) {
             return;
@@ -235,7 +235,7 @@ public class InitialService implements Service {
 
         selectedEntries.stream()
                 .map(AudioListEntry::getSimpleAudioWrapper)
-                .filter(SimpleAudioWrapper::isHasCover)
+                .filter(FlatAudioWrapper::isHasCover)
                 .forEach(entry -> {
                     removeCover(entry);
                     dataService.updateResultEntry(entry);
@@ -252,7 +252,7 @@ public class InitialService implements Service {
 
     public void copyCoverToClipBrd() {
         AudioListEntry audioListEntry = ServiceLocator.get(SelectionService.class).getLastSelected();
-        SimpleAudioWrapper audioWrapper = audioListEntry.getSimpleAudioWrapper();
+        FlatAudioWrapper audioWrapper = audioListEntry.getSimpleAudioWrapper();
 
         if (audioWrapper.isHasCover()) {
             audioWrapper.getImage().ifPresent(image ->
@@ -277,7 +277,7 @@ public class InitialService implements Service {
     }
 
     public void clearAllListEntries() {
-        Map<String, List<SimpleAudioWrapper>> audioMap =
+        Map<String, List<FlatAudioWrapper>> audioMap =
                 ServiceLocator.get(DataService.class).getScanResultData().getAudioMap();
 
         if (audioMap != null && !audioMap.isEmpty()) {
