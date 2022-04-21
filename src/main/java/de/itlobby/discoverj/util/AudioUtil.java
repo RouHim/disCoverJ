@@ -59,16 +59,36 @@ public class AudioUtil {
         return tag != null && tag.getFirstArtwork() != null && tag.getFirstArtwork().getBinaryData() != null;
     }
 
+    /**
+     * Reads the cover from the audio file.
+     *
+     * @param audioFile to read the cover from
+     * @param width     target width of the cover
+     * @param height    target height of the cover
+     * @return the extracted cover image
+     */
     public static Optional<Image> getCover(AudioFile audioFile, int width, int height) {
         byte[] data = AudioUtil.getCoverData(audioFile);
         return ImageCache.getInstance().getImage(data, width, height);
     }
 
+    /**
+     * Reads the cover from the audio file.
+     *
+     * @param audioFile to read the cover from
+     * @return the extracted cover image
+     */
     public static Optional<Image> getCover(AudioFile audioFile) {
         return Optional.ofNullable(AudioUtil.getCoverData(audioFile))
                 .flatMap(imageData -> ImageCache.getInstance().getImage(imageData));
     }
 
+    /**
+     * Reads the cover from the audio file.
+     *
+     * @param audioFile to read the cover from
+     * @return the extracted cover image as buffered image
+     */
     public static Optional<BufferedImage> getCoverAsBufImg(AudioFile audioFile) {
         try {
             return Optional.ofNullable(getCoverData(audioFile))
@@ -80,6 +100,12 @@ public class AudioUtil {
         return Optional.empty();
     }
 
+    /**
+     * Reads the cover from the audio file.
+     *
+     * @param audioFile to read the cover from
+     * @return the extracted cover image as byte array
+     */
     private static byte[] getCoverData(AudioFile audioFile) {
         Tag tag = audioFile.getTag();
 
@@ -90,6 +116,12 @@ public class AudioUtil {
         return null;
     }
 
+    /**
+     * Reads the album tag from the audio file
+     *
+     * @param audioFile to read the album tag from
+     * @return the album tag value
+     */
     public static String getAlbum(AudioFile audioFile) {
         try {
             return readFieldValue(audioFile, FieldKey.ALBUM);
@@ -100,6 +132,12 @@ public class AudioUtil {
         return "";
     }
 
+    /**
+     * Reads the artist tag from the audio file
+     *
+     * @param audioFile to read the artist tag from
+     * @return the artist tag value
+     */
     public static String getAlbumArtist(AudioFile audioFile) {
         try {
             return readFieldValue(audioFile, FieldKey.ALBUM_ARTIST);
@@ -110,6 +148,13 @@ public class AudioUtil {
         return "";
     }
 
+    /**
+     * Reads a field value from the audio file
+     *
+     * @param audioFile to read the field value from
+     * @param fieldKey  as identifier
+     * @return the field value
+     */
     private static Optional<String> readMaybeFieldValue(AudioFile audioFile, FieldKey fieldKey) {
         Tag tag = audioFile.getTag();
         return tag != null && tag.hasField(fieldKey)
@@ -117,6 +162,13 @@ public class AudioUtil {
                 : Optional.empty();
     }
 
+    /**
+     * Reads a field value from the audio file
+     *
+     * @param audioFile to read the field value from
+     * @param fieldKey  as identifier
+     * @return the field value
+     */
     private static String readFieldValue(AudioFile audioFile, FieldKey fieldKey) {
         Tag tag = audioFile.getTag();
 
