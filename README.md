@@ -25,3 +25,5 @@
 **Supported audio types:** mp3, mp4, m4a, m4r, ogg, oga, flac, wma, ra
 
 **Search engines:** iTunes, Deezer, searX, Discogs, Spotify, Musicbrainz, Local search
+
+**Powered by:** [IntelliJ IDEA](https://www.jetbrains.com/idea), [jaudiotagger](https://bitbucket.org/ijabz/jaudiotagger), [jDeploy](https://www.jdeploy.com)
