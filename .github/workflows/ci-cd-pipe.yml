@@ -47,6 +47,7 @@ jobs:
 
   publish:
     runs-on: ubuntu-latest
+    if: github.ref_name == 'main'
     needs:
       - build
       - analyse
