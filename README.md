@@ -25,3 +25,4 @@
 **Supported audio types:** mp3, mp4, m4a, m4r, ogg, oga, flac, wma, ra
 
 **Search engines:** iTunes, Deezer, searX, Discogs, Spotify, Musicbrainz, Local search
+
