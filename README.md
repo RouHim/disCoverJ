@@ -9,11 +9,11 @@
 </p>
 
 <p align="center">
-  <a href="https://www.jdeploy.com/~discoverj" target="_blank">Download</a>
-  | <a href="https://github.com/RouHim/disCoverJ/issues" target="_blank">Issue Tracker</a>
-  | <a href="https://github.com/RouHim/disCoverJ/discussions" target="_blank">Discussions</a>
-  | <a href="https://crowdin.com/project/discoverj/invite" target="_blank">Help translate</a>
-  | <a href="https://www.paypal.me/disCoverJ" target="_blank">Donate me</a>
+  <a href="https://www.jdeploy.com/~discoverj">Download</a>
+  | <a href="https://github.com/RouHim/disCoverJ/issues">Issue Tracker</a>
+  | <a href="https://github.com/RouHim/disCoverJ/discussions">Discussions</a>
+  | <a href="https://crowdin.com/project/discoverj/invite">Help translate</a>
+  | <a href="https://www.paypal.me/disCoverJ">Donate me</a>
 </p>
 
 <p align="center">
