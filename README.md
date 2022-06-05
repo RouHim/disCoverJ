@@ -20,6 +20,10 @@
     <i>A simple tool that allows you to automatically embed cover images into your audio files.</i>
 </p>
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/RouHim/disCoverJ/main/screenshot.png" width="600">
+</p>
+
 ## Features
 
 **Supported audio types:** mp3, mp4, m4a, m4r, ogg, oga, flac, wma, ra
