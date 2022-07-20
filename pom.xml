@@ -67,7 +67,7 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-swing</artifactId>
-            <version>18.0.1</version>
+            <version>18.0.2</version>
         </dependency>
 
         <!--JavaFX 3rd Party-->
