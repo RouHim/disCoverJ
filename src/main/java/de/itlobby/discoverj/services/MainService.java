@@ -78,7 +78,7 @@ public class MainService implements Service {
 
         lightBoxService.showDialog(LanguageUtil.getString("mainService.reportBugTitle"), contentLayout, cancelListener, okListener, false, false);
 
-        SystemUtil.browseUrl("https://gitlab.com/rouvenhimmelstein/disCoverJ/-/issues/new");
+        SystemUtil.browseUrl("https://github.com/RouHim/disCoverJ/issues/new");
     }
 
     public void startMemoryWatchDog() {
