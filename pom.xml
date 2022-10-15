@@ -20,7 +20,7 @@
 
         <main.class>de.itlobby.discoverj.Main</main.class>
 
-        <twelvemonkeys.version>3.8.3</twelvemonkeys.version>
+        <twelvemonkeys.version>3.9.0</twelvemonkeys.version>
     </properties>
 
     <build>
