@@ -172,12 +172,14 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
     }
 
     private void validateAndAddFile(File fileObj) {
-        if (AudioUtil.isAudioFile(fileObj)) {
-            try {
-                addAudioToList(fileObj.getAbsolutePath());
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
+        if (!AudioUtil.isAudioFile(fileObj)) {
+            return;
+        }
+
+        try {
+            addAudioToList(fileObj.getAbsolutePath());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
     }
 

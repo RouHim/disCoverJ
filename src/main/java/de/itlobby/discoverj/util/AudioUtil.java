@@ -42,7 +42,7 @@ public class AudioUtil {
     public static final String[] VALID_AUDIO_FILE_EXTENSION = Arrays.stream(SupportedFileFormat.values())
             .map(SupportedFileFormat::getFilesuffix)
             .toArray(String[]::new);
-    public static final List<String> VALID_AUDIO_FILE_EXTENSION_LIST = Arrays.stream(VALID_AUDIO_FILE_EXTENSION).toList();
+    public static final Set<String> VALID_AUDIO_FILE_EXTENSION_LIST = Arrays.stream(VALID_AUDIO_FILE_EXTENSION).collect(Collectors.toSet());
     private static final Logger log = LogManager.getLogger(AudioUtil.class);
 
     private AudioUtil() {
