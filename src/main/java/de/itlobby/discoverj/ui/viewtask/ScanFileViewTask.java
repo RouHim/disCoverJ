@@ -182,25 +182,32 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
     }
 
     private void addAudioToList(String filePath) throws Exception {
+        // TODO: Here the audio file should be read the first and only time
+        // May be worth doing this in parallel with a limited amount of threads
+        // Read all information that are needed, and do not keep the heavy AudioFile instance in memory
+
+
         AudioWrapper wrapper = new AudioWrapper();
         File file = new File(filePath);
         File parent = file.getParentFile();
         AudioFile audioFile = AudioFileIO.read(file);
         wrapper.setAudioFile(audioFile);
 
-        if (AudioUtil.haveCover(audioFile)) {
-            wrapper.setHasCover(true);
-            withCover++;
-        }
-
         wrapper.setId(idCount);
 
+        // Separate the caching
         if (!parent.equals(parentFileLastScanning)) {
             parentFileLastScanning = parent;
             new Thread(() -> AudioUtil.checkForMixCD(wrapper)).start();
         }
 
         audioWrapperList.add(wrapper);
+
+        if (AudioUtil.haveCover(audioFile)) {
+            wrapper.setHasCover(true);
+            withCover++;
+        }
+
         idCount++;
 
         updateProgress();

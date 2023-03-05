@@ -4,20 +4,19 @@ import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.services.SearchQueryService;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.StringUtil;
-import kong.unirest.HttpResponse;
-import kong.unirest.JsonNode;
-import kong.unirest.Unirest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.URI;
 import java.net.URLEncoder;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.*;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -45,13 +44,11 @@ public class SpotifyService implements SearchService {
 
         try {
             String searchString = URLEncoder.encode(SearchQueryService.createSearchString(audioWrapper.getAudioFile()), UTF_8);
-            String urlString = String.format("https://api.spotify.com/v1/search?q=%s&type=album", searchString);
+            String searchUrl = String.format("https://api.spotify.com/v1/search?q=%s&type=album", searchString);
 
-            String jsonString = Unirest.get(urlString)
-                    .header("Authorization", "Bearer " + authToken)
-                    .asString().getBody();
+            String searchResponse = getRequest(searchUrl);
 
-            Optional<JSONArray> items = Optional.of(new JSONObject(jsonString).getJSONObject("albums"))
+            Optional<JSONArray> items = Optional.of(new JSONObject(searchResponse).getJSONObject("albums"))
                     .map(albums -> albums.getJSONArray("items"));
 
             if (items.isEmpty()) {
@@ -73,18 +70,31 @@ public class SpotifyService implements SearchService {
         return Collections.emptyList();
     }
 
+    private String getRequest(String url) throws IOException, InterruptedException {
+        HttpClient httpClient = HttpClient.newHttpClient();
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + authToken)
+                .build();
+        HttpResponse<String> httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+        return httpResponse.body();
+    }
+
     private void auth() {
         try {
-            HttpResponse<JsonNode> jsonNodeHttpResponse = Unirest.post("https://accounts.spotify.com/api/token")
-                    .basicAuth(CLIENT_ID, CLIENT_SECRET)
+            HttpClient httpClient = HttpClient.newHttpClient();
+            URI uri = URI.create("https://accounts.spotify.com/api/token");
+            String requestBody = "grant_type=client_credentials";
+            HttpRequest httpRequest = HttpRequest.newBuilder()
+                    .uri(uri)
                     .header("Content-Type", "application/x-www-form-urlencoded")
-                    .field("grant_type", "client_credentials")
-                    .asJson();
+                    .header("Authorization", "Basic " + Base64.getEncoder().encodeToString((CLIENT_ID + ":" + CLIENT_SECRET).getBytes()))
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                    .build();
 
-            this.authToken = jsonNodeHttpResponse
-                    .getBody()
-                    .getObject()
-                    .getString("access_token");
+            HttpResponse<String> httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            JSONObject responseJson = new JSONObject(httpResponse.body());
+            this.authToken = responseJson.getString("access_token");
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

@@ -112,7 +112,7 @@ public class InitialService implements Service {
         DataService dataService = ServiceLocator.get(DataService.class);
 
         dataService.setScanResultData(null);
-        dataService.clearMixCDMap();
+        dataService.clearMixCDCache();
         ImageCache.getInstance().clear();
 
         MainViewController viewController = getMainViewController();
@@ -133,20 +133,22 @@ public class InitialService implements Service {
     }
 
     private void scanFiles(List<String> fileList) {
-        if (!interruptProgress) {
-            int size = fileList.size();
-            getMainViewController().setTotalAudioCountToLoad(size);
-            log.info("To scan: {}", size);
+        if (interruptProgress) {
+            return;
+        }
 
-            try {
-                scanFileTask = new ScanFileViewTask(fileList, getMainViewController());
-                scanFileTask.setFinishedListener(this::scanFinished);
-                Thread thread = new Thread(scanFileTask);
-                thread.setUncaughtExceptionHandler(ServiceLocator.get(ExceptionService.class));
-                thread.start();
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
+        int fileCount = fileList.size();
+        getMainViewController().setTotalAudioCountToLoad(fileCount);
+        log.info("To scan: {}", fileCount);
+
+        try {
+            scanFileTask = new ScanFileViewTask(fileList, getMainViewController());
+            scanFileTask.setFinishedListener(this::scanFinished);
+            Thread thread = new Thread(scanFileTask);
+            thread.setUncaughtExceptionHandler(ServiceLocator.get(ExceptionService.class));
+            thread.start();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
     }
 

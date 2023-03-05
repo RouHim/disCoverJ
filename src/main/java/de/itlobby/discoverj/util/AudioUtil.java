@@ -29,13 +29,7 @@ import org.jaudiotagger.tag.reference.PictureTypes;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Spliterator;
-import java.util.Spliterators;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -384,7 +378,7 @@ public class AudioUtil {
 
         Collection<File> audioFilesInFolder = FileUtils.listFiles(parentFile, VALID_AUDIO_FILE_EXTENSION, false);
 
-        if (dataService.getMixCDMap().containsKey(absoluteParentPath)) {
+        if (dataService.getMixCDCache().containsKey(absoluteParentPath)) {
             return dataService.checkForMixCDEntry(absoluteParentPath);
         }
 
@@ -403,7 +397,7 @@ public class AudioUtil {
         double artistOfTotalPercentage = (double) biggest / (double) totalSize;
 
         boolean isMixCD = artistOfTotalPercentage < 0.50;
-        dataService.getMixCDMap().put(absoluteParentPath, isMixCD);
+        dataService.getMixCDCache().put(absoluteParentPath, isMixCD);
 
         log.debug("IsMixCD: {} ({})", isMixCD, artistOfTotalPercentage);
         return isMixCD;
@@ -433,5 +427,15 @@ public class AudioUtil {
                                 absolutePath)
                 )
         );
+    }
+
+    public static AudioFile readAudioFile(String filePath) {
+        try {
+            return AudioFileIO.read(new File(filePath));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
+        return null;
     }
 }

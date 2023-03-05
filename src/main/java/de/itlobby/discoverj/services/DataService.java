@@ -9,23 +9,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DataService implements Service {
-    private final Map<String, Boolean> mixCDMap = new HashMap<>();
+    private static final Map<String, Boolean> mixCDCache = new ConcurrentHashMap<>();
     private ScanResultData scanResultData;
 
-    public Map<String, Boolean> getMixCDMap() {
-        return mixCDMap;
+    public Map<String, Boolean> getMixCDCache() {
+        return mixCDCache;
     }
 
-    public void clearMixCDMap() {
-        mixCDMap.clear();
+    public void clearMixCDCache() {
+        mixCDCache.clear();
     }
 
     public boolean checkForMixCDEntry(String path) {
         boolean mixCD = false;
-        if (mixCDMap.containsKey(path)) {
-            mixCD = mixCDMap.get(path);
+        if (mixCDCache.containsKey(path)) {
+            mixCD = mixCDCache.get(path);
         }
         return mixCD;
     }

@@ -2,10 +2,7 @@ package de.itlobby.discoverj.models;
 
 import de.itlobby.discoverj.util.AudioUtil;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jaudiotagger.audio.AudioFile;
-import org.jaudiotagger.audio.AudioFileIO;
 
 import java.io.File;
 import java.util.Objects;
@@ -14,7 +11,6 @@ import static de.itlobby.discoverj.util.StringUtil.isInteger;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class AudioWrapper implements Comparable<AudioWrapper> {
-    private static final Logger log = LogManager.getLogger(AudioWrapper.class);
     private AudioFile audioFile;
     private boolean hasCover;
     private Integer id;
@@ -23,13 +19,9 @@ public class AudioWrapper implements Comparable<AudioWrapper> {
     }
 
     public AudioWrapper(FlatAudioWrapper simpleWrapper) {
-        try {
-            audioFile = AudioFileIO.read(new File(simpleWrapper.getPath()));
-            hasCover = simpleWrapper.isHasCover();
-            id = simpleWrapper.getId();
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
+        audioFile = AudioUtil.readAudioFile(simpleWrapper.getPath());
+        hasCover = simpleWrapper.isHasCover();
+        id = simpleWrapper.getId();
     }
 
     public AudioFile getAudioFile() {
