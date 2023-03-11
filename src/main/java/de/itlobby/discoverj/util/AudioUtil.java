@@ -1,7 +1,6 @@
 package de.itlobby.discoverj.util;
 
 import de.itlobby.discoverj.models.AudioWrapper;
-import de.itlobby.discoverj.models.FlatAudioWrapper;
 import de.itlobby.discoverj.services.DataService;
 import de.itlobby.discoverj.services.LightBoxService;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
@@ -56,25 +55,27 @@ public class AudioUtil {
     /**
      * Reads the cover from the audio file.
      *
-     * @param audioFile to read the cover from
-     * @param width     target width of the cover
-     * @param height    target height of the cover
+     * @param audioFilePath to read the cover from
+     * @param width         target width of the cover
+     * @param height        target height of the cover
      * @return the extracted cover image
      */
-    public static Optional<Image> getCover(AudioFile audioFile, int width, int height) {
-        byte[] data = AudioUtil.getCoverData(audioFile);
-        return ImageCache.getInstance().getImage(data, width, height);
+    public static Optional<Image> getCover(String audioFilePath, int width, int height) {
+        return readAudioFile(audioFilePath)
+                .flatMap(AudioUtil::getCoverData)
+                .flatMap(data -> ImageCache.getInstance().getImage(data, width, height));
     }
 
     /**
      * Reads the cover from the audio file.
      *
-     * @param audioFile to read the cover from
+     * @param audioFilePath to read the cover from
      * @return the extracted cover image
      */
-    public static Optional<Image> getCover(AudioFile audioFile) {
-        return Optional.ofNullable(AudioUtil.getCoverData(audioFile))
-                .flatMap(imageData -> ImageCache.getInstance().getImage(imageData));
+    public static Optional<Image> getCover(String audioFilePath) {
+        return readAudioFile(audioFilePath)
+                .flatMap(AudioUtil::getCoverData)
+                .flatMap(data -> ImageCache.getInstance().getImage(data));
     }
 
     /**
@@ -85,8 +86,7 @@ public class AudioUtil {
      */
     public static Optional<BufferedImage> getCoverAsBufImg(AudioFile audioFile) {
         try {
-            return Optional.ofNullable(getCoverData(audioFile))
-                    .map(data -> ImageCache.getInstance().getBuffImage(data));
+            return getCoverData(audioFile).map(data -> ImageCache.getInstance().getBuffImage(data));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -100,14 +100,14 @@ public class AudioUtil {
      * @param audioFile to read the cover from
      * @return the extracted cover image as byte array
      */
-    private static byte[] getCoverData(AudioFile audioFile) {
+    private static Optional<byte[]> getCoverData(AudioFile audioFile) {
         Tag tag = audioFile.getTag();
 
         if (tag != null && tag.getFirstArtwork() != null) {
-            return tag.getFirstArtwork().getBinaryData();
+            return Optional.ofNullable(tag.getFirstArtwork().getBinaryData());
         }
 
-        return null;
+        return Optional.empty();
     }
 
     /**
@@ -222,7 +222,8 @@ public class AudioUtil {
         return null;
     }
 
-    public static Optional<String> getMusicbrainzReleaseId(AudioFile audioFile) {
+    public static Optional<String> getMusicbrainzReleaseId(AudioWrapper audioWrapper) {
+        AudioFile audioFile = AudioUtil.readAudioFileSafe(new File(audioWrapper.getFileName()));
         return readMaybeFieldValue(audioFile, MUSICBRAINZ_RELEASEID);
     }
 
@@ -301,13 +302,13 @@ public class AudioUtil {
         }
 
         try {
-            String currentFolder = currentAudio.getAudioFile().getFile().getParent();
+            String currentFolder = currentAudio.getParentFilePath();
             File lastAudio = new File(lastAudioPath);
             String lastFolder = lastAudio.getParent();
 
             equalFolder = currentFolder.equals(lastFolder);
 
-            String currentAlbum = AudioUtil.getAlbum(currentAudio.getAudioFile());
+            String currentAlbum = currentAudio.getAlbum();
             AudioFile lastAudioFile = AudioFileIO.read(lastAudio);
             String lastAlbum = AudioUtil.getAlbum(lastAudioFile);
 
@@ -321,39 +322,18 @@ public class AudioUtil {
         return equalFolder && equalAlbum;
     }
 
-    public static void removeCover(FlatAudioWrapper flatWrapper) {
-        String filePath = flatWrapper.getPath();
+    public static void removeCover(AudioWrapper audioWrapper) {
+        String filePath = audioWrapper.getFilePath();
         try {
             AudioFile audioFile = AudioFileIO.read(new File(filePath));
             audioFile.getTag().deleteArtworkField();
             audioFile.commit();
-            flatWrapper.setHasCover(false);
+            audioWrapper.setHasCover(false);
         } catch (CannotWriteException e) {
             showCannotWriteError(filePath);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    public static String buildDisplayValue(AudioWrapper audioWrapper) {
-        String res = "";
-
-        AudioFile audioFile = audioWrapper.getAudioFile();
-        if (!StringUtil.isNullOrEmpty(getArtist(audioFile))) {
-            res += getArtist(audioFile);
-
-            if (!StringUtil.isNullOrEmpty(getTitle(audioFile))) {
-                res += " - " + getTitle(audioFile);
-            }
-        } else {
-            res += audioWrapper.getFileName();
-        }
-
-        if (!StringUtil.isNullOrEmpty(getAlbum(audioFile))) {
-            res += "\n" + getAlbum(audioFile);
-        }
-
-        return res;
     }
 
     public static boolean isAudioFile(File file) {
@@ -371,12 +351,11 @@ public class AudioUtil {
     }
 
     public static boolean checkForMixCD(AudioWrapper audioWrapper) {
-        File parentFile = audioWrapper.getFile().getParentFile();
-        String absoluteParentPath = parentFile.getAbsolutePath();
+        String absoluteParentPath = audioWrapper.getParentFilePath();
 
         DataService dataService = ServiceLocator.get(DataService.class);
 
-        Collection<File> audioFilesInFolder = FileUtils.listFiles(parentFile, VALID_AUDIO_FILE_EXTENSION, false);
+        Collection<File> audioFilesInFolder = FileUtils.listFiles(new File(absoluteParentPath), VALID_AUDIO_FILE_EXTENSION, false);
 
         if (dataService.getMixCDCache().containsKey(absoluteParentPath)) {
             return dataService.checkForMixCDEntry(absoluteParentPath);
@@ -429,13 +408,13 @@ public class AudioUtil {
         );
     }
 
-    public static AudioFile readAudioFile(String filePath) {
+    public static Optional<AudioFile> readAudioFile(String filePath) {
         try {
-            return AudioFileIO.read(new File(filePath));
+            return Optional.ofNullable(AudioFileIO.read(new File(filePath)));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
 
-        return null;
+        return Optional.empty();
     }
 }

@@ -37,7 +37,7 @@ public class MusicbrainzService implements SearchService {
 
     @Override
     public List<BufferedImage> searchCover(AudioWrapper audioWrapper) {
-        Optional<String> musicbrainzReleaseId = AudioUtil.getMusicbrainzReleaseId(audioWrapper.getAudioFile());
+        Optional<String> musicbrainzReleaseId = AudioUtil.getMusicbrainzReleaseId(audioWrapper);
 
         if (musicbrainzReleaseId.isPresent()) {
             return getCoversById(musicbrainzReleaseId.get()).toList();
@@ -91,12 +91,12 @@ public class MusicbrainzService implements SearchService {
     }
 
     private String buildSearchQuery(AudioWrapper audioWrapper) {
-        SearchTagWrapper searchTag = SearchModelQueryService.createSearchModel(audioWrapper.getAudioFile());
+        SearchTagWrapper searchTag = SearchModelQueryService.createSearchModel(audioWrapper);
         searchTag.escapeFields();
 
         boolean primarySingleCover = Settings.getInstance().getConfig().isPrimarySingleCover();
         boolean isMixCD = ServiceLocator.get(DataService.class)
-                .checkForMixCDEntry(audioWrapper.getFile().getParentFile().getAbsolutePath());
+                .checkForMixCDEntry(audioWrapper.getParentFilePath());
 
         boolean hasArtist = searchTag.hasArtist();
         boolean hasTitle = searchTag.hasTitle();

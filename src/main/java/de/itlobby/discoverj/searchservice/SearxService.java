@@ -31,7 +31,7 @@ public class SearxService implements SearchService {
         AppConfig config = Settings.getInstance().getConfig();
 
         String googleSearchPattern = config.getGoogleSearchPattern();
-        String rawQuery = SearchQueryService.createQueryFromPattern(audioWrapper.getAudioFile(), googleSearchPattern);
+        String rawQuery = SearchQueryService.createQueryFromPattern(audioWrapper, googleSearchPattern);
         String query = StringUtil.encodeRfc3986(rawQuery);
         String searxInstance = config.isSearxCustomInstanceActive() ? config.getSearxCustomInstance() : DEFAULT_SEARX;
 

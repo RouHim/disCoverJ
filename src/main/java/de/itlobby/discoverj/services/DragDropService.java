@@ -2,7 +2,6 @@ package de.itlobby.discoverj.services;
 
 import de.itlobby.discoverj.listeners.ActionListener;
 import de.itlobby.discoverj.models.AudioWrapper;
-import de.itlobby.discoverj.models.FlatAudioWrapper;
 import de.itlobby.discoverj.ui.components.AudioListEntry;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.ui.core.ViewManager;
@@ -93,10 +92,10 @@ public class DragDropService implements Service {
 
             for (AudioListEntry selectedEntry : selectedEntries) {
                 getMainViewController().countIndicatorUp();
-                FlatAudioWrapper audioWrapper = selectedEntry.getSimpleAudioWrapper();
-                AudioFile audioFile = AudioFileIO.read(new File(audioWrapper.getPath()));
+                AudioWrapper audioWrapper = selectedEntry.getWrapper();
+                AudioFile audioFile = AudioFileIO.read(new File(audioWrapper.getFilePath()));
 
-                List<FlatAudioWrapper> audioList = ServiceLocator.get(DataService.class).getAudioList();
+                List<AudioWrapper> audioList = ServiceLocator.get(DataService.class).getAudioList();
 
                 audioList.stream()
                         .filter(x -> x.getId().equals(audioWrapper.getId()))
@@ -106,11 +105,11 @@ public class DragDropService implements Service {
                         .stream()
                         .filter(AudioListEntry.class::isInstance)
                         .map(AudioListEntry.class::cast)
-                        .filter(audioEntry -> audioEntry.getSimpleAudioWrapper().getId().equals(audioWrapper.getId()))
+                        .filter(audioEntry -> audioEntry.getWrapper().getId().equals(audioWrapper.getId()))
                         .forEach(wrapper -> wrapper.replaceCover(img.get()));
             }
 
-            getMainViewController().showAudioInfo(new AudioWrapper(selectedEntries.get(0).getSimpleAudioWrapper()));
+            getMainViewController().showAudioInfo(selectedEntries.get(0).getWrapper());
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         } finally {

@@ -1,7 +1,6 @@
 package de.itlobby.discoverj.services;
 
 import de.itlobby.discoverj.models.AudioWrapper;
-import de.itlobby.discoverj.models.FlatAudioWrapper;
 import de.itlobby.discoverj.models.ProgressInterruptedException;
 import de.itlobby.discoverj.models.ScanResultData;
 import de.itlobby.discoverj.models.SearchEngine;
@@ -23,25 +22,15 @@ import org.apache.logging.log4j.Logger;
 import org.jaudiotagger.audio.AudioFile;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class SearchService implements Service {
     private static final Logger log = LogManager.getLogger(SearchService.class);
     private final AtomicReference<BufferedImage> lastAudioCover = new AtomicReference<>();
     private volatile boolean interruptProgress;
-    private volatile File lastAudioFile;
+    private volatile String lastAudioFilePath;
 
     public void setInterruptProgress(boolean interruptProgress) {
         this.interruptProgress = interruptProgress;
@@ -53,7 +42,7 @@ public class SearchService implements Service {
 
         // cleanup
         interruptProgress = false;
-        lastAudioFile = null;
+        lastAudioFilePath = null;
         lastAudioCover.set(null);
         ServiceLocator.unload(InitialService.class);
 
@@ -82,7 +71,7 @@ public class SearchService implements Service {
      *
      * @param audioMap
      */
-    private void setManualCover(Map<String, List<FlatAudioWrapper>> audioMap) {
+    private void setManualCover(Map<String, List<AudioWrapper>> audioMap) {
         if (!Settings.getInstance().getConfig().isGeneralManualImageSelection()) {
             return;
         }
@@ -110,20 +99,20 @@ public class SearchService implements Service {
     /**
      * Resizes and saves the found cover for the current audio file
      *
-     * @param newCover         to set
-     * @param audioWrapper     to set the new cover to
-     * @param flatAudioWrapper to set the new cover to
+     * @param newCover     to set
+     * @param audioWrapper to set the new cover to
+     * @param audioWrapper to set the new cover to
      */
-    private void saveCoverToFile(BufferedImage newCover, AudioWrapper audioWrapper, FlatAudioWrapper flatAudioWrapper) {
+    private void saveCoverToFile(BufferedImage newCover, AudioWrapper audioWrapper) {
         AppConfig config = Settings.getInstance().getConfig();
-        AudioFile audioFile = audioWrapper.getAudioFile();
+        Optional<AudioFile> audioFile = AudioUtil.readAudioFile(audioWrapper.getFilePath());
 
-        if (newCover == null) {
+        if (newCover == null || audioFile.isEmpty()) {
             getMainViewController().setState(LanguageUtil.getString("SearchController.noFittingCover"));
-            getMainViewController().unHighlightInList(flatAudioWrapper);
+            getMainViewController().unHighlightInList(audioWrapper);
         } else {
             newCover = resizeIfNeed(newCover);
-            Optional<BufferedImage> oldCover = AudioUtil.getCoverAsBufImg(audioFile);
+            Optional<BufferedImage> oldCover = AudioUtil.getCoverAsBufImg(audioFile.get());
 
             if (config.isOverwriteOnlyHigher()
                     && audioWrapper.hasCover()
@@ -133,18 +122,18 @@ public class SearchService implements Service {
             ) {
                 getMainViewController().setState(LanguageUtil.getString("SearchController.oldResHigher"));
             } else {
-                flushCoverImageToFile(newCover, flatAudioWrapper, audioFile);
+                flushCoverImageToFile(newCover, audioWrapper, audioFile.get());
             }
         }
 
         lastAudioCover.set(newCover);
-        lastAudioFile = audioFile.getFile();
+        lastAudioFilePath = audioWrapper.getFilePath();
 
-        getMainViewController().unHighlightInList(flatAudioWrapper);
+        getMainViewController().unHighlightInList(audioWrapper);
         getMainViewController().setState("");
     }
 
-    private void flushCoverImageToFile(BufferedImage newCover, FlatAudioWrapper flatAudioWrapper, AudioFile audioFile) {
+    private void flushCoverImageToFile(BufferedImage newCover, AudioWrapper audioWrapper, AudioFile audioFile) {
         if (!audioFile.getFile().canWrite()) {
             AudioUtil.showCannotWriteError(audioFile.getFile().getAbsolutePath());
             return;
@@ -152,7 +141,7 @@ public class SearchService implements Service {
 
         WritableImage fxImage = SwingFXUtils.toFXImage(newCover, null);
         getMainViewController().showNewCover(newCover, fxImage);
-        getMainViewController().updateListItem(flatAudioWrapper, fxImage);
+        getMainViewController().updateListItem(audioWrapper, fxImage);
         getMainViewController().setState(LanguageUtil.getString("SearchController.saveingMp3"));
 
         AudioUtil.saveCoverToAudioFile(audioFile, newCover);
@@ -164,58 +153,55 @@ public class SearchService implements Service {
      * - wenn das erste cover eines albums gefunden wurde, setzt es für alle nachfolgenden tracks das gleiche cover autom.
      * - Von manual image selection wird das cover gesetzt
      *
-     * @param flatAudioWrapper to set the cover to
+     * @param audioWrapper to set the cover to
      */
-    private void setCover(FlatAudioWrapper flatAudioWrapper) {
+    private void setCover(AudioWrapper audioWrapper) {
         if (interruptProgress) {
             throw new ProgressInterruptedException();
         }
 
         Settings settings = Settings.getInstance();
         AppConfig config = settings.getConfig();
-        AudioWrapper audioWrapper = new AudioWrapper(flatAudioWrapper);
         CoverPersistentService coverPersistentService = ServiceLocator.get(CoverPersistentService.class);
 
         getMainViewController().showAudioInfo(audioWrapper);
-        getMainViewController().highlightInList(flatAudioWrapper);
-        getMainViewController().setAudioLineBusy(flatAudioWrapper, true);
+        getMainViewController().highlightInList(audioWrapper);
+        getMainViewController().setAudioLineBusy(audioWrapper, true);
 
-        if (!flatAudioWrapper.isReadOnly() && (config.isOverwriteCover() || !audioWrapper.hasCover())) {
+        if (!audioWrapper.isReadOnly() && (config.isOverwriteCover() || !audioWrapper.hasCover())) {
             boolean canLoadCoverFromLastFile = canLoadCoverFromLastFile(config, audioWrapper);
 
             if (canLoadCoverFromLastFile) {
-                saveCoverToFile(lastAudioCover.get(), audioWrapper, flatAudioWrapper);
+                saveCoverToFile(lastAudioCover.get(), audioWrapper);
             } else {
                 List<BufferedImage> covers = coverPersistentService.getCoversForAudioFile(audioWrapper);
                 BufferedImage newCover = selectImageFromResultView(audioWrapper, covers);
-                saveCoverToFile(newCover, audioWrapper, flatAudioWrapper);
+                saveCoverToFile(newCover, audioWrapper);
             }
         } else {
             getMainViewController().setState(LanguageUtil.getString("SearchController.mp3CoverAlreadyExists"));
             Platform.runLater(() -> getMainViewController().imgNewCover.setImage(null));
         }
 
-        getMainViewController().unHighlightInList(flatAudioWrapper);
-        getMainViewController().setAudioLineBusy(flatAudioWrapper, false);
+        getMainViewController().unHighlightInList(audioWrapper);
+        getMainViewController().setAudioLineBusy(audioWrapper, false);
     }
 
     private boolean canLoadCoverFromLastFile(AppConfig config, AudioWrapper audioWrapper) {
         return config.isGeneralAutoLastAudio() &&
-                lastAudioFile != null &&
-                AudioUtil.hasSameFolderAndAlbumAsLast(audioWrapper, lastAudioFile.getAbsolutePath()) &&
-                lastAudioCover.get() != null &&
-                lastAudioFile.canWrite();
+                lastAudioFilePath != null &&
+                AudioUtil.hasSameFolderAndAlbumAsLast(audioWrapper, lastAudioFilePath) &&
+                lastAudioCover.get() != null;
     }
 
-    private void searchCover(FlatAudioWrapper flatAudioWrapper) {
+    private void searchCover(AudioWrapper audioWrapper) {
         if (interruptProgress) {
             throw new ProgressInterruptedException();
         }
 
         AppConfig config = Settings.getInstance().getConfig();
-        AudioWrapper audioWrapper = new AudioWrapper(flatAudioWrapper);
 
-        getMainViewController().setEntryToProcessingState(audioWrapper, flatAudioWrapper);
+        getMainViewController().setEntryToProcessingState(audioWrapper);
 
         if (!audioWrapper.hasCover() || config.isOverwriteCover()) {
             boolean canLoadCoverFromLastFile = canLoadCoverFromLastFile(config, audioWrapper);
@@ -225,20 +211,20 @@ public class SearchService implements Service {
                     collectAllCoverForAudioFile(audioWrapper);
                 } else {
                     setFirstCoverForAudioFile(audioWrapper);
-                    setCover(flatAudioWrapper);
+                    setCover(audioWrapper);
                 }
             }
 
             if (canLoadCoverFromLastFile && !config.isGeneralManualImageSelection()) {
-                saveCoverToFile(lastAudioCover.get(), audioWrapper, flatAudioWrapper);
+                saveCoverToFile(lastAudioCover.get(), audioWrapper);
             }
         } else {
             Platform.runLater(() -> getMainViewController().imgNewCover.setImage(null));
         }
 
-        getMainViewController().setEntryToFinishedState(flatAudioWrapper);
+        getMainViewController().setEntryToFinishedState(audioWrapper);
 
-        lastAudioFile = audioWrapper.getFile();
+        lastAudioFilePath = audioWrapper.getFilePath();
     }
 
     private boolean isNewResHigher(BufferedImage oldCover, BufferedImage newCover) {
@@ -344,7 +330,7 @@ public class SearchService implements Service {
 
         if (manualImageSelection && !images.isEmpty()) {
             SystemUtil.requestUserAttentionInTaskbar();
-            String title = SearchQueryService.createSearchString(audioWrapper.getAudioFile());
+            String title = SearchQueryService.createSearchString(audioWrapper);
             newCover = new ImageSelectionService().openImageSelection(images, title);
         } else if (!images.isEmpty()) {
             newCover = images.get(0);
@@ -359,4 +345,3 @@ public class SearchService implements Service {
         getMainViewController().activateActionButton(event -> search(), FontAwesomeIcon.SEARCH);
     }
 }
-

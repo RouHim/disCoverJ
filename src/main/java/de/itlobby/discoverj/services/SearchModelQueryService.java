@@ -1,21 +1,20 @@
 package de.itlobby.discoverj.services;
 
+import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.SearchTagWrapper;
 import de.itlobby.discoverj.util.AudioUtil;
 import de.itlobby.discoverj.util.StringUtil;
-import org.jaudiotagger.audio.AudioFile;
 
 import java.io.File;
 
 public class SearchModelQueryService {
-    public static SearchTagWrapper createSearchModel(AudioFile audioFile) {
-        SearchTagWrapper query = buildString(audioFile);
+    public static SearchTagWrapper createSearchModel(AudioWrapper audioWrapper) {
+        SearchTagWrapper query = buildString(audioWrapper);
 
+        // Remove file extension
         if (query.isEmpty()) {
-            File file = audioFile.getFile();
-            String name = file.getName();
-            String fileExtension = StringUtil.getFileExtension(file);
-            query.setFileName(name.replace("." + fileExtension, ""));
+            String fileExtension = audioWrapper.getFileNameExtension();
+            query.setFileName(audioWrapper.getFileName().replace("." + fileExtension, ""));
         }
 
         query.clear();
@@ -23,10 +22,10 @@ public class SearchModelQueryService {
         return query;
     }
 
-    private static SearchTagWrapper buildString(AudioFile audioFile) {
-        String album = AudioUtil.getAlbum(audioFile);
-        String title = AudioUtil.getTitle(audioFile);
-        String artist = AudioUtil.getArtist(audioFile);
+    private static SearchTagWrapper buildString(AudioWrapper audioFile) {
+        String album = audioFile.getAlbum();
+        String title = audioFile.getTitle();
+        String artist = audioFile.getArtist();
 
         return new SearchTagWrapper(album, title, artist);
     }

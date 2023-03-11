@@ -21,7 +21,7 @@ public class ItunesService implements SearchService {
 
     @Override
     public List<BufferedImage> searchCover(AudioWrapper audioWrapper) {
-        String searchString = URLEncoder.encode(SearchQueryService.createSearchString(audioWrapper.getAudioFile()), UTF_8);
+        String searchString = URLEncoder.encode(SearchQueryService.createSearchString(audioWrapper), UTF_8);
 
         Optional<JSONObject> jsonFromUrl = getJsonFromUrl(
                 format(ITUNES_SEARCH_QUERY, searchString)

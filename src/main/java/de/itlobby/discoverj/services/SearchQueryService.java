@@ -1,5 +1,6 @@
 package de.itlobby.discoverj.services;
 
+import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.settings.AppConfig;
 import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
@@ -10,19 +11,18 @@ import org.jaudiotagger.audio.AudioFile;
 import java.io.File;
 
 public class SearchQueryService {
-    public static String createSearchString(AudioFile audioFile) {
-        String album = AudioUtil.getAlbum(audioFile);
-        String title = AudioUtil.getTitle(audioFile);
-        String artist = AudioUtil.getArtist(audioFile);
+    public static String createSearchString(AudioWrapper audioWrapper) {
+        String album = audioWrapper.getAlbum();
+        String title = audioWrapper.getTitle();
+        String artist = audioWrapper.getArtist();
 
-        Boolean isMixCD = ServiceLocator.get(DataService.class).checkForMixCDEntry(audioFile.getFile().getParentFile().getAbsolutePath());
+        Boolean isMixCD = ServiceLocator.get(DataService.class).checkForMixCDEntry(audioWrapper.getParentFilePath());
 
         String query = concatTags(album, title, artist, isMixCD);
 
         if (query.equals("")) {
-            File file = audioFile.getFile();
-            String name = file.getName();
-            String fileExtension = StringUtil.getFileExtension(file);
+            String name = audioWrapper.getFileName();
+            String fileExtension = audioWrapper.getFileNameExtension();
             query = name.replace("." + fileExtension, "");
         }
 
@@ -66,14 +66,14 @@ public class SearchQueryService {
         return "";
     }
 
-    public static String createQueryFromPattern(AudioFile audioFile, String pattern) {
+    public static String createQueryFromPattern(AudioWrapper audioWrapper, String pattern) {
         String query = pattern;
 
-        query = query.replace("%auto%", createSearchString(audioFile));
-        query = query.replace("%artist%", AudioUtil.getArtist(audioFile));
-        query = query.replace("%title%", AudioUtil.getTitle(audioFile));
-        query = query.replace("%album%", AudioUtil.getAlbum(audioFile));
-        query = query.replace("%year%", AudioUtil.getYear(audioFile));
+        query = query.replace("%auto%", createSearchString(audioWrapper));
+        query = query.replace("%artist%", audioWrapper.getArtist());
+        query = query.replace("%title%", audioWrapper.getTitle());
+        query = query.replace("%album%", audioWrapper.getAlbum());
+        query = query.replace("%year%", audioWrapper.getYear());
 
         return query;
     }

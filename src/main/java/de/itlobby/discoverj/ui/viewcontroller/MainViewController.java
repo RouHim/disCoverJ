@@ -4,7 +4,6 @@ import de.itlobby.discoverj.listeners.ListenerStateProvider;
 import de.itlobby.discoverj.listeners.MultipleSelectionListener;
 import de.itlobby.discoverj.listeners.ParentKeyDeletedListener;
 import de.itlobby.discoverj.models.AudioWrapper;
-import de.itlobby.discoverj.models.FlatAudioWrapper;
 import de.itlobby.discoverj.models.ScanResultData;
 import de.itlobby.discoverj.services.InitialService;
 import de.itlobby.discoverj.services.LightBoxService;
@@ -15,12 +14,7 @@ import de.itlobby.discoverj.ui.components.FolderListEntry;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.ui.core.ViewManager;
 import de.itlobby.discoverj.ui.core.Views;
-import de.itlobby.discoverj.util.AudioUtil;
-import de.itlobby.discoverj.util.GlyphsDude;
-import de.itlobby.discoverj.util.ImageUtil;
-import de.itlobby.discoverj.util.LanguageUtil;
-import de.itlobby.discoverj.util.StringUtil;
-import de.itlobby.discoverj.util.SystemUtil;
+import de.itlobby.discoverj.util.*;
 import de.itlobby.discoverj.util.helper.AnimationHelper;
 import de.itlobby.discoverj.util.helper.AwesomeHelper;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
@@ -32,22 +26,11 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -58,10 +41,8 @@ import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jaudiotagger.audio.AudioFile;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -192,24 +173,23 @@ public class MainViewController implements ViewController, MultipleSelectionList
             return;
         }
 
-        AudioFile audioFile = audioWrapper.getAudioFile();
         boolean isMixCD = AudioUtil.checkForMixCD(audioWrapper);
 
         Platform.runLater(() -> {
-            File file = audioWrapper.getFile();
-            String fileSize = StringUtil.sizeToHumanReadable(file.length());
-            txtFilename.setText(String.format("%s (%s)", file.getName(), fileSize));
-            txtTitle.setText(AudioUtil.getTitle(audioFile));
-            txtArtist.setText(AudioUtil.getArtist(audioFile));
-            txtAlbum.setText(AudioUtil.getAlbum(audioFile));
+            String fileSize = StringUtil.sizeToHumanReadable(audioWrapper.getFileLength());
+            txtFilename.setText(String.format("%s (%s)", audioWrapper.getFileName(), fileSize));
+            txtTitle.setText(audioWrapper.getTitle());
+            txtArtist.setText(audioWrapper.getArtist());
+            txtAlbum.setText(audioWrapper.getAlbum());
             txtIsMixCD.setVisible(isMixCD);
         });
 
-        setAudioCoverInformation(audioFile);
+        setAudioCoverInformation(audioWrapper);
     }
 
-    private void setAudioCoverInformation(AudioFile audioFile) {
-        Optional<Image> maybeCover = AudioUtil.getCover(audioFile);
+    private void setAudioCoverInformation(AudioWrapper audioWrapper) {
+        Optional<Image> maybeCover = AudioUtil.getCover(audioWrapper.getFilePath());
+
         Platform.runLater(() -> {
             if (maybeCover.isPresent()) {
                 imgCurrentCover.setImage(maybeCover.get());
@@ -387,10 +367,10 @@ public class MainViewController implements ViewController, MultipleSelectionList
     private void setAudioList(ScanResultData scanResultData) {
         lwAudioList.getChildren().clear();
 
-        Map<String, List<FlatAudioWrapper>> audioMap = scanResultData.getAudioMap();
+        Map<String, List<AudioWrapper>> audioMap = scanResultData.getAudioMap();
 
         int iParent = 0;
-        for (Map.Entry<String, List<FlatAudioWrapper>> entry : audioMap.entrySet()) {
+        for (Map.Entry<String, List<AudioWrapper>> entry : audioMap.entrySet()) {
             FolderListEntry folderEntry = new FolderListEntry(entry.getKey());
             lwAudioList.getChildren().add(folderEntry);
 
@@ -398,8 +378,8 @@ public class MainViewController implements ViewController, MultipleSelectionList
                 VBox.setMargin(folderEntry, new Insets(10, 0, 0, 0));
             }
 
-            for (FlatAudioWrapper flatAudioWrapper : entry.getValue()) {
-                lwAudioList.getChildren().add(new AudioListEntry(flatAudioWrapper));
+            for (AudioWrapper audioWrapper : entry.getValue()) {
+                lwAudioList.getChildren().add(new AudioListEntry(audioWrapper));
             }
 
             iParent++;
@@ -496,9 +476,9 @@ public class MainViewController implements ViewController, MultipleSelectionList
         });
     }
 
-    public void highlightInList(FlatAudioWrapper flatAudioWrapper) {
+    public void highlightInList(AudioWrapper audioWrapper) {
         Platform.runLater(() -> {
-            int i = lwAudioList.getChildren().indexOf(getAudioListEntry(flatAudioWrapper));
+            int i = lwAudioList.getChildren().indexOf(getAudioListEntry(audioWrapper));
             lwAudioList.getChildren().get(i).getStyleClass().add(AUDIO_LINE_SELECTED);
         });
     }
@@ -513,8 +493,8 @@ public class MainViewController implements ViewController, MultipleSelectionList
     public void highlightRangeInList(AudioListEntry from, AudioListEntry to) {
         Platform.runLater(() -> {
             ArrayList<AudioListEntry> selectedEntries = new ArrayList<>();
-            FlatAudioWrapper fromWrapper = from.getSimpleAudioWrapper();
-            FlatAudioWrapper toWrapper = to.getSimpleAudioWrapper();
+            AudioWrapper fromWrapper = from.getWrapper();
+            AudioWrapper toWrapper = to.getWrapper();
 
             boolean isInRange = false;
             List<AudioListEntry> children = lwAudioList
@@ -527,15 +507,15 @@ public class MainViewController implements ViewController, MultipleSelectionList
             int toIndex = children.indexOf(to);
 
             if (fromIndex > toIndex) {
-                fromWrapper = to.getSimpleAudioWrapper();
-                toWrapper = from.getSimpleAudioWrapper();
+                fromWrapper = to.getWrapper();
+                toWrapper = from.getWrapper();
             }
 
             for (AudioListEntry entry : children) {
-                if (entry.getSimpleAudioWrapper().getId().equals(fromWrapper.getId())) {
+                if (entry.getWrapper().getId().equals(fromWrapper.getId())) {
                     isInRange = true;
                 }
-                if (entry.getSimpleAudioWrapper().getId().equals(toWrapper.getId())) {
+                if (entry.getWrapper().getId().equals(toWrapper.getId())) {
                     entry.getStyleClass().add(AUDIO_LINE_SELECTED);
                     selectedEntries.add(entry);
                     isInRange = false;
@@ -551,13 +531,13 @@ public class MainViewController implements ViewController, MultipleSelectionList
         });
     }
 
-    public void unHighlightInList(FlatAudioWrapper currentAudio) {
+    public void unHighlightInList(AudioWrapper currentAudio) {
         Platform.runLater(() -> {
             lwAudioList.getChildren().stream()
                     .filter(AudioListEntry.class::isInstance)
                     .map(AudioListEntry.class::cast)
                     .filter(
-                            x -> x.getSimpleAudioWrapper().getId().equals(currentAudio.getId())
+                            x -> x.getWrapper().getId().equals(currentAudio.getId())
                     )
                     .forEach(x -> x.getStyleClass().removeAll(AUDIO_LINE_SELECTED));
 
@@ -581,7 +561,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
         );
     }
 
-    public void updateListItem(FlatAudioWrapper currentAudio, WritableImage newCover) {
+    public void updateListItem(AudioWrapper currentAudio, WritableImage newCover) {
         AudioListEntry listEntry = getAudioListEntry(currentAudio);
 
         if (listEntry == null) {
@@ -589,7 +569,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
         }
 
         Platform.runLater(() -> {
-            listEntry.getSimpleAudioWrapper().setHasCover(true);
+            listEntry.getWrapper().setHasCover(true);
             createSingleLineAnimation(ImageUtil.resize(newCover, 36, 36), listEntry);
             listEntry.getIconView().setIcon(FontAwesomeIcon.CHECK);
         });
@@ -607,17 +587,17 @@ public class MainViewController implements ViewController, MultipleSelectionList
         });
     }
 
-    public AudioListEntry getAudioListEntry(FlatAudioWrapper currentAudio) {
+    public AudioListEntry getAudioListEntry(AudioWrapper currentAudio) {
         return lwAudioList.getChildren()
                 .stream()
                 .filter(x -> x instanceof AudioListEntry)
                 .map(x -> (AudioListEntry) x)
-                .filter(x -> x.getSimpleAudioWrapper().getId().equals(currentAudio.getId()))
+                .filter(x -> x.getWrapper().getId().equals(currentAudio.getId()))
                 .findFirst()
                 .orElse(null);
     }
 
-    public void scrollToNodeInList(FlatAudioWrapper currentAudio) {
+    public void scrollToNodeInList(AudioWrapper currentAudio) {
         Platform.runLater(() -> {
             scrollTo(getAudioListEntry(currentAudio));
             ServiceLocator.get(SelectionService.class).addSelection(getAudioListEntry(currentAudio));
@@ -675,19 +655,19 @@ public class MainViewController implements ViewController, MultipleSelectionList
         lwAudioList.getChildren().removeAll(entriesToRemove);
     }
 
-    public void setAudioLineBusy(FlatAudioWrapper flatAudioWrapper, boolean isBusy) {
-        getAudioListEntry(flatAudioWrapper).setBusy(isBusy);
+    public void setAudioLineBusy(AudioWrapper audioWrapper, boolean isBusy) {
+        getAudioListEntry(audioWrapper).setBusy(isBusy);
     }
 
-    public void setEntryToProcessingState(AudioWrapper audioWrapper, FlatAudioWrapper flatAudioWrapper) {
+    public void setEntryToProcessingState(AudioWrapper audioWrapper) {
         showAudioInfo(audioWrapper);
-        highlightInList(flatAudioWrapper);
-        setAudioLineBusy(flatAudioWrapper, true);
+        highlightInList(audioWrapper);
+        setAudioLineBusy(audioWrapper, true);
     }
 
-    public void setEntryToFinishedState(FlatAudioWrapper flatAudioWrapper) {
-        unHighlightInList(flatAudioWrapper);
-        setAudioLineBusy(flatAudioWrapper, false);
+    public void setEntryToFinishedState(AudioWrapper audioWrapper) {
+        unHighlightInList(audioWrapper);
+        setAudioLineBusy(audioWrapper, false);
         increaseProgress();
     }
 }

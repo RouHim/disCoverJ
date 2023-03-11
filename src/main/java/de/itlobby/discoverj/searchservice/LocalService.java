@@ -35,8 +35,6 @@ public class LocalService implements SearchService {
 
     @Override
     public List<BufferedImage> searchCover(AudioWrapper audioWrapper) {
-        AudioFile audioFile = audioWrapper.getAudioFile();
-        File currentAudioFile = audioFile.getFile();
         AppConfig config = Settings.getInstance().getConfig();
 
         // check if we should use the cover from a custom audio folder
@@ -46,32 +44,32 @@ public class LocalService implements SearchService {
         }
 
         // First check if we have image files in the same folder
-        List<BufferedImage> coverImagesFound = new ArrayList<>(getCoverFromAudioFolder(currentAudioFile));
+        List<BufferedImage> coverImagesFound = new ArrayList<>(getCoverFromAudioFolder(new File(audioWrapper.getParentFilePath())));
 
         // Additionally add images from the other audio files in the folder, if enabled in the settings
         if (config.isLocalScanAudioFiles()) {
-            coverImagesFound.addAll(getCoverImagesFromOtherAudioFiles(audioFile, currentAudioFile));
+            coverImagesFound.addAll(getCoverImagesFromOtherAudioFiles(audioWrapper));
         }
 
         return coverImagesFound;
     }
 
-    private List<BufferedImage> getCoverImagesFromOtherAudioFiles(AudioFile audioFile, File currentAudio) {
+    private List<BufferedImage> getCoverImagesFromOtherAudioFiles(AudioWrapper audioWrapper) {
         AppConfig config = Settings.getInstance().getConfig();
-        File parentFile = currentAudio.getParentFile();
-        String parentFilePath = parentFile.getAbsolutePath();
+        String parentFilePath = audioWrapper.getParentFilePath();
+
         LocalMatchInfo currentMatchInfos = LocalMatchInfo.of(
-                currentAudio.getAbsolutePath(),
-                getAlbum(audioFile),
-                getAlbumArtist(audioFile),
-                getYear(audioFile),
-                haveCover(audioFile)
+                audioWrapper.getFilePath(),
+                audioWrapper.getAlbum(),
+                audioWrapper.getAlbumArtist(),
+                audioWrapper.getYear(),
+                audioWrapper.hasCover()
         );
 
         long s = System.currentTimeMillis();
         fillLocalScannerCache(
-                parentFile,
-                audioFile
+                new File(parentFilePath),
+                audioWrapper
         );
         log.info("Built cache in: {}ms", System.currentTimeMillis() - s);
 
@@ -113,12 +111,11 @@ public class LocalService implements SearchService {
         File customDir = new File(config.getLocalAdditionalFolderPath());
         String pattern = config.getLocalNamePattern();
 
-        AudioFile audioFile = audioWrapper.getAudioFile();
         String coverFileName = pattern
                 .replace("%filename%", audioWrapper.getFileName())
-                .replace("%artist%", AudioUtil.getArtist(audioFile))
-                .replace("%title%", AudioUtil.getTitle(audioFile))
-                .replace("%album%", getAlbum(audioFile))
+                .replace("%artist%", audioWrapper.getArtist())
+                .replace("%title%", audioWrapper.getTitle())
+                .replace("%album%", audioWrapper.getAlbum())
                 .replace("%dummy%", "");
 
         return FileUtils.listFiles(customDir, VALID_IMAGE_FILE_EXTENSION, false).stream()
@@ -134,11 +131,10 @@ public class LocalService implements SearchService {
     /**
      * Load images located in the same folder as the audio file.
      *
-     * @param audioFile to get the folder from
+     * @param parentDir
      * @return the found list of images
      */
-    private List<BufferedImage> getCoverFromAudioFolder(File audioFile) {
-        File parentDir = audioFile.getParentFile();
+    private List<BufferedImage> getCoverFromAudioFolder(File parentDir) {
         return FileUtils.listFiles(parentDir, VALID_IMAGE_FILE_EXTENSION, false).stream()
                 .parallel()
                 .map(ImageUtil::readRGBImage)
@@ -152,14 +148,14 @@ public class LocalService implements SearchService {
         return (x, y) -> Integer.compare(x.getHeight() * x.getWidth(), y.getHeight() * y.getWidth()) * -1;
     }
 
-    public void fillLocalScannerCache(File parent, AudioFile audioFile) {
+    public void fillLocalScannerCache(File parent, AudioWrapper audioWrapper) {
         if (scanInfoCache.containsKey(parent.getAbsolutePath())) {
             return;
         }
 
         List<LocalMatchInfo> scanInfoList = FileUtils.listFiles(parent, VALID_AUDIO_FILE_EXTENSION, false)
                 .parallelStream()
-                .filter(file -> !file.equals(audioFile.getFile()))
+                .filter(file -> !file.equals(new File(audioWrapper.getFilePath())))
                 .map(this::buildCriteriaMatcher)
                 .flatMap(Optional::stream)
                 .toList();

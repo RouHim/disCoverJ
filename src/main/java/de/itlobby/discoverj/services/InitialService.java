@@ -1,7 +1,6 @@
 package de.itlobby.discoverj.services;
 
 import de.itlobby.discoverj.models.AudioWrapper;
-import de.itlobby.discoverj.models.FlatAudioWrapper;
 import de.itlobby.discoverj.models.ScanResultData;
 import de.itlobby.discoverj.settings.AppConfig;
 import de.itlobby.discoverj.settings.Settings;
@@ -168,7 +167,7 @@ public class InitialService implements Service {
             return;
         }
 
-        FlatAudioWrapper audioWrapper = audioListEntry.getSimpleAudioWrapper();
+        AudioWrapper audioWrapper = audioListEntry.getWrapper();
         String title = MessageFormat.format(LanguageUtil.getString("cover.von.0"), audioWrapper.getDisplayValue());
 
         ServiceLocator.get(LightBoxService.class).showDialog(
@@ -180,12 +179,13 @@ public class InitialService implements Service {
                 false
         );
 
-        audioWrapper.getImage().ifPresent(cover -> {
-            CoverDetailViewController vc = ViewManager.getInstance().getViewController(Views.COVER_DETAIL_VIEW);
-            vc.imgCover.setImage(cover);
-            vc.createCoverInfo(audioWrapper);
+        CoverDetailViewController vc = ViewManager.getInstance().getViewController(Views.COVER_DETAIL_VIEW);
+
+        audioWrapper.loadImage().ifPresentOrElse(coverImage -> {
+            vc.imgCover.setImage(coverImage);
+            vc.createCoverInfo(coverImage);
             vc.fitImageSizeImage(getMainViewController().lightBoxLayout);
-        });
+        }, vc::clearCoverInfo) ;
     }
 
     private Parent createDetailCoverLayout() {
@@ -208,9 +208,9 @@ public class InitialService implements Service {
 
     public void removeLastSelectedCover() {
         AudioListEntry audioListEntry = ServiceLocator.get(SelectionService.class).getLastSelected();
-        FlatAudioWrapper audioWrapper = audioListEntry.getSimpleAudioWrapper();
+        AudioWrapper audioWrapper = audioListEntry.getWrapper();
 
-        if (!audioWrapper.isHasCover()) {
+        if (!audioWrapper.hasCover()) {
             return;
         }
 
@@ -222,7 +222,7 @@ public class InitialService implements Service {
                 .stream()
                 .filter(AudioListEntry.class::isInstance)
                 .map(AudioListEntry.class::cast)
-                .filter(x -> x.getSimpleAudioWrapper().getId().equals(audioWrapper.getId()))
+                .filter(x -> x.getWrapper().getId().equals(audioWrapper.getId()))
                 .forEach(AudioListEntry::removeCover);
 
         selectLine(audioListEntry, false, false);
@@ -235,8 +235,8 @@ public class InitialService implements Service {
         List<AudioListEntry> selectedEntries = selectionService.getSelectedEntries();
 
         selectedEntries.stream()
-                .map(AudioListEntry::getSimpleAudioWrapper)
-                .filter(FlatAudioWrapper::isHasCover)
+                .map(AudioListEntry::getWrapper)
+                .filter(AudioWrapper::hasCover)
                 .forEach(entry -> {
                     removeCover(entry);
                     dataService.updateResultEntry(entry);
@@ -244,7 +244,7 @@ public class InitialService implements Service {
                             .stream()
                             .filter(AudioListEntry.class::isInstance)
                             .map(AudioListEntry.class::cast)
-                            .filter(x -> x.getSimpleAudioWrapper().getId().equals(entry.getId()))
+                            .filter(x -> x.getWrapper().getId().equals(entry.getId()))
                             .forEach(AudioListEntry::removeCover);
                 });
 
@@ -253,10 +253,10 @@ public class InitialService implements Service {
 
     public void copyCoverToClipBrd() {
         AudioListEntry audioListEntry = ServiceLocator.get(SelectionService.class).getLastSelected();
-        FlatAudioWrapper audioWrapper = audioListEntry.getSimpleAudioWrapper();
+        AudioWrapper audioWrapper = audioListEntry.getWrapper();
 
-        if (audioWrapper.isHasCover()) {
-            audioWrapper.getImage().ifPresent(image ->
+        if (audioWrapper.hasCover()) {
+            audioWrapper.loadImage().ifPresent(image ->
                     new Thread(() -> new ImageClipboardUtil().copyImage(image)).start()
             );
         }
@@ -269,7 +269,7 @@ public class InitialService implements Service {
             ServiceLocator.get(DataService.class).removeResultEntries(
                     selectedEntries
                             .stream()
-                            .map(AudioListEntry::getSimpleAudioWrapper)
+                            .map(AudioListEntry::getWrapper)
                             .toList());
 
             getMainViewController().lwAudioList.getChildren().removeAll(selectedEntries);
@@ -278,7 +278,7 @@ public class InitialService implements Service {
     }
 
     public void clearAllListEntries() {
-        Map<String, List<FlatAudioWrapper>> audioMap =
+        Map<String, List<AudioWrapper>> audioMap =
                 ServiceLocator.get(DataService.class).getScanResultData().getAudioMap();
 
         if (audioMap != null && !audioMap.isEmpty()) {
@@ -292,10 +292,8 @@ public class InitialService implements Service {
         AudioListEntry lastSelected = ServiceLocator.get(SelectionService.class).getLastSelected();
 
         if (lastSelected != null) {
-            AudioWrapper audioWrapper = new AudioWrapper(lastSelected.getSimpleAudioWrapper());
-
             String googleSearchPattern = Settings.getInstance().getConfig().getGoogleSearchPattern();
-            String rawQuery = SearchQueryService.createQueryFromPattern(audioWrapper.getAudioFile(), googleSearchPattern);
+            String rawQuery = SearchQueryService.createQueryFromPattern(lastSelected.getWrapper(), googleSearchPattern);
             String query = StringUtil.encodeRfc3986(rawQuery);
 
             SystemUtil.browseUrl(String.format("https://www.google.com/search?q=%s&tbm=isch", query));

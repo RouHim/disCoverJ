@@ -1,12 +1,11 @@
 package de.itlobby.discoverj.services;
 
 import de.itlobby.discoverj.listeners.ListenerStateProvider;
-import de.itlobby.discoverj.models.FlatAudioWrapper;
+import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ScanResultData;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,27 +38,27 @@ public class DataService implements Service {
         this.scanResultData = scanResultData;
     }
 
-    public void updateResultEntry(FlatAudioWrapper flatAudioWrapper) {
-        String parent = new File(flatAudioWrapper.getPath()).getParent();
-        Map<String, List<FlatAudioWrapper>> audioMap = scanResultData.getAudioMap();
-        List<FlatAudioWrapper> audioWrappers = audioMap.get(parent);
+    public void updateResultEntry(AudioWrapper audioWrapper) {
+        String parent = new File(audioWrapper.getFilePath()).getParent();
+        Map<String, List<AudioWrapper>> audioMap = scanResultData.getAudioMap();
+        List<AudioWrapper> audioWrappers = audioMap.get(parent);
 
-        int i = audioWrappers.indexOf(flatAudioWrapper);
-        audioWrappers.set(i, flatAudioWrapper);
+        int i = audioWrappers.indexOf(audioWrapper);
+        audioWrappers.set(i, audioWrapper);
     }
 
-    public void removeResultEntries(List<FlatAudioWrapper> flatAudioWrappers) {
-        for (FlatAudioWrapper flatAudioWrapper : flatAudioWrappers) {
-            removeResultEntry(flatAudioWrapper);
+    public void removeResultEntries(List<AudioWrapper> audioWrappers) {
+        for (AudioWrapper audioWrapper : audioWrappers) {
+            removeResultEntry(audioWrapper);
         }
     }
 
-    private void removeResultEntry(FlatAudioWrapper flatAudioWrapper) {
-        String parent = new File(flatAudioWrapper.getPath()).getParent();
-        Map<String, List<FlatAudioWrapper>> audioMap = scanResultData.getAudioMap();
-        List<FlatAudioWrapper> audioWrappers = audioMap.get(parent);
+    private void removeResultEntry(AudioWrapper audioWrapper) {
+        String parent = new File(audioWrapper.getFilePath()).getParent();
+        Map<String, List<AudioWrapper>> audioMap = scanResultData.getAudioMap();
+        List<AudioWrapper> audioWrappers = audioMap.get(parent);
 
-        audioWrappers.remove(flatAudioWrapper);
+        audioWrappers.remove(audioWrapper);
 
         checkForEmptyAudioDataKey();
     }
@@ -81,8 +80,8 @@ public class DataService implements Service {
         }
     }
 
-    public List<FlatAudioWrapper> getAudioList() {
-        List<FlatAudioWrapper> audioList = new ArrayList<>();
+    public List<AudioWrapper> getAudioList() {
+        List<AudioWrapper> audioList = new ArrayList<>();
 
         scanResultData.getAudioMap().values().forEach(audioList::addAll);
 

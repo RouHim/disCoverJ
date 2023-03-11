@@ -19,7 +19,7 @@ public class DeezerService implements SearchService {
 
     @Override
     public List<BufferedImage> searchCover(AudioWrapper audioWrapper) {
-        String searchString = StringUtil.encodeRfc3986(SearchQueryService.createSearchString(audioWrapper.getAudioFile()));
+        String searchString = StringUtil.encodeRfc3986(SearchQueryService.createSearchString(audioWrapper));
 
         Optional<JSONObject> jsonFromUrl = getJsonFromUrl(DEEZER_API_REQUEST + searchString);
         if (jsonFromUrl.isEmpty()) {

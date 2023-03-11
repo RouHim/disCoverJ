@@ -109,12 +109,12 @@ public class SelectionService implements Service {
             return;
         }
 
-        getMainViewController().showAudioInfo(new AudioWrapper(lastSelected.get().getSimpleAudioWrapper()));
+        getMainViewController().showAudioInfo(lastSelected.get().getWrapper());
     }
 
     public void removeSelection(AudioListEntry entry) {
         selectedEntries.remove(entry);
-        getMainViewController().unHighlightInList(entry.getSimpleAudioWrapper());
+        getMainViewController().unHighlightInList(entry.getWrapper());
 
         if (lastSelected.get().equals(entry)) {
             lastSelected.set(null);

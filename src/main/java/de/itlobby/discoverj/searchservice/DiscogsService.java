@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static de.itlobby.discoverj.util.AudioUtil.getYear;
 import static de.itlobby.discoverj.util.WSUtil.getJsonFromUrl;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -34,21 +33,25 @@ public class DiscogsService implements SearchService {
 
     @Override
     public List<BufferedImage> searchCover(AudioWrapper audioWrapper) {
-        AudioFile audioFile = audioWrapper.getAudioFile();
+        Optional<AudioFile> audioFile = AudioUtil.getAudioFile(audioWrapper.getFilePath());
 
-        Optional<Integer> discogsReleaseId = AudioUtil.getDiscogsReleaseId(audioFile);
+        if (audioFile.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Optional<Integer> discogsReleaseId = AudioUtil.getDiscogsReleaseId(audioFile.get());
         if (discogsReleaseId.isPresent()) {
             return getCoverByReleaseId(discogsReleaseId.get());
         }
 
-        return findCoverByTags(audioFile);
+        return findCoverByTags(audioWrapper);
     }
 
-    private List<BufferedImage> findCoverByTags(AudioFile audioFile) {
-        String searchQuery = URLEncoder.encode(SearchQueryService.createSearchString(audioFile), UTF_8);
+    private List<BufferedImage> findCoverByTags(AudioWrapper audioWrapper) {
+        String searchQuery = URLEncoder.encode(SearchQueryService.createSearchString(audioWrapper), UTF_8);
         AppConfig config = Settings.getInstance().getConfig();
 
-        String yearString = getYear(audioFile);
+        String yearString = audioWrapper.getYear();
         String queryUrl = MessageFormat.format(
                 "https://api.discogs.com/database/search?q={0}&key={1}&per_page=5&type=release",
                 searchQuery,
