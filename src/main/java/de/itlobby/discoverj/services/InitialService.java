@@ -153,9 +153,7 @@ public class InitialService implements Service {
 
     private void scanFinished(ScanResultData scanResultData) {
         ServiceLocator.get(DataService.class).setScanResultData(scanResultData);
-        int withCoverCount = scanResultData.getWithCover();
-
-        getMainViewController().showScanResult(scanResultData, withCoverCount);
+        getMainViewController().showScanResult(scanResultData);
 
         ServiceLocator.get(SelectionService.class).clearAll();
     }

@@ -7,7 +7,7 @@ import java.util.Map;
 public class ScanResultData {
     private Map<String, List<AudioWrapper>> audioMap = new HashMap<>();
     private int audioFilesCount;
-    private int withCover;
+    private int withCoverCount;
 
     public Map<String, List<AudioWrapper>> getAudioMap() {
         return audioMap;
@@ -25,11 +25,11 @@ public class ScanResultData {
         this.audioFilesCount = audioFilesCount;
     }
 
-    public int getWithCover() {
-        return withCover;
+    public int getWithCoverCount() {
+        return withCoverCount;
     }
 
-    public void setWithCover(int withCover) {
-        this.withCover = withCover;
+    public void setWithCoverCount(int withCoverCount) {
+        this.withCoverCount = withCoverCount;
     }
 }

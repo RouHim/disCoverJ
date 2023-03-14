@@ -142,27 +142,33 @@ public class MainViewController implements ViewController, MultipleSelectionList
         ListenerStateProvider.getInstance().setParentKeyDeletedListener(this);
     }
 
-    public void showScanResult(ScanResultData scanResultData, int withCoverCount) {
+    public void showScanResult(ScanResultData scanResultData) {
+        int withCoverCount = scanResultData.getWithCoverCount();
+
         Platform.runLater(() -> {
             hideBusyIndicator();
-            setState(MessageFormat.format(LanguageUtil.getString("InitialController.thereAre0Files"),
-                    scanResultData.getAudioFilesCount()));
 
-            int without = scanResultData.getAudioFilesCount() - withCoverCount;
+            setState(MessageFormat.format(
+                    LanguageUtil.getString("InitialController.thereAre0Files"),
+                    scanResultData.getAudioFilesCount()
+            ));
+
+            int withoutCoverCount = scanResultData.getAudioFilesCount() - withCoverCount;
 
             txtTotalAudioCount.setText(scanResultData.getAudioFilesCount() + "");
             txtWithCoverAudioCount.setText(withCoverCount + "");
-            txtWithoutCoverAudioCount.setText(without + "");
+            txtWithoutCoverAudioCount.setText(withoutCoverCount + "");
 
-            log.info(String.format("With cover: %s\tWithout cover: %s", withCoverCount, without));
+            log.info(String.format("With cover: %s\tWithout cover: %s", withCoverCount, withoutCoverCount));
 
             setAudioList(scanResultData);
 
             if (scanResultData.getAudioFilesCount() <= 0) {
                 deactivateActionButton();
             } else {
-                activateActionButton(event -> ServiceLocator.get(SearchService.class)
-                        .search(), FontAwesomeIcon.SEARCH);
+                activateActionButton(
+                        event -> ServiceLocator.get(SearchService.class).search(), FontAwesomeIcon.SEARCH
+                );
             }
         });
     }
@@ -367,10 +373,8 @@ public class MainViewController implements ViewController, MultipleSelectionList
     private void setAudioList(ScanResultData scanResultData) {
         lwAudioList.getChildren().clear();
 
-        Map<String, List<AudioWrapper>> audioMap = scanResultData.getAudioMap();
-
         int iParent = 0;
-        for (Map.Entry<String, List<AudioWrapper>> entry : audioMap.entrySet()) {
+        for (Map.Entry<String, List<AudioWrapper>> entry : scanResultData.getAudioMap().entrySet()) {
             FolderListEntry folderEntry = new FolderListEntry(entry.getKey());
             lwAudioList.getChildren().add(folderEntry);
 
