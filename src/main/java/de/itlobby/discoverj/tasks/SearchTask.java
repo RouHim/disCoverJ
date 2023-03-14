@@ -1,7 +1,7 @@
 package de.itlobby.discoverj.tasks;
 
 import de.itlobby.discoverj.models.AudioWrapper;
-import de.itlobby.discoverj.searchservice.SearchService;
+import de.itlobby.discoverj.searchservices.SearchService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

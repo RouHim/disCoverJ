@@ -32,7 +32,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static de.itlobby.discoverj.searchservice.DiscogsService.DISCOGS_RELEASE_ID;
+import static de.itlobby.discoverj.searchservices.DiscogsService.DISCOGS_RELEASE_ID;
 import static de.itlobby.discoverj.util.StringUtil.ARTISTS_SEPARATOR_KEYWORDS;
 import static org.jaudiotagger.tag.FieldKey.MUSICBRAINZ_RELEASEID;
 

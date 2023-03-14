@@ -1,4 +1,4 @@
-package de.itlobby.discoverj.searchservice;
+package de.itlobby.discoverj.searchservices;
 
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.services.SearchQueryService;
@@ -15,7 +15,7 @@ import java.util.Optional;
 import static de.itlobby.discoverj.util.WSUtil.getJsonFromUrl;
 
 public class DeezerService implements SearchService {
-    public static final String DEEZER_API_REQUEST = "http://api.deezer.com/search?limit=5&q=";
+    private static final String DEEZER_API_REQUEST = "https://api.deezer.com/search?limit=5&q=";
 
     @Override
     public List<BufferedImage> searchCover(AudioWrapper audioWrapper) {

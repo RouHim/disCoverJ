@@ -2,7 +2,7 @@ package de.itlobby.discoverj.util;
 
 import de.itlobby.discoverj.models.OperatingSystem;
 import de.itlobby.discoverj.models.SearchEngineType;
-import de.itlobby.discoverj.searchservice.SearchService;
+import de.itlobby.discoverj.searchservices.SearchService;
 import de.itlobby.discoverj.settings.AppConfig;
 import de.itlobby.discoverj.settings.Settings;
 import javafx.scene.Node;

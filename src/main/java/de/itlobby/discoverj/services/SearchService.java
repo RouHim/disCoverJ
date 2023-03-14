@@ -263,7 +263,7 @@ public class SearchService implements Service {
         List<Future<List<BufferedImage>>> searchFutures = new ArrayList<>();
 
         for (SearchEngine searchEngine : activeSearchEngines) {
-            de.itlobby.discoverj.searchservice.SearchService searchService = SystemUtil.getSearchService(searchEngine.getType());
+            de.itlobby.discoverj.searchservices.SearchService searchService = SystemUtil.getSearchService(searchEngine.getType());
             searchFutures.add(executorService.submit(new SearchTask(searchService, audioWrapper)));
         }
 
@@ -304,7 +304,7 @@ public class SearchService implements Service {
         List<Future<List<BufferedImage>>> searchFutures = new ArrayList<>();
 
         for (SearchEngine searchEngine : activeSearchEngines) {
-            de.itlobby.discoverj.searchservice.SearchService searchService = SystemUtil.getSearchService(searchEngine.getType());
+            de.itlobby.discoverj.searchservices.SearchService searchService = SystemUtil.getSearchService(searchEngine.getType());
             searchFutures.add(executorService.submit(new SearchTask(searchService, audioWrapper)));
         }
 

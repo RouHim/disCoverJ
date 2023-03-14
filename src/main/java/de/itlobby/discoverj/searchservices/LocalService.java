@@ -1,4 +1,4 @@
-package de.itlobby.discoverj.searchservice;
+package de.itlobby.discoverj.searchservices;
 
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.LocalMatchInfo;

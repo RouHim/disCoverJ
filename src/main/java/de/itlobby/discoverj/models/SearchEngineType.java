@@ -1,13 +1,13 @@
 package de.itlobby.discoverj.models;
 
-import de.itlobby.discoverj.searchservice.DeezerService;
-import de.itlobby.discoverj.searchservice.DiscogsService;
-import de.itlobby.discoverj.searchservice.ItunesService;
-import de.itlobby.discoverj.searchservice.LocalService;
-import de.itlobby.discoverj.searchservice.MusicbrainzService;
-import de.itlobby.discoverj.searchservice.SearchService;
-import de.itlobby.discoverj.searchservice.SearxService;
-import de.itlobby.discoverj.searchservice.SpotifyService;
+import de.itlobby.discoverj.searchservices.DeezerService;
+import de.itlobby.discoverj.searchservices.DiscogsService;
+import de.itlobby.discoverj.searchservices.ItunesService;
+import de.itlobby.discoverj.searchservices.LocalService;
+import de.itlobby.discoverj.searchservices.MusicbrainzService;
+import de.itlobby.discoverj.searchservices.SearchService;
+import de.itlobby.discoverj.searchservices.SearxService;
+import de.itlobby.discoverj.searchservices.SpotifyService;
 
 import java.io.Serializable;
 import java.util.Arrays;
