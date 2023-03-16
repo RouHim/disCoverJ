@@ -7,14 +7,18 @@ import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.StringUtil;
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import java.awt.image.BufferedImage;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static de.itlobby.discoverj.util.WSUtil.getJsonFromUrl;
@@ -22,9 +26,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 
 public class SearxService implements SearchService {
+    private static final Logger log = LogManager.getLogger(SearxService.class);
+
     private static final int MAX_RESULTS = 10;
-    private static final String API_REQUEST = "/search?categories=images&engines=bing%20images,duckduckgo%20images,google%20imagews,qwant%20images&format=json&q=";
-    private static final String DEFAULT_SEARX = "https://searx.netzspielplatz.de"; // Optional: https://searx.operationtulip.com
+    private static final String SEARX_INSTANCES_INDEX = "https://searx.space/data/instances.json";
+    private static final String API_REQUEST = "search?categories=images&engines=bing%20images,duckduckgo%20images,google%20images,qwant%20images&format=json&q=";
+    private List<String> instances = null;
 
     @Override
     public List<BufferedImage> searchCover(AudioWrapper audioWrapper) {
@@ -33,8 +40,44 @@ public class SearxService implements SearchService {
         String googleSearchPattern = config.getGoogleSearchPattern();
         String rawQuery = SearchQueryService.createQueryFromPattern(audioWrapper, googleSearchPattern);
         String query = StringUtil.encodeRfc3986(rawQuery);
-        String searxInstance = config.isSearxCustomInstanceActive() ? config.getSearxCustomInstance() : DEFAULT_SEARX;
 
+        // Load instances from searX index
+        if (instances == null) {
+            instances = getJsonFromUrl(SEARX_INSTANCES_INDEX)
+                    .map(response -> response.getJSONObject("instances").toMap().keySet().stream().toList())
+                    .orElse(Collections.emptyList());
+        }
+
+        // If a manual searX instance is configured set to the start
+        if (config.isSearxCustomInstanceActive()) {
+            instances.add(0, config.getSearxCustomInstance());
+        }
+
+        for (String instanceUrl : instances) {
+            log.info("Executing searX for {}", instanceUrl);
+
+            List<BufferedImage> response = startSearch(query, instanceUrl);
+
+            if (!response.isEmpty()) {
+                return response;
+            }
+        }
+
+        return Collections.emptyList();
+    }
+
+    private List<String> detectEngines() {
+        Optional<JSONObject> jsonFromUrl = getJsonFromUrl(SEARX_INSTANCES_INDEX);
+        if (jsonFromUrl.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return jsonFromUrl.get().getJSONObject("instances").toMap().keySet()
+                .parallelStream()
+                .filter(SearxService::isReachable)
+                .collect(Collectors.toList());
+    }
+
+    private static List<BufferedImage> startSearch(String query, String searxInstance) {
         Optional<JSONObject> jsonFromUrl = getJsonFromUrl(searxInstance + API_REQUEST + query);
         if (jsonFromUrl.isEmpty()) {
             return Collections.emptyList();
@@ -65,6 +108,24 @@ public class SearxService implements SearchService {
                 .filter(SearchService::reachesMinRequiredCoverSize);
 
         return Stream.concat(httpStream, base64Stream).toList();
+    }
+
+    private static boolean isReachable(String engineUrl) {
+        HttpURLConnection connection = null;
+        try {
+            URL headUrl = new URL(engineUrl + API_REQUEST + "test");
+            connection = (HttpURLConnection) headUrl.openConnection();
+            connection.setRequestMethod("HEAD");
+            connection.setConnectTimeout(3000);
+            connection.setReadTimeout(3000);
+            return connection.getResponseCode() == HttpURLConnection.HTTP_OK;
+        } catch (Exception e) {
+            return false;
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
     }
 
     /**

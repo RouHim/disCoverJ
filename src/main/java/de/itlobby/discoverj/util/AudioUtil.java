@@ -223,7 +223,7 @@ public class AudioUtil {
     }
 
     public static Optional<String> getMusicbrainzReleaseId(AudioWrapper audioWrapper) {
-        AudioFile audioFile = AudioUtil.readAudioFileSafe(new File(audioWrapper.getFileName()));
+        AudioFile audioFile = AudioUtil.readAudioFileSafe(new File(audioWrapper.getFilePath()));
         return readMaybeFieldValue(audioFile, MUSICBRAINZ_RELEASEID);
     }
 

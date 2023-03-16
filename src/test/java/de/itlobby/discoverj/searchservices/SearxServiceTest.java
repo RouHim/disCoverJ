@@ -12,7 +12,7 @@ import static de.itlobby.discoverj.searchservices.DeezerServiceTest.getAudioFile
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Execution(ExecutionMode.CONCURRENT)
-class ItunesServiceTest {
+class SearxServiceTest {
 
     @Test
     void searchCover() {
@@ -20,9 +20,9 @@ class ItunesServiceTest {
         AudioWrapper audioWrapper = new AudioWrapper(1, getAudioFile("test-files/test.mp3"));
 
         // WHEN I search for a cover
-        List<BufferedImage> coverImages = new ItunesService().searchCover(audioWrapper);
+        List<BufferedImage> bufferedImages = new SearxService().searchCover(audioWrapper);
 
-        // THEN
-        assertThat(coverImages).hasSizeGreaterThan(1);
+        // THEN I get a list of buffered images
+        assertThat(bufferedImages).hasSizeGreaterThan(0);
     }
 }

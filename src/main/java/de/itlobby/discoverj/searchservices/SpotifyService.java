@@ -44,7 +44,7 @@ public class SpotifyService implements SearchService {
 
         try {
             String searchString = URLEncoder.encode(SearchQueryService.createSearchString(audioWrapper), UTF_8);
-            String searchUrl = String.format("https://api.spotify.com/v1/search?q=%s&type=album", searchString);
+            String searchUrl = "https://api.spotify.com/v1/search?q=%s&type=album".formatted(searchString);
 
             String searchResponse = getRequest(searchUrl);
 
