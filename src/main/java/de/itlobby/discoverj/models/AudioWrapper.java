@@ -19,7 +19,6 @@ public class AudioWrapper implements Comparable<AudioWrapper> {
     private final String filePath;
     private boolean hasCover;
     private final String artist;
-    private final List<String> artists;
     private final String title;
     private final String album;
     private final String trackNumber;
@@ -38,7 +37,6 @@ public class AudioWrapper implements Comparable<AudioWrapper> {
         this.parentFilePath = audioFile.getFile().getParentFile().getAbsolutePath();
         this.hasCover = AudioUtil.haveCover(audioFile);
         this.artist = AudioUtil.getArtist(audioFile);
-        this.artists = AudioUtil.getArtists(audioFile);
         this.title = AudioUtil.getTitle(audioFile);
         this.album = AudioUtil.getAlbum(audioFile);
         this.year = AudioUtil.getYear(audioFile);
@@ -63,10 +61,6 @@ public class AudioWrapper implements Comparable<AudioWrapper> {
 
     public String getArtist() {
         return artist;
-    }
-
-    public List<String> getArtists() {
-        return artists;
     }
 
     public String getTitle() {

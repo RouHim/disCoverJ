@@ -1,9 +1,9 @@
 package de.itlobby.discoverj.ui.viewcontroller;
 
-import de.itlobby.discoverj.mixcd.MixCd;
 import de.itlobby.discoverj.listeners.ListenerStateProvider;
 import de.itlobby.discoverj.listeners.MultipleSelectionListener;
 import de.itlobby.discoverj.listeners.ParentKeyDeletedListener;
+import de.itlobby.discoverj.mixcd.MixCd;
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ScanResultData;
 import de.itlobby.discoverj.services.InitialService;
@@ -15,12 +15,7 @@ import de.itlobby.discoverj.ui.components.FolderListEntry;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.ui.core.ViewManager;
 import de.itlobby.discoverj.ui.core.Views;
-import de.itlobby.discoverj.util.AudioUtil;
-import de.itlobby.discoverj.util.GlyphsDude;
-import de.itlobby.discoverj.util.ImageUtil;
-import de.itlobby.discoverj.util.LanguageUtil;
-import de.itlobby.discoverj.util.StringUtil;
-import de.itlobby.discoverj.util.SystemUtil;
+import de.itlobby.discoverj.util.*;
 import de.itlobby.discoverj.util.helper.AnimationHelper;
 import de.itlobby.discoverj.util.helper.AwesomeHelper;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
@@ -32,22 +27,11 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -196,7 +180,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
             return;
         }
 
-        boolean isMixCD = MixCd.isMixCd(audioWrapper);
+        boolean isMixCD = MixCd.isMixCd(audioWrapper.getParentFilePath());
 
         Platform.runLater(() -> {
             String fileSize = StringUtil.sizeToHumanReadable(audioWrapper.getFileLength());
@@ -390,20 +374,20 @@ public class MainViewController implements ViewController, MultipleSelectionList
     private void setAudioList(ScanResultData scanResultData) {
         lwAudioList.getChildren().clear();
 
-        int iParent = 0;
+        int parentIndex = 0;
         for (Map.Entry<String, List<AudioWrapper>> entry : scanResultData.getAudioMap().entrySet()) {
             FolderListEntry folderEntry = new FolderListEntry(entry.getKey());
             lwAudioList.getChildren().add(folderEntry);
 
-            if (iParent > 0) {
+            if (parentIndex > 0) {
                 VBox.setMargin(folderEntry, new Insets(10, 0, 0, 0));
             }
 
-            for (AudioWrapper audioWrapper : entry.getValue()) {
+            entry.getValue().forEach(audioWrapper -> {
                 lwAudioList.getChildren().add(new AudioListEntry(audioWrapper));
-            }
+            });
 
-            iParent++;
+            parentIndex++;
         }
     }
 

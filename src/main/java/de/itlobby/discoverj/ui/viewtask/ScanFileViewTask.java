@@ -1,6 +1,5 @@
 package de.itlobby.discoverj.ui.viewtask;
 
-import de.itlobby.discoverj.mixcd.MixCd;
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ScanResultData;
 import de.itlobby.discoverj.settings.Settings;
@@ -14,13 +13,7 @@ import org.apache.logging.log4j.Logger;
 import org.jaudiotagger.audio.AudioFile;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ScanFileViewTask extends ViewTask<ScanResultData> {
@@ -31,7 +24,6 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
     private List<AudioWrapper> audioWrapperList;
     private Integer idCount;
     private int withCover;
-    private String parentFilePathLastScanning;
 
     public ScanFileViewTask(List<String> filesToLoad, MainViewController mainViewController) {
         this.filesToLoad = filesToLoad;
@@ -183,14 +175,6 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
                 idCount,
                 audioFile
         );
-
-        // Check if the parent file path is the same as the last scanned file
-        // If not, start a new thread to check if the parent file path is a mix cd
-        if (!wrapper.getParentFilePath().equals(parentFilePathLastScanning)) {
-            // Pre-Calculate the parent file path is a mix cd
-            parentFilePathLastScanning = wrapper.getParentFilePath();
-            new Thread(() -> MixCd.isMixCd(wrapper)).start();
-        }
 
         audioWrapperList.add(wrapper);
 

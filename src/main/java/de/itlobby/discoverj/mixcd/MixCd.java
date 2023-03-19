@@ -1,15 +1,16 @@
 package de.itlobby.discoverj.mixcd;
 
-import de.itlobby.discoverj.models.AudioWrapper;
-import de.itlobby.discoverj.util.CollectionUtil;
+import de.itlobby.discoverj.util.AudioUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static de.itlobby.discoverj.util.AudioUtil.VALID_AUDIO_FILE_EXTENSION;
@@ -49,22 +50,22 @@ public class MixCd {
      * Checks if the given folder is a mix cd.
      * Uses a cache to speed up the process.
      *
-     * @param parentPath the folder to check
+     * @param parentFilePath the folder to check
      * @return true if the folder is a mix cd
      */
-    public static boolean isMixCd(AudioWrapper audioWrapper) {
-        return cache.computeIfAbsent(audioWrapper.getParentFilePath(), __ -> checkForMixCD(audioWrapper));
+    public static boolean isMixCd(String parentFilePath) {
+        return cache.computeIfAbsent(parentFilePath, __ -> checkForMixCD(parentFilePath));
     }
 
     /**
      * Checks if the given folder is a mix cd.
      *
-     * @param audioWrapper to analyse
+     * @param parentFilePath to analyse
      * @return true if the folder is a mix cd
      */
-    static boolean checkForMixCD(AudioWrapper audioWrapper) {
+    static boolean checkForMixCD(String parentFilePath) {
         Collection<File> audioFilesInFolder = FileUtils.listFiles(
-                new File(audioWrapper.getParentFilePath()),
+                new File(parentFilePath),
                 VALID_AUDIO_FILE_EXTENSION,
                 false
         );
@@ -73,19 +74,22 @@ public class MixCd {
 
         if (totalSize < 3) return false;
 
-        Map<String, Long> grouped = audioWrapper
-                .getArtists().stream()
-                .collect(Collectors.groupingBy(x -> x, Collectors.counting()));
+        // Count entries by occurrence, and get the most frequent entry
+        int mostFrequentCount = audioFilesInFolder.parallelStream()
+                .map(AudioUtil::readAudioFileSafe)
+                .flatMap(audioFile -> AudioUtil.getArtists(audioFile).stream())
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                .values()
+                .stream()
+                .max(Comparator.naturalOrder())
+                .orElse(0L)
+                .intValue();
 
-        Map.Entry<String, Long> firstEntry = CollectionUtil.sortByValueDescAndGetFirst(grouped);
-        long biggest = firstEntry.getValue();
+        // Calculate the percentage of the most frequent entry
+        double artistToTotalPercentage = (double) mostFrequentCount / (double) totalSize;
 
-        double artistOfTotalPercentage = (double) biggest / (double) totalSize;
+        // If the percentage is less than 50%, it is a mix cd
 
-        boolean isMixCD = artistOfTotalPercentage < 0.50;
-
-        log.debug("IsMixCD: {} ({})", isMixCD, artistOfTotalPercentage);
-
-        return isMixCD;
+        return artistToTotalPercentage < 0.50;
     }
 }

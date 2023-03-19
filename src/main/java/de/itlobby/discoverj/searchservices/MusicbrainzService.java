@@ -94,7 +94,7 @@ public class MusicbrainzService implements SearchService {
         searchTag.escapeFields();
 
         boolean primarySingleCover = Settings.getInstance().getConfig().isPrimarySingleCover();
-        boolean isMixCD = MixCd.isMixCd(audioWrapper);
+        boolean isMixCD = MixCd.isMixCd(audioWrapper.getParentFilePath());
 
         boolean hasArtist = searchTag.hasArtist();
         boolean hasTitle = searchTag.hasTitle();

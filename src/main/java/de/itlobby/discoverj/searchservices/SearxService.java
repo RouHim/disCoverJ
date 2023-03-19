@@ -54,8 +54,6 @@ public class SearxService implements SearchService {
         }
 
         for (String instanceUrl : instances) {
-            log.info("Executing searX for {}", instanceUrl);
-
             List<BufferedImage> response = startSearch(query, instanceUrl);
 
             if (!response.isEmpty()) {

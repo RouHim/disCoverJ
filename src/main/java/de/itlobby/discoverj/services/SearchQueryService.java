@@ -12,7 +12,7 @@ public class SearchQueryService {
         String title = audioWrapper.getTitle();
         String artist = audioWrapper.getArtist();
 
-        boolean isMixCD = MixCd.isMixCd(audioWrapper);
+        boolean isMixCD = MixCd.isMixCd(audioWrapper.getParentFilePath());
 
         String query = concatTags(album, title, artist, isMixCD);
 
