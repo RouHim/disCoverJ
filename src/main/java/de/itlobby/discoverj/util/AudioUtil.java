@@ -1,13 +1,11 @@
 package de.itlobby.discoverj.util;
 
 import de.itlobby.discoverj.models.AudioWrapper;
-import de.itlobby.discoverj.services.DataService;
 import de.itlobby.discoverj.services.LightBoxService;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.util.helper.ImageCache;
 import javafx.application.Platform;
 import javafx.scene.image.Image;
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jaudiotagger.audio.AudioFile;
@@ -28,7 +26,12 @@ import org.jaudiotagger.tag.reference.PictureTypes;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -341,45 +344,13 @@ public class AudioUtil {
                 .contains(StringUtil.getFileExtension(file).toLowerCase());
     }
 
-    private static AudioFile readAudioFileSafe(File file) {
+    public static AudioFile readAudioFileSafe(File file) {
         try {
             return AudioFileIO.read(file.getAbsoluteFile());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
         return null;
-    }
-
-    public static boolean checkForMixCD(AudioWrapper audioWrapper) {
-        String absoluteParentPath = audioWrapper.getParentFilePath();
-
-        DataService dataService = ServiceLocator.get(DataService.class);
-
-        Collection<File> audioFilesInFolder = FileUtils.listFiles(new File(absoluteParentPath), VALID_AUDIO_FILE_EXTENSION, false);
-
-        if (dataService.getMixCDCache().containsKey(absoluteParentPath)) {
-            return dataService.checkForMixCDEntry(absoluteParentPath);
-        }
-
-        int totalSize = audioFilesInFolder.size();
-
-        if (totalSize < 3)
-            return false;
-
-        Map<String, Long> grouped = audioFilesInFolder.parallelStream()
-                .flatMap(x -> getArtists(readAudioFileSafe(x)).stream())
-                .collect(Collectors.groupingBy(x -> x, Collectors.counting()));
-
-        Map.Entry<String, Long> firstEntry = CollectionUtil.sortByValueDescAndGetFirst(grouped);
-        long biggest = firstEntry.getValue();
-
-        double artistOfTotalPercentage = (double) biggest / (double) totalSize;
-
-        boolean isMixCD = artistOfTotalPercentage < 0.50;
-        dataService.getMixCDCache().put(absoluteParentPath, isMixCD);
-
-        log.debug("IsMixCD: {} ({})", isMixCD, artistOfTotalPercentage);
-        return isMixCD;
     }
 
     public static String getImageResolutionString(Image cover) {

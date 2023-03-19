@@ -1,11 +1,10 @@
 package de.itlobby.discoverj.searchservices;
 
+import de.itlobby.discoverj.mixcd.MixCd;
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.SearchTagWrapper;
-import de.itlobby.discoverj.services.DataService;
 import de.itlobby.discoverj.services.SearchModelQueryService;
 import de.itlobby.discoverj.settings.Settings;
-import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.util.AudioUtil;
 import de.itlobby.discoverj.util.ImageUtil;
 import org.apache.logging.log4j.LogManager;
@@ -95,8 +94,7 @@ public class MusicbrainzService implements SearchService {
         searchTag.escapeFields();
 
         boolean primarySingleCover = Settings.getInstance().getConfig().isPrimarySingleCover();
-        boolean isMixCD = ServiceLocator.get(DataService.class)
-                .checkForMixCDEntry(audioWrapper.getParentFilePath());
+        boolean isMixCD = MixCd.isMixCd(audioWrapper);
 
         boolean hasArtist = searchTag.hasArtist();
         boolean hasTitle = searchTag.hasTitle();

@@ -1,5 +1,6 @@
 package de.itlobby.discoverj.ui.viewtask;
 
+import de.itlobby.discoverj.mixcd.MixCd;
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ScanResultData;
 import de.itlobby.discoverj.settings.Settings;
@@ -13,7 +14,13 @@ import org.apache.logging.log4j.Logger;
 import org.jaudiotagger.audio.AudioFile;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ScanFileViewTask extends ViewTask<ScanResultData> {
@@ -75,31 +82,36 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
                         );
         scanResultData.setAudioMap(audioData);
 
-        // Unload audioWrapperList
-        audioWrapperList = null;
-
         // If there are less than 300 audio files, load cover images async
         if (totalAudioCountToLoad <= 300) {
             Settings.getInstance().setCoverLoadingDisabled(false);
-            new Thread(() -> lazyLoadCoverImages(audioWrapperList)).start();
+            // Create map with id and file path and handover to the lazy load thread
+            var idPathMap = audioWrapperList.stream().collect(
+                    Collectors.toMap(AudioWrapper::getId, AudioWrapper::getFilePath)
+            );
+            new Thread(() -> lazyLoadCoverImages(idPathMap)).start();
         } else {
             Settings.getInstance().setCoverLoadingDisabled(true);
         }
 
+        // Unload audioWrapperList
+        audioWrapperList = null;
+
+        // Handover result data to tne next task
         setResult(scanResultData);
     }
 
-    private void lazyLoadCoverImages(List<AudioWrapper> audioList) {
+    private void lazyLoadCoverImages(Map<Integer, String> audioList) {
         while (mainViewController.lwAudioList.getChildren().size() < audioList.size() && !isCancelled()) {
             SystemUtil.threadSleep(100);
         }
 
-        for (AudioWrapper audioWrapper : audioList) {
+        for (Map.Entry<Integer, String> audioEntry : audioList.entrySet()) {
             if (isCancelled()) {
                 return;
             }
 
-            Optional<Image> coverImage = AudioUtil.getCover(audioWrapper.getFilePath(), 36, 36);
+            Optional<Image> coverImage = AudioUtil.getCover(audioEntry.getValue(), 36, 36);
 
             if (coverImage.isEmpty()) {
                 continue;
@@ -109,7 +121,7 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
                     .stream()
                     .filter(AudioListEntry.class::isInstance)
                     .map(AudioListEntry.class::cast)
-                    .filter(x -> x.getWrapper().getId().equals(audioWrapper.getId()))
+                    .filter(x -> x.getWrapper().getId().equals(audioEntry.getKey()))
                     .findFirst()
                     .ifPresent(audioListEntry ->
                             mainViewController.createSingleLineAnimation(coverImage.get(), audioListEntry));
@@ -172,11 +184,12 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
                 audioFile
         );
 
-        // Separate the caching
+        // Check if the parent file path is the same as the last scanned file
+        // If not, start a new thread to check if the parent file path is a mix cd
         if (!wrapper.getParentFilePath().equals(parentFilePathLastScanning)) {
-            // TODO: optimize cache
+            // Pre-Calculate the parent file path is a mix cd
             parentFilePathLastScanning = wrapper.getParentFilePath();
-            new Thread(() -> AudioUtil.checkForMixCD(wrapper)).start();
+            new Thread(() -> MixCd.isMixCd(wrapper)).start();
         }
 
         audioWrapperList.add(wrapper);

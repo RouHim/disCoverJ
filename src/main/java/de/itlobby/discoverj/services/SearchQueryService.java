@@ -1,14 +1,10 @@
 package de.itlobby.discoverj.services;
 
+import de.itlobby.discoverj.mixcd.MixCd;
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.settings.AppConfig;
 import de.itlobby.discoverj.settings.Settings;
-import de.itlobby.discoverj.ui.core.ServiceLocator;
-import de.itlobby.discoverj.util.AudioUtil;
 import de.itlobby.discoverj.util.StringUtil;
-import org.jaudiotagger.audio.AudioFile;
-
-import java.io.File;
 
 public class SearchQueryService {
     public static String createSearchString(AudioWrapper audioWrapper) {
@@ -16,7 +12,7 @@ public class SearchQueryService {
         String title = audioWrapper.getTitle();
         String artist = audioWrapper.getArtist();
 
-        Boolean isMixCD = ServiceLocator.get(DataService.class).checkForMixCDEntry(audioWrapper.getParentFilePath());
+        boolean isMixCD = MixCd.isMixCd(audioWrapper);
 
         String query = concatTags(album, title, artist, isMixCD);
 
@@ -32,7 +28,7 @@ public class SearchQueryService {
         return query;
     }
 
-    private static String concatTags(String album, String title, String artist, Boolean isMixCD) {
+    private static String concatTags(String album, String title, String artist, boolean isMixCD) {
         boolean hasAlbum = !StringUtil.isNullOrEmpty(album);
         boolean hasTitle = !StringUtil.isNullOrEmpty(title);
         boolean hasArtist = !StringUtil.isNullOrEmpty(artist);

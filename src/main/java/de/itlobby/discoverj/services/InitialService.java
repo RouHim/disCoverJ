@@ -1,5 +1,6 @@
 package de.itlobby.discoverj.services;
 
+import de.itlobby.discoverj.mixcd.MixCd;
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ScanResultData;
 import de.itlobby.discoverj.settings.AppConfig;
@@ -111,7 +112,7 @@ public class InitialService implements Service {
         DataService dataService = ServiceLocator.get(DataService.class);
 
         dataService.setScanResultData(null);
-        dataService.clearMixCDCache();
+        MixCd.clearCache();
         ImageCache.getInstance().clear();
 
         MainViewController viewController = getMainViewController();
@@ -183,7 +184,7 @@ public class InitialService implements Service {
             vc.imgCover.setImage(coverImage);
             vc.createCoverInfo(coverImage);
             vc.fitImageSizeImage(getMainViewController().lightBoxLayout);
-        }, vc::clearCoverInfo) ;
+        }, vc::clearCoverInfo);
     }
 
     private Parent createDetailCoverLayout() {

@@ -2,10 +2,6 @@ package de.itlobby.discoverj.services;
 
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.SearchTagWrapper;
-import de.itlobby.discoverj.util.AudioUtil;
-import de.itlobby.discoverj.util.StringUtil;
-
-import java.io.File;
 
 public class SearchModelQueryService {
     public static SearchTagWrapper createSearchModel(AudioWrapper audioWrapper) {

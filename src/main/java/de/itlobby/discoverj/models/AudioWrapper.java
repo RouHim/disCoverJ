@@ -7,6 +7,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.jaudiotagger.audio.AudioFile;
 
 import java.io.File;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -14,20 +15,21 @@ import static de.itlobby.discoverj.util.StringUtil.isInteger;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class AudioWrapper implements Comparable<AudioWrapper> {
-    private Integer id;
-    private String filePath;
+    private final Integer id;
+    private final String filePath;
     private boolean hasCover;
-    private String artist;
-    private String title;
-    private String album;
-    private String trackNumber;
-    private String parentFilePath;
-    private String fileName;
-    private long fileLength;
-    private boolean readOnly;
-    private String fileNameExtension;
-    private String year;
-    private String albumArtist;
+    private final String artist;
+    private final List<String> artists;
+    private final String title;
+    private final String album;
+    private final String trackNumber;
+    private final String parentFilePath;
+    private final String fileName;
+    private final long fileLength;
+    private final boolean readOnly;
+    private final String fileNameExtension;
+    private final String year;
+    private final String albumArtist;
 
     public AudioWrapper(Integer id, AudioFile audioFile) {
         this.id = id;
@@ -36,6 +38,7 @@ public class AudioWrapper implements Comparable<AudioWrapper> {
         this.parentFilePath = audioFile.getFile().getParentFile().getAbsolutePath();
         this.hasCover = AudioUtil.haveCover(audioFile);
         this.artist = AudioUtil.getArtist(audioFile);
+        this.artists = AudioUtil.getArtists(audioFile);
         this.title = AudioUtil.getTitle(audioFile);
         this.album = AudioUtil.getAlbum(audioFile);
         this.year = AudioUtil.getYear(audioFile);
@@ -60,6 +63,10 @@ public class AudioWrapper implements Comparable<AudioWrapper> {
 
     public String getArtist() {
         return artist;
+    }
+
+    public List<String> getArtists() {
+        return artists;
     }
 
     public String getTitle() {

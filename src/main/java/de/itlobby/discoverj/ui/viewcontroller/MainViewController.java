@@ -1,5 +1,6 @@
 package de.itlobby.discoverj.ui.viewcontroller;
 
+import de.itlobby.discoverj.mixcd.MixCd;
 import de.itlobby.discoverj.listeners.ListenerStateProvider;
 import de.itlobby.discoverj.listeners.MultipleSelectionListener;
 import de.itlobby.discoverj.listeners.ParentKeyDeletedListener;
@@ -14,7 +15,12 @@ import de.itlobby.discoverj.ui.components.FolderListEntry;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.ui.core.ViewManager;
 import de.itlobby.discoverj.ui.core.Views;
-import de.itlobby.discoverj.util.*;
+import de.itlobby.discoverj.util.AudioUtil;
+import de.itlobby.discoverj.util.GlyphsDude;
+import de.itlobby.discoverj.util.ImageUtil;
+import de.itlobby.discoverj.util.LanguageUtil;
+import de.itlobby.discoverj.util.StringUtil;
+import de.itlobby.discoverj.util.SystemUtil;
 import de.itlobby.discoverj.util.helper.AnimationHelper;
 import de.itlobby.discoverj.util.helper.AwesomeHelper;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
@@ -26,11 +32,22 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -179,7 +196,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
             return;
         }
 
-        boolean isMixCD = AudioUtil.checkForMixCD(audioWrapper);
+        boolean isMixCD = MixCd.isMixCd(audioWrapper);
 
         Platform.runLater(() -> {
             String fileSize = StringUtil.sizeToHumanReadable(audioWrapper.getFileLength());

@@ -9,8 +9,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
-import java.util.Optional;
-
 public class CoverDetailViewController implements ViewController {
     public TextFlow txtCoverInfo;
     public ImageView imgCover;

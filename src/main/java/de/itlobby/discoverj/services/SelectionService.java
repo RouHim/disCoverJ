@@ -1,7 +1,6 @@
 package de.itlobby.discoverj.services;
 
 import de.itlobby.discoverj.listeners.ListenerStateProvider;
-import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.ui.components.AudioListEntry;
 import de.itlobby.discoverj.ui.components.FolderListEntry;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
