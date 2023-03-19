@@ -1,31 +1,25 @@
 {
-  "bin": {
-    "disCoverJ": "jdeploy-bundle/jdeploy.js"
-  },
-  "author": "Rouven Himmelstein",
-  "description": " A simple tool that allows you to automatically embed cover images into your audio files.",
-  "main": "index.js",
-  "preferGlobal": true,
-  "repository": "https://github.com/RouHim/disCoverJ",
-  "version": "0.0.0",
-  "jdeploy": {
-    "jdk": false,
-    "javaVersion": "17",
-    "jar": "target/disCoverJ.jar",
-    "javafx": true,
-    "title": "disCoverJ"
-  },
-  "dependencies": {
-    "njre": "^0.3.0",
-    "shelljs": "^0.8.4"
-  },
-  "license": "GPL-2.0 License",
-  "name": "discoverj",
-  "files": [
-    "jdeploy-bundle"
-  ],
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "homepage": "https://github.com/RouHim/disCoverJ"
+    "bin": {"disCoverJ": "jdeploy-bundle/jdeploy.js"},
+    "author": "Rouven Himmelstein",
+    "description": " A simple tool that allows you to automatically embed cover images into your audio files.",
+    "main": "index.js",
+    "preferGlobal": false,
+    "repository": "https://github.com/RouHim/disCoverJ",
+    "version": "0.0.0",
+    "jdeploy": {
+        "jdk": false,
+        "javaVersion": "17",
+        "jar": "target/disCoverJ.jar",
+        "javafx": true,
+        "title": "disCoverJ"
+    },
+    "dependencies": {
+        "njre": "^0.3.0",
+        "shelljs": "^0.8.4"
+    },
+    "license": "GPL-2.0 License",
+    "name": "discoverj",
+    "files": ["jdeploy-bundle"],
+    "scripts": {"test": "echo \"Error: no test specified\" && exit 1"},
+    "homepage": "https://github.com/RouHim/disCoverJ"
 }
