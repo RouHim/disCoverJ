@@ -202,6 +202,7 @@ public class CoverSearchService implements Service {
             // No need or not able to search a new cover
             boolean noNeedToSearchCover = audioWrapper.hasCover() && !config.isOverwriteCover();
             if (noNeedToSearchCover || audioWrapper.isReadOnly()) {
+                SystemUtil.threadSleep(10);
                 return;
             }
 
@@ -219,7 +220,6 @@ public class CoverSearchService implements Service {
                             },
                             () -> lastAudioCover = null
                     );
-
         } finally {
             finalizeProcessAudioWrapper(audioWrapper);
         }
