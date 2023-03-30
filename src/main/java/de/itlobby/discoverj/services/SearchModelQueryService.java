@@ -4,6 +4,9 @@ import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.SearchTagWrapper;
 
 public class SearchModelQueryService {
+    private SearchModelQueryService() {
+    }
+
     public static SearchTagWrapper createSearchModel(AudioWrapper audioWrapper) {
         SearchTagWrapper query = buildString(audioWrapper);
 

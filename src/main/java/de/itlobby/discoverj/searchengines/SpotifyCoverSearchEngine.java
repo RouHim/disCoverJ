@@ -1,4 +1,4 @@
-package de.itlobby.discoverj.searchservices;
+package de.itlobby.discoverj.searchengines;
 
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.services.SearchQueryService;
@@ -16,21 +16,17 @@ import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class SpotifyService implements SearchService {
+public class SpotifyCoverSearchEngine implements CoverSearchEngine {
     private static final String CLIENT_ID = "ba25a9ff00bc4e19bf598dbe55c041ea";
     private static final String CLIENT_SECRET = "0465053e651b4dfb87a0b60571c5aea1";
-    private static final Logger log = LogManager.getLogger(SpotifyService.class);
+    private static final Logger log = LogManager.getLogger(SpotifyCoverSearchEngine.class);
     private String authToken;
 
-    public SpotifyService() {
+    public SpotifyCoverSearchEngine() {
         auth();
     }
 
@@ -41,7 +37,7 @@ public class SpotifyService implements SearchService {
     }
 
     @Override
-    public List<BufferedImage> searchCover(AudioWrapper audioWrapper) {
+    public List<BufferedImage> search(AudioWrapper audioWrapper) {
         if (StringUtil.isNullOrEmpty(authToken)) {
             return Collections.emptyList();
         }
@@ -61,11 +57,11 @@ public class SpotifyService implements SearchService {
 
             return items.get().toList().stream()
                     .map(result -> new JSONObject((Map) result))
-                    .map(SpotifyService::getCoverUrl)
+                    .map(SpotifyCoverSearchEngine::getCoverUrl)
                     .flatMap(Optional::stream)
                     .map(ImageUtil::readRGBImageFromUrl)
                     .flatMap(Optional::stream)
-                    .filter(SearchService::reachesMinRequiredCoverSize)
+                    .filter(CoverSearchEngine::reachesMinRequiredCoverSize)
                     .toList();
         } catch (Exception e) {
             log.debug(e.getMessage(), e);

@@ -1,4 +1,4 @@
-package de.itlobby.discoverj.searchservices;
+package de.itlobby.discoverj.searchengines;
 
 import de.itlobby.discoverj.models.AudioWrapper;
 import org.junit.jupiter.api.Test;
@@ -8,11 +8,11 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
-import static de.itlobby.discoverj.searchservices.DeezerServiceTest.getAudioFile;
+import static de.itlobby.discoverj.searchengines.DeezerServiceTest.getAudioFile;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Execution(ExecutionMode.CONCURRENT)
-class ItunesServiceTest {
+class MusicbrainzServiceTest {
 
     @Test
     void searchCover() {
@@ -20,9 +20,9 @@ class ItunesServiceTest {
         AudioWrapper audioWrapper = new AudioWrapper(1, getAudioFile("test-files/test.mp3"));
 
         // WHEN I search for a cover
-        List<BufferedImage> coverImages = new ItunesService().searchCover(audioWrapper);
+        List<BufferedImage> bufferedImages = new MusicbrainzCoverSearchEngine().search(audioWrapper);
 
-        // THEN
-        assertThat(coverImages).hasSizeGreaterThan(1);
+        // THEN I get a list of buffered images
+        assertThat(bufferedImages).hasSizeGreaterThan(0);
     }
 }

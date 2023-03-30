@@ -22,6 +22,9 @@ public class AppConfig implements Serializable {
     private String proxyPort = StringUtil.EMPTY_STRING;
     private String proxyUser = StringUtil.EMPTY_STRING;
     private String proxyPassword = StringUtil.EMPTY_STRING;
+    /**
+     * Search timeout in seconds
+     */
     private int searchTimeout = 60;
     private boolean overwriteOnlyHigher = false;
     private String localAdditionalFolderPath = "";

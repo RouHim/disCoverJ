@@ -1,8 +1,6 @@
 package de.itlobby.discoverj.util;
 
 import de.itlobby.discoverj.models.OperatingSystem;
-import de.itlobby.discoverj.models.SearchEngineType;
-import de.itlobby.discoverj.searchservices.SearchService;
 import de.itlobby.discoverj.settings.AppConfig;
 import de.itlobby.discoverj.settings.Settings;
 import javafx.scene.Node;
@@ -28,20 +26,6 @@ public class SystemUtil {
     private static final Logger log = LogManager.getLogger(SystemUtil.class);
 
     private SystemUtil() {
-    }
-
-    public static SearchService getSearchService(SearchEngineType searchEngineType) {
-        SearchService searchService = null;
-
-        try {
-            Class<? extends SearchService> clazz = searchEngineType.getServiceClass();
-            searchService = clazz.getDeclaredConstructor().newInstance();
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-
-        return searchService;
-
     }
 
     public static Node getChildrenById(FlowPane flowPane, String nodeName) {

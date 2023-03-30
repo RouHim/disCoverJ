@@ -1,4 +1,4 @@
-package de.itlobby.discoverj.searchservices;
+package de.itlobby.discoverj.searchengines;
 
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.LocalMatchInfo;
@@ -14,27 +14,16 @@ import org.jaudiotagger.audio.AudioFileIO;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
-import static de.itlobby.discoverj.util.AudioUtil.VALID_AUDIO_FILE_EXTENSION;
-import static de.itlobby.discoverj.util.AudioUtil.VALID_IMAGE_FILE_EXTENSION;
-import static de.itlobby.discoverj.util.AudioUtil.getAlbum;
-import static de.itlobby.discoverj.util.AudioUtil.getAlbumArtist;
-import static de.itlobby.discoverj.util.AudioUtil.getYear;
-import static de.itlobby.discoverj.util.AudioUtil.haveCover;
+import static de.itlobby.discoverj.util.AudioUtil.*;
 
-public class LocalService implements SearchService {
+public class LocalCoverSearchEngine implements CoverSearchEngine {
     private static final Map<String, List<LocalMatchInfo>> scanInfoCache = new HashMap<>();
     private final Logger log = LogManager.getLogger(this.getClass());
 
     @Override
-    public List<BufferedImage> searchCover(AudioWrapper audioWrapper) {
+    public List<BufferedImage> search(AudioWrapper audioWrapper) {
         AppConfig config = Settings.getInstance().getConfig();
 
         // check if we should use the cover from a custom audio folder
@@ -58,7 +47,7 @@ public class LocalService implements SearchService {
         AppConfig config = Settings.getInstance().getConfig();
         String parentFilePath = audioWrapper.getParentFilePath();
 
-        LocalMatchInfo currentMatchInfos = LocalMatchInfo.of(
+        LocalMatchInfo currentMatchInfos = new LocalMatchInfo(
                 audioWrapper.getFilePath(),
                 audioWrapper.getAlbum(),
                 audioWrapper.getAlbumArtist(),
@@ -80,26 +69,26 @@ public class LocalService implements SearchService {
         s = System.currentTimeMillis();
         List<BufferedImage> foundImages = scanInfoCache.get(parentFilePath)
                 .parallelStream()
-                .filter(LocalMatchInfo::isHaveCover)
+                .filter(LocalMatchInfo::haveCover)
                 .filter(otherFile -> matchesCriteria(currentMatchInfos, otherFile, config))
-                .map(otherFile -> AudioUtil.getAudioFile(otherFile.getPath()))
+                .map(otherFile -> AudioUtil.getAudioFile(otherFile.filePath()))
                 .flatMap(Optional::stream)
                 .map(AudioUtil::getCoverAsBufImg)
                 .flatMap(Optional::stream)
-                .filter(SearchService::reachesMinRequiredCoverSize)
+                .filter(CoverSearchEngine::reachesMinRequiredCoverSize)
                 .toList();
         log.info("Matched in: {}ms", System.currentTimeMillis() - s);
         return foundImages;
     }
 
     private boolean matchesCriteria(LocalMatchInfo currentFile, LocalMatchInfo otherFile, AppConfig config) {
-        boolean matches = !config.isLocalMatchAlbum() || currentFile.getAlbum().equals(otherFile.getAlbum());
+        boolean matches = !config.isLocalMatchAlbum() || currentFile.album().equals(otherFile.album());
 
-        if (config.isLocalMatchAlbumArtist() && !currentFile.getAlbumArtist().equals(otherFile.getAlbumArtist())) {
+        if (config.isLocalMatchAlbumArtist() && !currentFile.albumArtist().equals(otherFile.albumArtist())) {
             matches = false;
         }
 
-        if (config.isLocalMatchYear() && !currentFile.getYear().equals(otherFile.getYear())) {
+        if (config.isLocalMatchYear() && !currentFile.year().equals(otherFile.year())) {
             matches = false;
         }
 
@@ -123,7 +112,7 @@ public class LocalService implements SearchService {
                 .parallel()
                 .map(ImageUtil::readRGBImage)
                 .flatMap(Optional::stream)
-                .filter(SearchService::reachesMinRequiredCoverSize)
+                .filter(CoverSearchEngine::reachesMinRequiredCoverSize)
                 .sorted(imageSizeComparator()) // biggest image first
                 .toList();
     }
@@ -139,7 +128,7 @@ public class LocalService implements SearchService {
                 .parallel()
                 .map(ImageUtil::readRGBImage)
                 .flatMap(Optional::stream)
-                .filter(SearchService::reachesMinRequiredCoverSize)
+                .filter(CoverSearchEngine::reachesMinRequiredCoverSize)
                 .sorted(imageSizeComparator()) // biggest image first
                 .toList();
     }
@@ -166,7 +155,7 @@ public class LocalService implements SearchService {
     private Optional<LocalMatchInfo> buildCriteriaMatcher(File file) {
         try {
             AudioFile audioFile = AudioFileIO.read(file);
-            return Optional.of(LocalMatchInfo.of(
+            return Optional.of(new LocalMatchInfo(
                     file.getAbsolutePath(),
                     getAlbum(audioFile),
                     getAlbumArtist(audioFile),

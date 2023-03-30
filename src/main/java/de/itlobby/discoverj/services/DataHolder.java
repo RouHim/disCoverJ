@@ -6,24 +6,38 @@ import de.itlobby.discoverj.models.ScanResultData;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DataService implements Service {
-    private ScanResultData scanResultData;
+public class DataHolder implements Service {
+    private static final DataHolder instance = new DataHolder();
 
+    private Map<String, List<AudioWrapper>> audioMap = new HashMap<>();
+    private int audioFilesCount;
+    private int withCoverCount;
 
-    public ScanResultData getScanResultData() {
-        return scanResultData;
+    private DataHolder() {
     }
 
-    public void setScanResultData(ScanResultData scanResultData) {
-        this.scanResultData = scanResultData;
+    public static DataHolder getInstance() {
+        return instance;
+    }
+
+    public Map<String, List<AudioWrapper>> getAudioMap() {
+        return audioMap;
+    }
+
+    public int getAudioFilesCount() {
+        return audioFilesCount;
+    }
+
+    public int getWithCoverCount() {
+        return withCoverCount;
     }
 
     public void updateResultEntry(AudioWrapper audioWrapper) {
         String parent = new File(audioWrapper.getFilePath()).getParent();
-        Map<String, List<AudioWrapper>> audioMap = scanResultData.getAudioMap();
         List<AudioWrapper> audioWrappers = audioMap.get(parent);
 
         int i = audioWrappers.indexOf(audioWrapper);
@@ -38,7 +52,6 @@ public class DataService implements Service {
 
     private void removeResultEntry(AudioWrapper audioWrapper) {
         String parent = new File(audioWrapper.getFilePath()).getParent();
-        Map<String, List<AudioWrapper>> audioMap = scanResultData.getAudioMap();
         List<AudioWrapper> audioWrappers = audioMap.get(parent);
 
         audioWrappers.remove(audioWrapper);
@@ -47,7 +60,7 @@ public class DataService implements Service {
     }
 
     private void checkForEmptyAudioDataKey() {
-        List<String> emptyKeyList = scanResultData.getAudioMap()
+        List<String> emptyKeyList = audioMap
                 .entrySet()
                 .stream()
                 .filter(x -> x.getValue().isEmpty())
@@ -56,7 +69,7 @@ public class DataService implements Service {
 
 
         for (String key : emptyKeyList) {
-            scanResultData.getAudioMap().remove(key);
+            audioMap.remove(key);
             ListenerStateProvider.getInstance()
                     .getParentKeyDeletedListener()
                     .onParentListEntryDeleted(key);
@@ -66,8 +79,20 @@ public class DataService implements Service {
     public List<AudioWrapper> getAudioList() {
         List<AudioWrapper> audioList = new ArrayList<>();
 
-        scanResultData.getAudioMap().values().forEach(audioList::addAll);
+        audioMap.values().forEach(audioList::addAll);
 
         return audioList;
+    }
+
+    public void setFromScanResult(ScanResultData scanResultData) {
+        this.audioMap = scanResultData.getAudioMap();
+        this.audioFilesCount = scanResultData.getAudioFilesCount();
+        this.withCoverCount = scanResultData.getWithCoverCount();
+    }
+
+    public void clear() {
+        this.audioMap = null;
+        this.withCoverCount = 0;
+        this.audioFilesCount = 0;
     }
 }

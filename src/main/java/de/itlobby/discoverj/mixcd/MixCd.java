@@ -2,8 +2,6 @@ package de.itlobby.discoverj.mixcd;
 
 import de.itlobby.discoverj.util.AudioUtil;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.Collection;
@@ -28,8 +26,6 @@ import static de.itlobby.discoverj.util.AudioUtil.VALID_AUDIO_FILE_EXTENSION;
  * </ul>
  */
 public class MixCd {
-    private static final Logger log = LogManager.getLogger(MixCd.class);
-
     /**
      * Cache for mix cd detection.
      */

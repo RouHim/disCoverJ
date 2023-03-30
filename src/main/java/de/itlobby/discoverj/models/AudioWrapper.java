@@ -7,7 +7,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.jaudiotagger.audio.AudioFile;
 
 import java.io.File;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -29,6 +28,36 @@ public class AudioWrapper implements Comparable<AudioWrapper> {
     private final String fileNameExtension;
     private final String year;
     private final String albumArtist;
+
+    public AudioWrapper(Integer id,
+                        String filePath,
+                        boolean hasCover,
+                        String artist,
+                        String title,
+                        String album,
+                        String trackNumber,
+                        String parentFilePath,
+                        String fileName,
+                        long fileLength,
+                        boolean readOnly,
+                        String fileNameExtension,
+                        String year,
+                        String albumArtist) {
+        this.id = id;
+        this.filePath = filePath;
+        this.hasCover = hasCover;
+        this.artist = artist;
+        this.title = title;
+        this.album = album;
+        this.trackNumber = trackNumber;
+        this.parentFilePath = parentFilePath;
+        this.fileName = fileName;
+        this.fileLength = fileLength;
+        this.readOnly = readOnly;
+        this.fileNameExtension = fileNameExtension;
+        this.year = year;
+        this.albumArtist = albumArtist;
+    }
 
     public AudioWrapper(Integer id, AudioFile audioFile) {
         this.id = id;
@@ -85,6 +114,10 @@ public class AudioWrapper implements Comparable<AudioWrapper> {
 
     public boolean isReadOnly() {
         return readOnly;
+    }
+
+    public boolean canWrite() {
+        return !readOnly;
     }
 
     public long getFileLength() {

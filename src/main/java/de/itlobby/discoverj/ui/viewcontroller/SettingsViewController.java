@@ -1,18 +1,11 @@
 package de.itlobby.discoverj.ui.viewcontroller;
 
 import de.itlobby.discoverj.models.Language;
-import de.itlobby.discoverj.searchservices.SearxService;
+import de.itlobby.discoverj.searchengines.SearxCoverSearchEngine;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.util.helper.AwesomeHelper;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
@@ -136,7 +129,7 @@ public class SettingsViewController implements ViewController {
     }
 
     private void checkHoster() {
-        Optional<String> errorMessage = ServiceLocator.get(SearxService.class).checkInstance(txtCustomSearxInstance.getText());
+        Optional<String> errorMessage = ServiceLocator.get(SearxCoverSearchEngine.class).checkInstance(txtCustomSearxInstance.getText());
 
         if (errorMessage.isEmpty()) {
             txtSearxHosterValid.setText(getString("key.settingsview.settings.searx.validHoster"));

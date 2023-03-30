@@ -1,4 +1,4 @@
-package de.itlobby.discoverj.searchservices;
+package de.itlobby.discoverj.searchengines;
 
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.services.SearchQueryService;
@@ -26,13 +26,13 @@ import java.util.Optional;
 import static de.itlobby.discoverj.util.WSUtil.getJsonFromUrl;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class DiscogsService implements SearchService {
+public class DiscogsCoverSearchEngine implements CoverSearchEngine {
     public static final String DISCOGS_RELEASE_ID = "DISCOGS_RELEASE_ID";
     public static final String DISCOGS_API_KEY = "DaaGqLxNconFRhNFkhlj&secret=nHsBIligVUMbMZnUhYkNjrLecmqUIRYt";
     private final Logger log = LogManager.getLogger(this.getClass());
 
     @Override
-    public List<BufferedImage> searchCover(AudioWrapper audioWrapper) {
+    public List<BufferedImage> search(AudioWrapper audioWrapper) {
         Optional<AudioFile> audioFile = AudioUtil.getAudioFile(audioWrapper.getFilePath());
 
         if (audioFile.isEmpty()) {
@@ -89,7 +89,7 @@ public class DiscogsService implements SearchService {
                     .map(result -> result.getString("uri"))
                     .map(ImageUtil::readRGBImageFromUrl)
                     .flatMap(Optional::stream)
-                    .filter(SearchService::reachesMinRequiredCoverSize)
+                    .filter(CoverSearchEngine::reachesMinRequiredCoverSize)
                     .toList();
         } catch (IOException e) {
             log.error(e.getMessage(), e);

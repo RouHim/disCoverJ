@@ -7,6 +7,9 @@ import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.util.StringUtil;
 
 public class SearchQueryService {
+    private SearchQueryService() {
+    }
+
     public static String createSearchString(AudioWrapper audioWrapper) {
         String album = audioWrapper.getAlbum();
         String title = audioWrapper.getTitle();

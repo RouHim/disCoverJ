@@ -166,11 +166,10 @@ public class AudioListEntry extends HBox {
         rotateTransition.setAutoReverse(false);
         rotateTransition.statusProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue == Animation.Status.STOPPED) {
-                RotateTransition transition = new RotateTransition(Duration.millis(10), iconView);
+                RotateTransition transition = new RotateTransition(Duration.millis(100), iconView);
                 transition.setFromAngle(iconView.getRotate());
                 transition.setToAngle(0);
                 transition.setCycleCount(1);
-                transition.setAutoReverse(true);
                 transition.play();
             }
         });

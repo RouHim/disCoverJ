@@ -30,7 +30,6 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.List;
-import java.util.Map;
 
 import static de.itlobby.discoverj.util.AudioUtil.removeCover;
 
@@ -109,9 +108,7 @@ public class InitialService implements Service {
     }
 
     public void beginScanFiles(File... musicObjects) {
-        DataService dataService = ServiceLocator.get(DataService.class);
-
-        dataService.setScanResultData(null);
+        DataHolder.getInstance().clear();
         MixCd.clearCache();
         ImageCache.getInstance().clear();
 
@@ -153,7 +150,7 @@ public class InitialService implements Service {
     }
 
     private void scanFinished(ScanResultData scanResultData) {
-        ServiceLocator.get(DataService.class).setScanResultData(scanResultData);
+        DataHolder.getInstance().setFromScanResult(scanResultData);
         getMainViewController().showScanResult(scanResultData);
 
         ServiceLocator.get(SelectionService.class).clearAll();
@@ -215,7 +212,7 @@ public class InitialService implements Service {
 
         removeCover(audioWrapper);
 
-        ServiceLocator.get(DataService.class).updateResultEntry(audioWrapper);
+        DataHolder.getInstance().updateResultEntry(audioWrapper);
 
         getMainViewController().lwAudioList.getChildren()
                 .stream()
@@ -228,7 +225,7 @@ public class InitialService implements Service {
     }
 
     public void removeAllSelectedCover() {
-        DataService dataService = ServiceLocator.get(DataService.class);
+        DataHolder dataHolder = DataHolder.getInstance();
         SelectionService selectionService = ServiceLocator.get(SelectionService.class);
 
         List<AudioListEntry> selectedEntries = selectionService.getSelectedEntries();
@@ -238,7 +235,7 @@ public class InitialService implements Service {
                 .filter(AudioWrapper::hasCover)
                 .forEach(entry -> {
                     removeCover(entry);
-                    dataService.updateResultEntry(entry);
+                    dataHolder.updateResultEntry(entry);
                     getMainViewController().lwAudioList.getChildren()
                             .stream()
                             .filter(AudioListEntry.class::isInstance)
@@ -265,7 +262,7 @@ public class InitialService implements Service {
         List<AudioListEntry> selectedEntries = ServiceLocator.get(SelectionService.class).getSelectedEntries();
 
         if (!selectedEntries.isEmpty()) {
-            ServiceLocator.get(DataService.class).removeResultEntries(
+            DataHolder.getInstance().removeResultEntries(
                     selectedEntries
                             .stream()
                             .map(AudioListEntry::getWrapper)
@@ -277,14 +274,9 @@ public class InitialService implements Service {
     }
 
     public void clearAllListEntries() {
-        Map<String, List<AudioWrapper>> audioMap =
-                ServiceLocator.get(DataService.class).getScanResultData().getAudioMap();
-
-        if (audioMap != null && !audioMap.isEmpty()) {
-            audioMap.clear();
-            getMainViewController().lwAudioList.getChildren().clear();
-            ServiceLocator.get(SelectionService.class).clearAll();
-        }
+        DataHolder.getInstance().clear();
+        getMainViewController().lwAudioList.getChildren().clear();
+        ServiceLocator.get(SelectionService.class).clearAll();
     }
 
     public void searchOnGoogleImages() {

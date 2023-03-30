@@ -26,16 +26,11 @@ import org.jaudiotagger.tag.reference.PictureTypes;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Spliterator;
-import java.util.Spliterators;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static de.itlobby.discoverj.searchservices.DiscogsService.DISCOGS_RELEASE_ID;
+import static de.itlobby.discoverj.searchengines.DiscogsCoverSearchEngine.DISCOGS_RELEASE_ID;
 import static de.itlobby.discoverj.util.StringUtil.ARTISTS_SEPARATOR_KEYWORDS;
 import static org.jaudiotagger.tag.FieldKey.MUSICBRAINZ_RELEASEID;
 
@@ -44,7 +39,7 @@ public class AudioUtil {
     public static final String[] VALID_AUDIO_FILE_EXTENSION = Arrays.stream(SupportedFileFormat.values())
             .map(SupportedFileFormat::getFilesuffix)
             .toArray(String[]::new);
-    public static final Set<String> VALID_AUDIO_FILE_EXTENSION_LIST = Arrays.stream(VALID_AUDIO_FILE_EXTENSION).collect(Collectors.toSet());
+    static final Set<String> VALID_AUDIO_FILE_EXTENSION_LIST = Arrays.stream(VALID_AUDIO_FILE_EXTENSION).collect(Collectors.toSet());
     private static final Logger log = LogManager.getLogger(AudioUtil.class);
 
     private AudioUtil() {
@@ -153,6 +148,10 @@ public class AudioUtil {
      * @return the field value
      */
     private static Optional<String> readMaybeFieldValue(AudioFile audioFile, FieldKey fieldKey) {
+        if (audioFile == null) {
+            return Optional.empty();
+        }
+
         Tag tag = audioFile.getTag();
         return tag != null && tag.hasField(fieldKey)
                 ? Optional.ofNullable(tag.getFirst(fieldKey))

@@ -1,4 +1,4 @@
-package de.itlobby.discoverj.searchservices;
+package de.itlobby.discoverj.searchengines;
 
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.services.SearchQueryService;
@@ -14,11 +14,11 @@ import java.util.Optional;
 
 import static de.itlobby.discoverj.util.WSUtil.getJsonFromUrl;
 
-public class DeezerService implements SearchService {
+public class DeezerCoverSearchEngine implements CoverSearchEngine {
     private static final String DEEZER_API_REQUEST = "https://api.deezer.com/search?limit=5&q=";
 
     @Override
-    public List<BufferedImage> searchCover(AudioWrapper audioWrapper) {
+    public List<BufferedImage> search(AudioWrapper audioWrapper) {
         String searchString = StringUtil.encodeRfc3986(SearchQueryService.createSearchString(audioWrapper));
 
         Optional<JSONObject> jsonFromUrl = getJsonFromUrl(DEEZER_API_REQUEST + searchString);
@@ -34,7 +34,7 @@ public class DeezerService implements SearchService {
                 .parallel()
                 .map(ImageUtil::readRGBImageFromUrl)
                 .flatMap(Optional::stream)
-                .filter(SearchService::reachesMinRequiredCoverSize)
+                .filter(CoverSearchEngine::reachesMinRequiredCoverSize)
                 .toList();
     }
 

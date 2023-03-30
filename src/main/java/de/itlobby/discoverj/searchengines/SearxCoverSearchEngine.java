@@ -1,4 +1,4 @@
-package de.itlobby.discoverj.searchservices;
+package de.itlobby.discoverj.searchengines;
 
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.services.SearchQueryService;
@@ -7,8 +7,6 @@ import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.StringUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import java.awt.image.BufferedImage;
@@ -18,23 +16,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static de.itlobby.discoverj.util.WSUtil.getJsonFromUrl;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 
-public class SearxService implements SearchService {
-    private static final Logger log = LogManager.getLogger(SearxService.class);
-
+public class SearxCoverSearchEngine implements CoverSearchEngine {
     private static final int MAX_RESULTS = 10;
     private static final String SEARX_INSTANCES_INDEX = "https://searx.space/data/instances.json";
     private static final String API_REQUEST = "search?categories=images&engines=bing%20images,duckduckgo%20images,google%20images,qwant%20images&format=json&q=";
     private List<String> instances = null;
 
     @Override
-    public List<BufferedImage> searchCover(AudioWrapper audioWrapper) {
+    public List<BufferedImage> search(AudioWrapper audioWrapper) {
         AppConfig config = Settings.getInstance().getConfig();
 
         String googleSearchPattern = config.getGoogleSearchPattern();
@@ -64,17 +59,6 @@ public class SearxService implements SearchService {
         return Collections.emptyList();
     }
 
-    private List<String> detectEngines() {
-        Optional<JSONObject> jsonFromUrl = getJsonFromUrl(SEARX_INSTANCES_INDEX);
-        if (jsonFromUrl.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return jsonFromUrl.get().getJSONObject("instances").toMap().keySet()
-                .parallelStream()
-                .filter(SearxService::isReachable)
-                .collect(Collectors.toList());
-    }
-
     private static List<BufferedImage> startSearch(String query, String searxInstance) {
         Optional<JSONObject> jsonFromUrl = getJsonFromUrl(searxInstance + API_REQUEST + query);
         if (jsonFromUrl.isEmpty()) {
@@ -95,7 +79,7 @@ public class SearxService implements SearchService {
                 .filter(url -> url.startsWith("http"))
                 .map(ImageUtil::readRGBImageFromUrl)
                 .flatMap(Optional::stream)
-                .filter(SearchService::reachesMinRequiredCoverSize);
+                .filter(CoverSearchEngine::reachesMinRequiredCoverSize);
 
         Stream<BufferedImage> base64Stream = searchResultData
                 .parallelStream()
@@ -103,7 +87,7 @@ public class SearxService implements SearchService {
                 .map(dataString -> dataString.split("base64,")[1])
                 .map(ImageUtil::readRGBImageFromBase64String)
                 .flatMap(Optional::stream)
-                .filter(SearchService::reachesMinRequiredCoverSize);
+                .filter(CoverSearchEngine::reachesMinRequiredCoverSize);
 
         return Stream.concat(httpStream, base64Stream).toList();
     }

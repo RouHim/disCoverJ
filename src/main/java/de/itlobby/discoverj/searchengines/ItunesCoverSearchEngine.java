@@ -1,4 +1,4 @@
-package de.itlobby.discoverj.searchservices;
+package de.itlobby.discoverj.searchengines;
 
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.services.SearchQueryService;
@@ -16,11 +16,11 @@ import static de.itlobby.discoverj.util.WSUtil.getJsonFromUrl;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.text.MessageFormat.format;
 
-public class ItunesService implements SearchService {
+public class ItunesCoverSearchEngine implements CoverSearchEngine {
     private static final String ITUNES_SEARCH_QUERY = "https://itunes.apple.com/search?limit=5&term={0}";
 
     @Override
-    public List<BufferedImage> searchCover(AudioWrapper audioWrapper) {
+    public List<BufferedImage> search(AudioWrapper audioWrapper) {
         String searchString = URLEncoder.encode(SearchQueryService.createSearchString(audioWrapper), UTF_8);
 
         Optional<JSONObject> jsonFromUrl = getJsonFromUrl(
@@ -40,7 +40,7 @@ public class ItunesService implements SearchService {
                 .parallel()
                 .map(ImageUtil::readRGBImageFromUrl)
                 .flatMap(Optional::stream)
-                .filter(SearchService::reachesMinRequiredCoverSize)
+                .filter(CoverSearchEngine::reachesMinRequiredCoverSize)
                 .toList();
     }
 }

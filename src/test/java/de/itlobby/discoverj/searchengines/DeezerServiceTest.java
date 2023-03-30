@@ -1,4 +1,4 @@
-package de.itlobby.discoverj.searchservices;
+package de.itlobby.discoverj.searchengines;
 
 import de.itlobby.discoverj.models.AudioWrapper;
 import org.jaudiotagger.audio.AudioFile;
@@ -23,7 +23,7 @@ class DeezerServiceTest {
         AudioWrapper audioWrapper = new AudioWrapper(1, getAudioFile("test-files/test.mp3"));
 
         // WHEN I search for a cover
-        List<BufferedImage> bufferedImages = new DeezerService().searchCover(audioWrapper);
+        List<BufferedImage> bufferedImages = new DeezerCoverSearchEngine().search(audioWrapper);
 
         // THEN I get a list of buffered images
         assertThat(bufferedImages).hasSizeGreaterThan(0);

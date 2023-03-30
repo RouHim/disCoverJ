@@ -7,11 +7,7 @@ import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.ui.core.ViewManager;
 import de.itlobby.discoverj.ui.core.Views;
 import de.itlobby.discoverj.ui.viewcontroller.OpenFileViewController;
-import de.itlobby.discoverj.util.AudioUtil;
-import de.itlobby.discoverj.util.GlyphsDude;
-import de.itlobby.discoverj.util.ImageUtil;
-import de.itlobby.discoverj.util.LanguageUtil;
-import de.itlobby.discoverj.util.SystemUtil;
+import de.itlobby.discoverj.util.*;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.animation.ScaleTransition;
 import javafx.scene.Node;
@@ -95,7 +91,7 @@ public class DragDropService implements Service {
                 AudioWrapper audioWrapper = selectedEntry.getWrapper();
                 AudioFile audioFile = AudioFileIO.read(new File(audioWrapper.getFilePath()));
 
-                List<AudioWrapper> audioList = ServiceLocator.get(DataService.class).getAudioList();
+                List<AudioWrapper> audioList = DataHolder.getInstance().getAudioList();
 
                 audioList.stream()
                         .filter(x -> x.getId().equals(audioWrapper.getId()))
@@ -109,7 +105,7 @@ public class DragDropService implements Service {
                         .forEach(wrapper -> wrapper.replaceCover(img.get()));
             }
 
-            getMainViewController().showAudioInfo(selectedEntries.get(0).getWrapper());
+            getMainViewController().showAudioInfo(selectedEntries.get(0).getWrapper(), true);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         } finally {

@@ -38,7 +38,6 @@ public class MainService implements Service {
         viewController.btnExitApp.setOnAction(event -> exitApplication());
         viewController.btnOpenAbout.setOnAction(event -> openAbout());
         viewController.btnDonate.setOnAction(event -> donate());
-        viewController.btnHelpTranslate.setOnAction(event -> helpTranslate());
         viewController.btnSendFeedback.setOnAction(event -> sendFeedback());
         viewController.btnReportBug.setOnAction(event -> reportBug());
         ListenerStateProvider.getInstance().setSettingsSavedListener(SystemUtil::setProxy);
@@ -142,7 +141,7 @@ public class MainService implements Service {
             ServiceLocator.get(CoverPersistentService.class).cleanup();
 
             ServiceLocator.get(InitialService.class).setInterruptProgress(true);
-            ServiceLocator.get(SearchService.class).setInterruptProgress(true);
+            ServiceLocator.get(CoverSearchService.class).setInterruptProgress(true);
 
             if (memCheckTimer != null) {
                 memCheckTimer.cancel();
@@ -167,7 +166,7 @@ public class MainService implements Service {
         if (e instanceof OutOfMemoryError) {
             ImageCache.getInstance().clear();
             ServiceLocator.unload(InitialService.class);
-            ServiceLocator.unload(SearchService.class);
+            ServiceLocator.unload(CoverSearchService.class);
 
             ServiceLocator.get(LightBoxService.class).showTextDialog("Error", e.getMessage());
         } else {

@@ -1,4 +1,4 @@
-package de.itlobby.discoverj.searchservices;
+package de.itlobby.discoverj.searchengines;
 
 import de.itlobby.discoverj.mixcd.MixCd;
 import de.itlobby.discoverj.models.AudioWrapper;
@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 import static de.itlobby.discoverj.util.WSUtil.getJsonFromUrl;
 import static java.text.MessageFormat.format;
 
-public class MusicbrainzService implements SearchService {
+public class MusicbrainzCoverSearchEngine implements CoverSearchEngine {
     //mbid rausfinden / alle mit 95+ wahrscheinlichkeit
     //http://musicbrainz.org/ws/2/release?query=release:%22meteora%22%20AND%20artist:%22linkin%20park%22&fmt=json
 
@@ -32,10 +32,10 @@ public class MusicbrainzService implements SearchService {
     //coverartarchive.org/release/mbid
     //https://coverartarchive.org/release/9c2d7cce-7c3b-48a0-90ec-456df13f5529
 
-    private static final Logger log = LogManager.getLogger(MusicbrainzService.class);
+    private static final Logger log = LogManager.getLogger(MusicbrainzCoverSearchEngine.class);
 
     @Override
-    public List<BufferedImage> searchCover(AudioWrapper audioWrapper) {
+    public List<BufferedImage> search(AudioWrapper audioWrapper) {
         Optional<String> musicbrainzReleaseId = AudioUtil.getMusicbrainzReleaseId(audioWrapper);
 
         if (musicbrainzReleaseId.isPresent()) {
@@ -86,7 +86,7 @@ public class MusicbrainzService implements SearchService {
                 // download the cover
                 .map(ImageUtil::readRGBImageFromUrl)
                 .flatMap(Optional::stream)
-                .filter(SearchService::reachesMinRequiredCoverSize);
+                .filter(CoverSearchEngine::reachesMinRequiredCoverSize);
     }
 
     private String buildSearchQuery(AudioWrapper audioWrapper) {
