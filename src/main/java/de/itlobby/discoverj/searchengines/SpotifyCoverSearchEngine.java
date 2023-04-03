@@ -1,6 +1,7 @@
 package de.itlobby.discoverj.searchengines;
 
 import de.itlobby.discoverj.models.AudioWrapper;
+import de.itlobby.discoverj.models.ImageFile;
 import de.itlobby.discoverj.services.SearchQueryService;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.StringUtil;
@@ -9,7 +10,6 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -37,7 +37,7 @@ public class SpotifyCoverSearchEngine implements CoverSearchEngine {
     }
 
     @Override
-    public List<BufferedImage> search(AudioWrapper audioWrapper) {
+    public List<ImageFile> search(AudioWrapper audioWrapper) {
         if (StringUtil.isNullOrEmpty(authToken)) {
             return Collections.emptyList();
         }
@@ -59,7 +59,7 @@ public class SpotifyCoverSearchEngine implements CoverSearchEngine {
                     .map(result -> new JSONObject((Map) result))
                     .map(SpotifyCoverSearchEngine::getCoverUrl)
                     .flatMap(Optional::stream)
-                    .map(ImageUtil::readRGBImageFromUrl)
+                    .map(ImageUtil::downloadImageFromUrl)
                     .flatMap(Optional::stream)
                     .filter(CoverSearchEngine::reachesMinRequiredCoverSize)
                     .toList();

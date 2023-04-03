@@ -1,11 +1,14 @@
 package de.itlobby.discoverj.util;
 
 import de.itlobby.discoverj.models.AudioWrapper;
+import de.itlobby.discoverj.models.ImageFile;
+import de.itlobby.discoverj.models.ImageSize;
 import de.itlobby.discoverj.services.LightBoxService;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.util.helper.ImageCache;
 import javafx.application.Platform;
 import javafx.scene.image.Image;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jaudiotagger.audio.AudioFile;
@@ -82,9 +85,17 @@ public class AudioUtil {
      * @param audioFile to read the cover from
      * @return the extracted cover image as buffered image
      */
-    public static Optional<BufferedImage> getCoverAsBufImg(AudioFile audioFile) {
+    public static Optional<ImageFile> getCoverAsImageFile(AudioFile audioFile) {
         try {
-            return getCoverData(audioFile).map(data -> ImageCache.getInstance().getBuffImage(data));
+            Optional<byte[]> coverData = getCoverData(audioFile);
+            if (coverData.isEmpty()) {
+                return Optional.empty();
+            }
+            File file = SystemUtil.getTempFile();
+            FileUtils.writeByteArrayToFile(file, coverData.get());
+            ImageSize imageSize = ImageUtil.readImageSize(file);
+
+            return Optional.of(new ImageFile(file.getAbsolutePath(), imageSize.width(), imageSize.height()));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -236,7 +247,7 @@ public class AudioUtil {
 
     private static Optional<String> readCustomFieldValue(AudioFile audioFile, String customField) {
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(audioFile.getTag().getFields(), Spliterator.ORDERED), false)
-                .filter(field -> field instanceof AbstractTagFrame)
+                .filter(AbstractTagFrame.class::isInstance)
                 .map(field -> ((AbstractTagFrame) field).getBody())
                 .filter(body -> body.getBriefDescription().contains(customField))
                 .findFirst()

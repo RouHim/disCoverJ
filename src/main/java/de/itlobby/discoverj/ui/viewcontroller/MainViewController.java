@@ -1,10 +1,12 @@
 package de.itlobby.discoverj.ui.viewcontroller;
 
+import de.itlobby.discoverj.listeners.ActionListener;
 import de.itlobby.discoverj.listeners.ListenerStateProvider;
 import de.itlobby.discoverj.listeners.MultipleSelectionListener;
 import de.itlobby.discoverj.listeners.ParentKeyDeletedListener;
 import de.itlobby.discoverj.mixcd.MixCd;
 import de.itlobby.discoverj.models.AudioWrapper;
+import de.itlobby.discoverj.models.ImageFile;
 import de.itlobby.discoverj.models.ScanResultData;
 import de.itlobby.discoverj.services.CoverSearchService;
 import de.itlobby.discoverj.services.InitialService;
@@ -44,6 +46,8 @@ import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -408,7 +412,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
         Platform.runLater(() -> txtState.setText(msg));
     }
 
-    public void showBusyIndicator(String title) {
+    public void showBusyIndicator(String title, ActionListener cancelListener) {
         Platform.runLater(() -> {
             VBox layout = new VBox(25);
             progressScanIndicator = new ProgressIndicator();
@@ -428,7 +432,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
             layout.setAlignment(Pos.TOP_CENTER);
             layout.setPadding(new Insets(10, 0, 10, 0));
 
-            ServiceLocator.get(LightBoxService.class).showDialog(title, layout, null, null, false, true);
+            ServiceLocator.get(LightBoxService.class).showDialog(title, layout, cancelListener, null, false, cancelListener == null);
         });
     }
 
@@ -551,16 +555,28 @@ public class MainViewController implements ViewController, MultipleSelectionList
         );
     }
 
-    public void setNewCoverToListItem(AudioWrapper currentAudio, WritableImage newCover) {
+    public void setNewCoverToListItem(AudioWrapper currentAudio, ImageFile newCover) {
         Platform.runLater(() -> {
             AudioListEntry listEntry = getAudioListEntry(currentAudio.getId());
 
             if (listEntry == null) {
                 return;
             }
-            listEntry.getWrapper().setHasCover(true);
-            createSingleLineAnimation(ImageUtil.resize(newCover, 36, 36), listEntry);
-            listEntry.getIconView().setIcon(FontAwesomeIcon.CHECK);
+
+            try {
+                Image previewImage = new Image(
+                        new FileInputStream(newCover.filePath()),
+                        36,
+                        36,
+                        true,
+                        false
+                );
+                createSingleLineAnimation(previewImage, listEntry);
+                listEntry.getIconView().setIcon(FontAwesomeIcon.CHECK);
+                listEntry.getWrapper().setHasCover(true);
+            } catch (FileNotFoundException e) {
+                log.error(e.getMessage(), e);
+            }
         });
     }
 

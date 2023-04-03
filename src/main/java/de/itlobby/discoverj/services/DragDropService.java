@@ -65,7 +65,7 @@ public class DragDropService implements Service {
             return;
         }
 
-        getMainViewController().showBusyIndicator(LanguageUtil.getString("add.images.to.audiofiles"));
+        getMainViewController().showBusyIndicator(LanguageUtil.getString("add.images.to.audiofiles"), null);
 
         new Thread(() ->
                 addCoverToEntries(

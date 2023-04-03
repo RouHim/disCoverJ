@@ -1,11 +1,11 @@
 package de.itlobby.discoverj.searchengines;
 
 import de.itlobby.discoverj.models.AudioWrapper;
+import de.itlobby.discoverj.models.ImageFile;
 import de.itlobby.discoverj.services.SearchQueryService;
 import de.itlobby.discoverj.util.ImageUtil;
 import org.json.JSONObject;
 
-import java.awt.image.BufferedImage;
 import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.List;
@@ -20,7 +20,7 @@ public class ItunesCoverSearchEngine implements CoverSearchEngine {
     private static final String ITUNES_SEARCH_QUERY = "https://itunes.apple.com/search?limit=5&term={0}";
 
     @Override
-    public List<BufferedImage> search(AudioWrapper audioWrapper) {
+    public List<ImageFile> search(AudioWrapper audioWrapper) {
         String searchString = URLEncoder.encode(SearchQueryService.createSearchString(audioWrapper), UTF_8);
 
         Optional<JSONObject> jsonFromUrl = getJsonFromUrl(
@@ -38,7 +38,7 @@ public class ItunesCoverSearchEngine implements CoverSearchEngine {
                 .filter(imgUrl -> !imgUrl.contains("mza_"))
                 .map(imgUrl -> imgUrl.replace("100x100", "1200x1200"))
                 .parallel()
-                .map(ImageUtil::readRGBImageFromUrl)
+                .map(ImageUtil::downloadImageFromUrl)
                 .flatMap(Optional::stream)
                 .filter(CoverSearchEngine::reachesMinRequiredCoverSize)
                 .toList();

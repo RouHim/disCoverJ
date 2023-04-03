@@ -15,6 +15,7 @@ import javafx.geometry.Insets;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import org.apache.commons.io.FileUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,9 +24,12 @@ import org.apache.logging.log4j.core.appender.FileAppender;
 
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import static de.itlobby.discoverj.util.SystemUtil.DISCOVERJ_TEMP_DIR;
 
 public class MainService implements Service {
     private static final Logger log = LogManager.getLogger(MainService.class);
@@ -51,10 +55,6 @@ public class MainService implements Service {
         viewController.imgCurrentCover.setOnMouseClicked(event -> initialService.showCurrentCoverDetailed());
 
         ServiceLocator.get(DragDropService.class).initDragAndDrop();
-    }
-
-    private void helpTranslate() {
-        SystemUtil.browseUrl("https://crowdin.com/project/discoverj/invite");
     }
 
     private void reportBug() {
@@ -100,7 +100,7 @@ public class MainService implements Service {
         double percentage = (double) curMem / (double) maxMem;
 
         Platform.runLater(() -> {
-            getMainViewController().txtJavaCurrentMem.setText(curMem + "");
+            getMainViewController().txtJavaCurrentMem.setText(String.valueOf(curMem));
             getMainViewController().txtJavaMaxMem.setText(maxMem + "M");
             getMainViewController().pbJavaMemory.setProgress(percentage);
         });
@@ -137,9 +137,13 @@ public class MainService implements Service {
     }
 
     public void exitApplication() {
-        Platform.runLater(() -> {
-            ServiceLocator.get(CoverPersistentService.class).cleanup();
+        try {
+            FileUtils.deleteDirectory(DISCOVERJ_TEMP_DIR);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
 
+        Platform.runLater(() -> {
             ServiceLocator.get(InitialService.class).setInterruptProgress(true);
             ServiceLocator.get(CoverSearchService.class).setInterruptProgress(true);
 

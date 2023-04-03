@@ -2,6 +2,7 @@ package de.itlobby.discoverj.searchengines;
 
 import de.itlobby.discoverj.mixcd.MixCd;
 import de.itlobby.discoverj.models.AudioWrapper;
+import de.itlobby.discoverj.models.ImageFile;
 import de.itlobby.discoverj.models.SearchTagWrapper;
 import de.itlobby.discoverj.services.SearchModelQueryService;
 import de.itlobby.discoverj.settings.Settings;
@@ -11,7 +12,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
-import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +35,7 @@ public class MusicbrainzCoverSearchEngine implements CoverSearchEngine {
     private static final Logger log = LogManager.getLogger(MusicbrainzCoverSearchEngine.class);
 
     @Override
-    public List<BufferedImage> search(AudioWrapper audioWrapper) {
+    public List<ImageFile> search(AudioWrapper audioWrapper) {
         Optional<String> musicbrainzReleaseId = AudioUtil.getMusicbrainzReleaseId(audioWrapper);
 
         if (musicbrainzReleaseId.isPresent()) {
@@ -71,7 +71,7 @@ public class MusicbrainzCoverSearchEngine implements CoverSearchEngine {
                 .toList();
     }
 
-    private Stream<BufferedImage> getCoversById(String id) {
+    private Stream<ImageFile> getCoversById(String id) {
         Optional<JSONObject> jsonFromUrl = getJsonFromUrl(format("https://coverartarchive.org/release/{0}", id));
 
         if (jsonFromUrl.isEmpty()) {
@@ -84,7 +84,7 @@ public class MusicbrainzCoverSearchEngine implements CoverSearchEngine {
                 .filter(image -> image.getBoolean("front"))
                 .map(image -> image.getString("image"))
                 // download the cover
-                .map(ImageUtil::readRGBImageFromUrl)
+                .map(ImageUtil::downloadImageFromUrl)
                 .flatMap(Optional::stream)
                 .filter(CoverSearchEngine::reachesMinRequiredCoverSize);
     }

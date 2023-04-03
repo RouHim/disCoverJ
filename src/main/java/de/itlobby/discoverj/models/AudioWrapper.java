@@ -10,13 +10,9 @@ import java.io.File;
 import java.util.Objects;
 import java.util.Optional;
 
-import static de.itlobby.discoverj.util.StringUtil.isInteger;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-
 public class AudioWrapper implements Comparable<AudioWrapper> {
     private final Integer id;
     private final String filePath;
-    private boolean hasCover;
     private final String artist;
     private final String title;
     private final String album;
@@ -28,6 +24,7 @@ public class AudioWrapper implements Comparable<AudioWrapper> {
     private final String fileNameExtension;
     private final String year;
     private final String albumArtist;
+    private boolean hasCover;
 
     public AudioWrapper(Integer id,
                         String filePath,
@@ -166,42 +163,67 @@ public class AudioWrapper implements Comparable<AudioWrapper> {
             return 1;
         }
 
-        File file = new File(this.filePath);
-        File file2 = new File(other.filePath);
+        String thisFolder = this.getParentFilePath();
+        String otherFolder = other.getParentFilePath();
 
-        String folder = this.getParentFilePath();
-        String folder2 = other.getParentFilePath();
-        int folderRes;
+        int folderComparisonResult = compareFolders(thisFolder, otherFolder);
+        if (folderComparisonResult != 0) {
+            return folderComparisonResult;
+        }
 
-        folderRes = folder.compareTo(folder2);
+        int albumComparisonResult = compareAlbums(this.album, other.album);
+        if (albumComparisonResult != 0) {
+            return albumComparisonResult;
+        }
 
-        if (folderRes == 0) {
+        int trackNumberComparisonResult = compareTrackNumbers(this.trackNumber, other.trackNumber);
+        if (trackNumberComparisonResult != 0) {
+            return trackNumberComparisonResult;
+        }
 
-            int albumRes = ObjectUtils.compare(this.album, other.album);
+        return compareFileNames(this.filePath, other.filePath);
+    }
 
-            if (albumRes == 0) {
-                String otherTrackNumber = other.trackNumber;
+    private int compareFolders(String thisFolder, String otherFolder) {
+        return thisFolder.compareTo(otherFolder);
+    }
 
-                if (isEmpty(trackNumber) && isEmpty(otherTrackNumber)) {
-                    return ObjectUtils.compare(file.getName(), file2.getName());
-                } else {
-                    int trackRes;
-                    if (isInteger(trackNumber) && isInteger(otherTrackNumber)) {
-                        int trackNumberInt = Integer.parseInt(trackNumber);
-                        int trackNumberInt2 = Integer.parseInt(otherTrackNumber);
+    private int compareAlbums(String thisAlbum, String otherAlbum) {
+        return ObjectUtils.compare(thisAlbum, otherAlbum);
+    }
 
-                        trackRes = ObjectUtils.compare(trackNumberInt, trackNumberInt2);
-                    } else {
-                        trackRes = ObjectUtils.compare(trackNumber, otherTrackNumber);
-                    }
+    private int compareTrackNumbers(String thisTrackNumber, String otherTrackNumber) {
+        if (isEmpty(thisTrackNumber) && isEmpty(otherTrackNumber)) {
+            return 0;
+        }
 
-                    return trackRes;
-                }
-            } else {
-                return albumRes;
-            }
-        } else {
-            return folderRes;
+        if (isInteger(thisTrackNumber) && isInteger(otherTrackNumber)) {
+            int thisTrackNumberInt = Integer.parseInt(thisTrackNumber);
+            int otherTrackNumberInt = Integer.parseInt(otherTrackNumber);
+            return Integer.compare(thisTrackNumberInt, otherTrackNumberInt);
+        }
+
+        return ObjectUtils.compare(thisTrackNumber, otherTrackNumber);
+    }
+
+    private int compareFileNames(String thisFileName, String otherFileName) {
+        return new File(thisFileName).getName().compareTo(new File(otherFileName).getName());
+    }
+
+    private boolean isEmpty(String value) {
+        return value == null || value.trim().isEmpty();
+    }
+
+    private boolean isInteger(String value) {
+        if (isEmpty(value)) {
+            return false;
+        }
+
+        try {
+            Integer.parseInt(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 

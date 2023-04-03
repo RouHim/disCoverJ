@@ -114,7 +114,7 @@ public class InitialService implements Service {
 
         MainViewController viewController = getMainViewController();
         viewController.resetRightSide();
-        viewController.showBusyIndicator(LanguageUtil.getString("InitialController.loadingMp3List"));
+        viewController.showBusyIndicator(LanguageUtil.getString("InitialController.loadingMp3List"), null);
         viewController.setState(LanguageUtil.getString("InitialController.loadingMp3List"));
 
         //Filter and count audio files

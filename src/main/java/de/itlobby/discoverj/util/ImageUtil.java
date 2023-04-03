@@ -1,22 +1,29 @@
 package de.itlobby.discoverj.util;
 
+import de.itlobby.discoverj.models.ImageFile;
+import de.itlobby.discoverj.models.ImageSize;
 import de.itlobby.discoverj.models.SearchEngine;
 import de.itlobby.discoverj.settings.Settings;
 import javafx.animation.ScaleTransition;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
-import javafx.scene.image.*;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.util.Duration;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -25,7 +32,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Optional;
 
 public class ImageUtil {
@@ -361,53 +367,40 @@ public class ImageUtil {
         return Optional.empty();
     }
 
-    public static Optional<BufferedImage> readRGBImageFromBase64String(String imageData) {
+    public static Optional<ImageFile> downloadImageFromUrl(String imgUrl) {
         try {
-            BufferedImage read = ImageIO.read(new ByteArrayInputStream(Base64.getDecoder().decode(imageData)));
-            if (read == null) {
+            File file = SystemUtil.getTempFile();
+            FileUtils.copyURLToFile(new URL(imgUrl), file);
+
+            if (!file.exists()) {
                 return Optional.empty();
             }
 
-            // Convert to RGB
-            BufferedImage rgbImage = new BufferedImage(read.getWidth(), read.getHeight(), BufferedImage.TYPE_INT_RGB);
-            rgbImage.createGraphics().drawImage(read, 0, 0, null);
+            // Read dimensions
+            ImageSize imageSize = readImageSize(file);
 
-            return Optional.of(rgbImage);
+            return Optional.of(new ImageFile(file.getAbsolutePath(), imageSize.width(), imageSize.height()));
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.debug("%s from url %s".formatted(e.getMessage(), imgUrl));
         }
 
         return Optional.empty();
     }
 
-    public static Image resize(Image inputImage, int targetWidth, int scaledHeight) {
-        WritableImage writableImage = null;
-
-        if (inputImage != null) {
-            writableImage = new WritableImage(targetWidth, scaledHeight);
-            PixelWriter pixelWriter = writableImage.getPixelWriter();
-            PixelReader pixelReader = inputImage.getPixelReader();
-
-            int originalWidth = (int) inputImage.getWidth();
-            int originalHeight = (int) inputImage.getHeight();
-
-            double sWidth = originalWidth / (double) targetWidth;
-            double sHeight = originalHeight / (double) scaledHeight;
-
-            for (int x = 0; x < targetWidth; x++) {
-
-                int xF = (int) (x * sWidth);
-
-                for (int y = 0; y < scaledHeight; y++) {
-                    int yF = (int) (y * sHeight);
-
-                    int rgbAtXfYf = pixelReader.getArgb(xF, yF);
-                    pixelWriter.setArgb(x, y, rgbAtXfYf);
-                }
-            }
-        }
-
-        return writableImage;
+    /**
+     * Reads the height and width of an image file and returns this information as a new ImageSize object.
+     *
+     * @param file the image file to read
+     * @return a new ImageSize object containing the width and height information of the image file
+     * @throws IOException if an error occurs while reading the image file
+     */
+    public static ImageSize readImageSize(File file) throws IOException {
+        ImageInputStream inputStream = ImageIO.createImageInputStream(file);
+        ImageReader reader = ImageIO.getImageReaders(inputStream).next();
+        reader.setInput(inputStream);
+        int width = reader.getWidth(0);
+        int height = reader.getHeight(0);
+        return new ImageSize(width, height);
     }
 
     public static WritableImage toFXImage(BufferedImage image, int targetWidth, int targetHeight) {
@@ -490,6 +483,23 @@ public class ImageUtil {
             BufferedImage rgbImage = new BufferedImage(read.getWidth(), read.getHeight(), BufferedImage.TYPE_INT_RGB);
             rgbImage.createGraphics().drawImage(read, 0, 0, null);
             return Optional.of(rgbImage);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Reads an image as RGB from a file.
+     *
+     * @param file to read
+     * @return the read rgb image
+     */
+    public static Optional<ImageFile> readImageFile(File file) {
+        try {
+            ImageSize imageSize = readImageSize(file);
+            return Optional.of(new ImageFile(file.getAbsolutePath(), imageSize.width(), imageSize.height()));
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }

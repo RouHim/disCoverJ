@@ -1,12 +1,12 @@
 package de.itlobby.discoverj.searchengines;
 
 import de.itlobby.discoverj.models.AudioWrapper;
+import de.itlobby.discoverj.models.ImageFile;
 import de.itlobby.discoverj.services.SearchQueryService;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.StringUtil;
 import org.json.JSONObject;
 
-import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +18,7 @@ public class DeezerCoverSearchEngine implements CoverSearchEngine {
     private static final String DEEZER_API_REQUEST = "https://api.deezer.com/search?limit=5&q=";
 
     @Override
-    public List<BufferedImage> search(AudioWrapper audioWrapper) {
+    public List<ImageFile> search(AudioWrapper audioWrapper) {
         String searchString = StringUtil.encodeRfc3986(SearchQueryService.createSearchString(audioWrapper));
 
         Optional<JSONObject> jsonFromUrl = getJsonFromUrl(DEEZER_API_REQUEST + searchString);
@@ -32,7 +32,7 @@ public class DeezerCoverSearchEngine implements CoverSearchEngine {
                 .map(this::findCoverUrl)
                 .flatMap(Optional::stream)
                 .parallel()
-                .map(ImageUtil::readRGBImageFromUrl)
+                .map(ImageUtil::downloadImageFromUrl)
                 .flatMap(Optional::stream)
                 .filter(CoverSearchEngine::reachesMinRequiredCoverSize)
                 .toList();

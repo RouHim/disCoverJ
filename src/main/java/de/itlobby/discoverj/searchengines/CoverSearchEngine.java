@@ -1,9 +1,9 @@
 package de.itlobby.discoverj.searchengines;
 
 import de.itlobby.discoverj.models.AudioWrapper;
+import de.itlobby.discoverj.models.ImageFile;
 import de.itlobby.discoverj.settings.Settings;
 
-import java.awt.image.BufferedImage;
 import java.util.List;
 
 public interface CoverSearchEngine {
@@ -13,9 +13,10 @@ public interface CoverSearchEngine {
      * @param image to check
      * @return true if the minimum size is reached, false if the cover is too small
      */
-    static boolean reachesMinRequiredCoverSize(BufferedImage image) {
+    static boolean reachesMinRequiredCoverSize(ImageFile image) {
         int minSize = Settings.getInstance().getConfig().getMinCoverSize();
-        return image.getWidth() >= minSize && image.getHeight() >= minSize;
+        return image.width() >= minSize && image.height()
+                >= minSize;
     }
 
     /**
@@ -24,5 +25,5 @@ public interface CoverSearchEngine {
      * @param audioWrapper to find cover for
      * @return the found covers, or empty list if nothing was found
      */
-    List<BufferedImage> search(AudioWrapper audioWrapper);
+    List<ImageFile> search(AudioWrapper audioWrapper);
 }

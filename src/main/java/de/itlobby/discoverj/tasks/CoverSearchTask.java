@@ -1,18 +1,18 @@
 package de.itlobby.discoverj.tasks;
 
 import de.itlobby.discoverj.models.AudioWrapper;
+import de.itlobby.discoverj.models.ImageFile;
 import de.itlobby.discoverj.models.SearchEngine;
 import de.itlobby.discoverj.models.SearchEngineType;
 import de.itlobby.discoverj.searchengines.CoverSearchEngine;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-public class CoverSearchTask implements Callable<List<BufferedImage>> {
+public class CoverSearchTask implements Callable<List<ImageFile>> {
     private static final Logger log = LogManager.getLogger(CoverSearchTask.class);
 
     private final CoverSearchEngine coverSearchEngine;
@@ -26,9 +26,11 @@ public class CoverSearchTask implements Callable<List<BufferedImage>> {
     }
 
     @Override
-    public List<BufferedImage> call() {
+    public List<ImageFile> call() {
         try {
             return coverSearchEngine.search(audioWrapper);
+        } catch (OutOfMemoryError e) {
+            throw new OutOfMemoryError(e.getMessage());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

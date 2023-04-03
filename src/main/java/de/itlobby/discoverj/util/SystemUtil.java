@@ -7,6 +7,7 @@ import javafx.scene.Node;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,15 +16,25 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Date;
 
 import static de.itlobby.discoverj.util.AudioUtil.VALID_IMAGE_FILE_EXTENSION;
 
 public class SystemUtil {
+    public static final File DISCOVERJ_TEMP_DIR = Paths.get(System.getProperty("java.io.tmpdir"), "discoverj").toFile();
     private static final Logger log = LogManager.getLogger(SystemUtil.class);
+
+    static {
+        try {
+            if (DISCOVERJ_TEMP_DIR.exists()) {
+                FileUtils.deleteDirectory(DISCOVERJ_TEMP_DIR);
+            }
+            DISCOVERJ_TEMP_DIR.mkdir();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
 
     private SystemUtil() {
     }
@@ -93,37 +104,6 @@ public class SystemUtil {
         } else {
             return OperatingSystem.OTHER;
         }
-    }
-
-    public static Date localeDateToDate(LocalDate localDate) {
-        return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-    }
-
-    public static boolean is64Bit() {
-        boolean is64bit;
-        if (System.getProperty("os.name").contains("Windows")) {
-            is64bit = (System.getenv("ProgramFiles(x86)") != null);
-        } else {
-            is64bit = (System.getProperty("os.arch").contains("64"));
-        }
-        return is64bit;
-    }
-
-    public static void launchFile(File targetFile) {
-        new Thread(() -> {
-            try {
-                Desktop desktop = Desktop.getDesktop();
-                if (targetFile.exists() && desktop.isSupported(Desktop.Action.OPEN)) {
-                    if (getOs() == OperatingSystem.UNIX && targetFile.getName().endsWith(".sh")) {
-                        Runtime.getRuntime().exec("sh " + targetFile);
-                    } else {
-                        desktop.open(targetFile);
-                    }
-                }
-            } catch (IOException e) {
-                log.error(e.getMessage(), e);
-            }
-        }).start();
     }
 
     public static void browseUrl(String urlString) {
@@ -209,10 +189,6 @@ public class SystemUtil {
         return false;
     }
 
-    public static int getCpuCount() {
-        return (int) (Runtime.getRuntime().availableProcessors() / 2.0f);
-    }
-
     public static void requestUserAttentionInTaskbar() {
         if (Taskbar.isTaskbarSupported() && Taskbar.getTaskbar().isSupported(Taskbar.Feature.USER_ATTENTION)) {
             new Thread(() -> Taskbar.getTaskbar().requestUserAttention(true, false)).start();
@@ -223,5 +199,9 @@ public class SystemUtil {
         if (Taskbar.isTaskbarSupported() && Taskbar.getTaskbar().isSupported(Taskbar.Feature.PROGRESS_VALUE)) {
             new Thread(() -> Taskbar.getTaskbar().setProgressValue((int) (value.doubleValue() * 100))).start();
         }
+    }
+
+    public static File getTempFile() throws IOException {
+        return File.createTempFile("cover_", null, DISCOVERJ_TEMP_DIR);
     }
 }

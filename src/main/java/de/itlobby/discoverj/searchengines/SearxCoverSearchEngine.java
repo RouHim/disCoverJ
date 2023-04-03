@@ -1,6 +1,7 @@
 package de.itlobby.discoverj.searchengines;
 
 import de.itlobby.discoverj.models.AudioWrapper;
+import de.itlobby.discoverj.models.ImageFile;
 import de.itlobby.discoverj.services.SearchQueryService;
 import de.itlobby.discoverj.settings.AppConfig;
 import de.itlobby.discoverj.settings.Settings;
@@ -9,8 +10,6 @@ import de.itlobby.discoverj.util.StringUtil;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 
-import java.awt.image.BufferedImage;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
@@ -28,8 +27,41 @@ public class SearxCoverSearchEngine implements CoverSearchEngine {
     private static final String API_REQUEST = "search?categories=images&engines=bing%20images,duckduckgo%20images,google%20images,qwant%20images&format=json&q=";
     private List<String> instances = null;
 
+    private static List<ImageFile> startSearch(String query, String searxInstance) {
+        Optional<JSONObject> jsonFromUrl = getJsonFromUrl(searxInstance + API_REQUEST + query);
+        if (jsonFromUrl.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<String> searchResultData = jsonFromUrl.get()
+                .getJSONArray("results").toList().stream()
+                .map(result -> new JSONObject((Map) result))
+                .filter(result -> result.getString("category").equals("images"))
+                .filter(result -> result.has("img_src"))
+                .limit(MAX_RESULTS)
+                .map(result -> result.getString("img_src"))
+                .toList();
+
+        Stream<ImageFile> httpStream = searchResultData
+                .parallelStream()
+                .filter(url -> url.startsWith("http"))
+                .map(ImageUtil::downloadImageFromUrl)
+                .flatMap(Optional::stream)
+                .filter(CoverSearchEngine::reachesMinRequiredCoverSize);
+
+        Stream<ImageFile> base64Stream = searchResultData
+                .parallelStream()
+                .filter(dataString -> dataString.startsWith("data") && dataString.contains("base64"))
+                .map(dataString -> dataString.split("base64,")[1])
+                .map(ImageUtil::downloadImageFromUrl)
+                .flatMap(Optional::stream)
+                .filter(CoverSearchEngine::reachesMinRequiredCoverSize);
+
+        return Stream.concat(httpStream, base64Stream).toList();
+    }
+
     @Override
-    public List<BufferedImage> search(AudioWrapper audioWrapper) {
+    public List<ImageFile> search(AudioWrapper audioWrapper) {
         AppConfig config = Settings.getInstance().getConfig();
 
         String googleSearchPattern = config.getGoogleSearchPattern();
@@ -49,7 +81,7 @@ public class SearxCoverSearchEngine implements CoverSearchEngine {
         }
 
         for (String instanceUrl : instances) {
-            List<BufferedImage> response = startSearch(query, instanceUrl);
+            List<ImageFile> response = startSearch(query, instanceUrl);
 
             if (!response.isEmpty()) {
                 return response;
@@ -57,57 +89,6 @@ public class SearxCoverSearchEngine implements CoverSearchEngine {
         }
 
         return Collections.emptyList();
-    }
-
-    private static List<BufferedImage> startSearch(String query, String searxInstance) {
-        Optional<JSONObject> jsonFromUrl = getJsonFromUrl(searxInstance + API_REQUEST + query);
-        if (jsonFromUrl.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        List<String> searchResultData = jsonFromUrl.get()
-                .getJSONArray("results").toList().stream()
-                .map(result -> new JSONObject((Map) result))
-                .filter(result -> result.getString("category").equals("images"))
-                .filter(result -> result.has("img_src"))
-                .limit(MAX_RESULTS)
-                .map(result -> result.getString("img_src"))
-                .toList();
-
-        Stream<BufferedImage> httpStream = searchResultData
-                .parallelStream()
-                .filter(url -> url.startsWith("http"))
-                .map(ImageUtil::readRGBImageFromUrl)
-                .flatMap(Optional::stream)
-                .filter(CoverSearchEngine::reachesMinRequiredCoverSize);
-
-        Stream<BufferedImage> base64Stream = searchResultData
-                .parallelStream()
-                .filter(dataString -> dataString.startsWith("data") && dataString.contains("base64"))
-                .map(dataString -> dataString.split("base64,")[1])
-                .map(ImageUtil::readRGBImageFromBase64String)
-                .flatMap(Optional::stream)
-                .filter(CoverSearchEngine::reachesMinRequiredCoverSize);
-
-        return Stream.concat(httpStream, base64Stream).toList();
-    }
-
-    private static boolean isReachable(String engineUrl) {
-        HttpURLConnection connection = null;
-        try {
-            URL headUrl = new URL(engineUrl + API_REQUEST + "test");
-            connection = (HttpURLConnection) headUrl.openConnection();
-            connection.setRequestMethod("HEAD");
-            connection.setConnectTimeout(3000);
-            connection.setReadTimeout(3000);
-            return connection.getResponseCode() == HttpURLConnection.HTTP_OK;
-        } catch (Exception e) {
-            return false;
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
-        }
     }
 
     /**

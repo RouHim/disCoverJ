@@ -1,6 +1,7 @@
 package de.itlobby.discoverj.searchengines;
 
 import de.itlobby.discoverj.models.AudioWrapper;
+import de.itlobby.discoverj.models.ImageFile;
 import de.itlobby.discoverj.services.SearchQueryService;
 import de.itlobby.discoverj.settings.AppConfig;
 import de.itlobby.discoverj.settings.Settings;
@@ -13,7 +14,6 @@ import org.apache.logging.log4j.Logger;
 import org.jaudiotagger.audio.AudioFile;
 import org.json.JSONObject;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -32,7 +32,7 @@ public class DiscogsCoverSearchEngine implements CoverSearchEngine {
     private final Logger log = LogManager.getLogger(this.getClass());
 
     @Override
-    public List<BufferedImage> search(AudioWrapper audioWrapper) {
+    public List<ImageFile> search(AudioWrapper audioWrapper) {
         Optional<AudioFile> audioFile = AudioUtil.getAudioFile(audioWrapper.getFilePath());
 
         if (audioFile.isEmpty()) {
@@ -47,7 +47,7 @@ public class DiscogsCoverSearchEngine implements CoverSearchEngine {
         return findCoverByTags(audioWrapper);
     }
 
-    private List<BufferedImage> findCoverByTags(AudioWrapper audioWrapper) {
+    private List<ImageFile> findCoverByTags(AudioWrapper audioWrapper) {
         String searchQuery = URLEncoder.encode(SearchQueryService.createSearchString(audioWrapper), UTF_8);
         AppConfig config = Settings.getInstance().getConfig();
 
@@ -78,7 +78,7 @@ public class DiscogsCoverSearchEngine implements CoverSearchEngine {
                 .toList();
     }
 
-    private List<BufferedImage> getCoverByReleaseId(Integer releaseId) {
+    private List<ImageFile> getCoverByReleaseId(Integer releaseId) {
         try {
             URL url = new URL("https://api.discogs.com/releases/" + releaseId + "?key=" + DISCOGS_API_KEY);
             String jsonResultString = IOUtils.toString(url, UTF_8);
@@ -87,7 +87,7 @@ public class DiscogsCoverSearchEngine implements CoverSearchEngine {
                     .map(result -> new JSONObject((Map) result))
                     .filter(result -> result.getString("type").equals("primary") && correctResolution(result))
                     .map(result -> result.getString("uri"))
-                    .map(ImageUtil::readRGBImageFromUrl)
+                    .map(ImageUtil::downloadImageFromUrl)
                     .flatMap(Optional::stream)
                     .filter(CoverSearchEngine::reachesMinRequiredCoverSize)
                     .toList();
