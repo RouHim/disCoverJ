@@ -22,13 +22,15 @@ import static de.itlobby.discoverj.util.WSUtil.getJsonFromUrl;
 import static java.text.MessageFormat.format;
 
 public class MusicbrainzCoverSearchEngine implements CoverSearchEngine {
-    //mbid rausfinden / alle mit 95+ wahrscheinlichkeit
+    private static final int MAX_RESULTS = 10;
+
+    //mbid find out / all with 95+ probability
     //http://musicbrainz.org/ws/2/release?query=release:%22meteora%22%20AND%20artist:%22linkin%20park%22&fmt=json
 
-    //evtl anz der cover zwischenprüfen:
+    //Intermediate check of the cover if necessary:
     //http://musicbrainz.org/ws/2/release/c2a975bc-90cc-414e-9415-17bffdbc191c?fmt=json
 
-    //cover liste hier erhalten:
+    //cover list obtained here:
     //coverartarchive.org/release/mbid
     //https://coverartarchive.org/release/9c2d7cce-7c3b-48a0-90ec-456df13f5529
 
@@ -39,7 +41,7 @@ public class MusicbrainzCoverSearchEngine implements CoverSearchEngine {
         Optional<String> musicbrainzReleaseId = AudioUtil.getMusicbrainzReleaseId(audioWrapper);
 
         if (musicbrainzReleaseId.isPresent()) {
-            return getCoversById(musicbrainzReleaseId.get()).toList();
+            return downloadCoversById(musicbrainzReleaseId.get()).toList();
         }
 
         String searchQuery = buildSearchQuery(audioWrapper);
@@ -62,16 +64,17 @@ public class MusicbrainzCoverSearchEngine implements CoverSearchEngine {
                 .map(result -> new JSONObject((Map) result))
                 .filter(entry -> entry.getInt("score") >= 95)
                 .map(entry -> entry.getString("id"))
+                .limit(MAX_RESULTS)
                 // Check if any cover exists
                 .map(id -> getJsonFromUrl(format("http://musicbrainz.org/ws/2/release/{0}?fmt=json", id)))
                 .flatMap(Optional::stream)
                 .filter(entry -> entry.getJSONObject("cover-art-archive").getInt("count") > 0)
                 // find their front cover urls and download them
-                .flatMap(entry -> getCoversById(entry.getString("id")))
+                .flatMap(entry -> downloadCoversById(entry.getString("id")))
                 .toList();
     }
 
-    private Stream<ImageFile> getCoversById(String id) {
+    private Stream<ImageFile> downloadCoversById(String id) {
         Optional<JSONObject> jsonFromUrl = getJsonFromUrl(format("https://coverartarchive.org/release/{0}", id));
 
         if (jsonFromUrl.isEmpty()) {
