@@ -62,7 +62,7 @@
                 </HBox>
                 <HBox spacing="5.0" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" VBox.vgrow="ALWAYS">
                     <children>
-                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                        <VBox maxWidth="400.0" spacing="5.0" HBox.hgrow="ALWAYS">
                             <children>
                                 <ScrollPane fx:id="spAudioList" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent-background" VBox.vgrow="ALWAYS">
                                     <content>
