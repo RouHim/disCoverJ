@@ -1,6 +1,7 @@
 package de.itlobby.discoverj.util.helper;
 
 import de.itlobby.discoverj.util.GlyphsDude;
+import de.jensd.fx.glyphs.GlyphIcons;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.animation.FadeTransition;
@@ -26,7 +27,7 @@ public class AwesomeHelper {
         button.setGraphic(iconView);
     }
 
-    public static void createIconButton(Button btn, FontAwesomeIcon icon, String iconStyle, String tooltipText, String iconSize) {
+    public static void createIconButton(Button btn, GlyphIcons icon, String iconStyle, String tooltipText, String iconSize) {
         Text iconTxt = GlyphsDude.createIcon(icon, iconSize);
         iconTxt.getStyleClass().add(iconStyle);
         btn.setGraphic(iconTxt);

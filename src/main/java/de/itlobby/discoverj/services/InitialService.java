@@ -14,10 +14,7 @@ import de.itlobby.discoverj.ui.viewcontroller.MainViewController;
 import de.itlobby.discoverj.ui.viewcontroller.OpenFileViewController;
 import de.itlobby.discoverj.ui.viewtask.PreCountViewTask;
 import de.itlobby.discoverj.ui.viewtask.ScanFileViewTask;
-import de.itlobby.discoverj.util.ImageClipboardUtil;
-import de.itlobby.discoverj.util.LanguageUtil;
-import de.itlobby.discoverj.util.StringUtil;
-import de.itlobby.discoverj.util.SystemUtil;
+import de.itlobby.discoverj.util.*;
 import de.itlobby.discoverj.util.helper.ImageCache;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.scene.Node;
@@ -26,10 +23,12 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jaudiotagger.audio.AudioFile;
 
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Optional;
 
 import static de.itlobby.discoverj.util.AudioUtil.removeCover;
 
@@ -253,9 +252,28 @@ public class InitialService implements Service {
 
         if (audioWrapper.hasCover()) {
             audioWrapper.loadImage().ifPresent(image ->
-                    new Thread(() -> new ImageClipboardUtil().copyImage(image)).start()
+                    new Thread(() -> new ImageClipboardUtil().setImage(image)).start()
             );
         }
+    }
+
+    public void pasteCoverFromClipBrd() {
+        new Thread(() -> {
+            AudioListEntry audioListEntry = ServiceLocator.get(SelectionService.class).getLastSelected();
+            AudioWrapper audioWrapper = audioListEntry.getWrapper();
+            audioWrapper.setHasCover(true);
+
+            Optional<AudioFile> audioFile = AudioUtil.readAudioFile(audioWrapper.getFilePath());
+            if (audioFile.isEmpty()) {
+                return;
+            }
+
+            ImageClipboardUtil.getImage().ifPresent(coverImage -> {
+                AudioUtil.saveCoverToAudioFile(audioFile.get(), coverImage);
+                getMainViewController().setNewCoverToListItem(audioWrapper, coverImage);
+                getMainViewController().showAudioInfo(audioWrapper, true);
+            });
+        }).start();
     }
 
     public void removeSelectedEntries() {

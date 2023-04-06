@@ -21,9 +21,11 @@ import de.itlobby.discoverj.util.*;
 import de.itlobby.discoverj.util.helper.AnimationHelper;
 import de.itlobby.discoverj.util.helper.AwesomeHelper;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.materialicons.MaterialIcon;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -35,10 +37,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
@@ -46,6 +45,7 @@ import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.text.MessageFormat;
@@ -63,6 +63,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
     private static final String AUDIO_LINE_SELECTED = "audio-line-selected";
 
     public AnchorPane rootLayout;
+    public GridPane audioDetailsLayout;
     public Button btnFindFolder;
     public Label txtTotalAudioCount;
     public Label txtWithCoverAudioCount;
@@ -97,6 +98,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
     public Button btnActionCircleIcon;
     public Button btnRemoveCover;
     public Button btnCopyCoverToClipBrd;
+    public Button btnPasteCoverFromClipBrd;
     public Label txtIsMixCD;
     public HBox multiSelectionLayout;
     public Button btnOpenGoogleImageSearch;
@@ -261,8 +263,9 @@ public class MainViewController implements ViewController, MultipleSelectionList
         AwesomeHelper.createIconButton(btnOpenSettings, FontAwesomeIcon.GEAR, MENU_ICON, LanguageUtil.getString("key.mainview.menu.program.settings"), "24px");
         AwesomeHelper.createIconButton(btnExitApp, FontAwesomeIcon.TIMES, MENU_ICON, LanguageUtil.getString("key.mainview.menu.program.shutdown"), "24px");
 
+        AwesomeHelper.createIconButton(btnPasteCoverFromClipBrd, MaterialIcon.CONTENT_PASTE, DEFAULT_ICON, LanguageUtil.getString("key.mainview.paste.from.clipbrd.cover"), "20px");
+        AwesomeHelper.createIconButton(btnCopyCoverToClipBrd, MaterialIcon.CONTENT_COPY, DEFAULT_ICON, LanguageUtil.getString("key.mainview.copy.clipbrd.cover"), "20px");
         AwesomeHelper.createIconButton(btnRemoveCover, FontAwesomeIcon.TRASH, DEFAULT_ICON, LanguageUtil.getString("key.mainview.remove.cover"), "24px");
-        AwesomeHelper.createIconButton(btnCopyCoverToClipBrd, FontAwesomeIcon.CLIPBOARD, DEFAULT_ICON, LanguageUtil.getString("key.mainview.copy.clipbrd.cover"), "20px");
         AwesomeHelper.createIconButton(btnOpenGoogleImageSearch, FontAwesomeIcon.GOOGLE, DEFAULT_ICON, LanguageUtil.getString("key.mainview.cm.google.image.search"), "20px");
 
         AwesomeHelper.createTextIcon(txtIsMixCD, FontAwesomeIcon.RANDOM, DEFAULT_ICON_TEXT, LanguageUtil.getString("key.mainview.isMixCD"), "15px");
@@ -339,11 +342,13 @@ public class MainViewController implements ViewController, MultipleSelectionList
     }
 
     private void createBinding() {
+        audioDetailsLayout.visibleProperty().bind(txtFilename.textProperty().isNotEmpty());
+
         btnRemoveCover.visibleProperty().bind(imgCurrentCover.imageProperty().isNotNull());
         btnCopyCoverToClipBrd.visibleProperty().bind(imgCurrentCover.imageProperty().isNotNull());
         btnOpenGoogleImageSearch.visibleProperty().bind(imgCurrentCover.imageProperty().isNotNull());
-        pbStatus.progressProperty().addListener((observable, oldValue, newValue) ->
-                SystemUtil.setTaskbarProgress(newValue));
+
+        pbStatus.progressProperty().addListener((observable, oldValue, newValue) -> SystemUtil.setTaskbarProgress(newValue));
     }
 
     public void activateActionButton(EventHandler<ActionEvent> action, FontAwesomeIcon icon) {
@@ -577,6 +582,24 @@ public class MainViewController implements ViewController, MultipleSelectionList
             } catch (FileNotFoundException e) {
                 log.error(e.getMessage(), e);
             }
+        });
+    }
+
+    public void setNewCoverToListItem(AudioWrapper currentAudio, BufferedImage newCover) {
+        Platform.runLater(() -> {
+            AudioListEntry listEntry = getAudioListEntry(currentAudio.getId());
+
+            if (listEntry == null) {
+                return;
+            }
+
+            Image previewImage = SwingFXUtils.toFXImage(
+                    ImageUtil.resize(newCover, 36, 36),
+                    null
+            );
+            createSingleLineAnimation(previewImage, listEntry);
+            listEntry.getIconView().setIcon(FontAwesomeIcon.CHECK);
+            listEntry.getWrapper().setHasCover(true);
         });
     }
 

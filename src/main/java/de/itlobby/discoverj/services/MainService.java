@@ -50,6 +50,7 @@ public class MainService implements Service {
         InitialService initialService = ServiceLocator.get(InitialService.class);
         viewController.btnRemoveCover.setOnAction(event -> initialService.removeLastSelectedCover());
         viewController.btnCopyCoverToClipBrd.setOnAction(event -> initialService.copyCoverToClipBrd());
+        viewController.btnPasteCoverFromClipBrd.setOnAction(event -> initialService.pasteCoverFromClipBrd());
         viewController.btnOpenGoogleImageSearch.setOnAction(event -> initialService.searchOnGoogleImages());
         viewController.btnFindFolder.setOnAction(event -> initialService.findFolder());
         viewController.imgCurrentCover.setOnMouseClicked(event -> initialService.showCurrentCoverDetailed());
