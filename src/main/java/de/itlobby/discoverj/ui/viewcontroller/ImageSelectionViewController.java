@@ -1,6 +1,6 @@
 package de.itlobby.discoverj.ui.viewcontroller;
 
-import de.itlobby.discoverj.util.GlyphsDude;
+import de.itlobby.discoverj.ui.utils.GlyphsDude;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.geometry.Insets;

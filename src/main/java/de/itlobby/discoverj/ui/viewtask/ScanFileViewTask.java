@@ -13,7 +13,13 @@ import org.apache.logging.log4j.Logger;
 import org.jaudiotagger.audio.AudioFile;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ScanFileViewTask extends ViewTask<ScanResultData> {
@@ -54,9 +60,6 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
 
         // Add audio list to audioData list
         int audioFilesCount = audioWrapperList.size();
-        ScanResultData scanResultData = new ScanResultData();
-        scanResultData.setAudioFilesCount(audioFilesCount);
-        scanResultData.setWithCoverCount(withCover);
 
         // Group audio list by parent file path and sort by key
         Map<String, List<AudioWrapper>> audioData =
@@ -72,7 +75,6 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
                                         LinkedHashMap::new
                                 )
                         );
-        scanResultData.setAudioMap(audioData);
 
         // If there are less than 300 audio files, load cover images async
         if (totalAudioCountToLoad <= 300) {
@@ -90,7 +92,7 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
         audioWrapperList = null;
 
         // Handover result data to tne next task
-        setResult(scanResultData);
+        setResult(new ScanResultData(audioData, audioFilesCount, withCover));
     }
 
     private void lazyLoadCoverImages(Map<Integer, String> audioList) {

@@ -2,7 +2,7 @@ package de.itlobby.discoverj.searchengines;
 
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ImageFile;
-import de.itlobby.discoverj.services.SearchQueryService;
+import de.itlobby.discoverj.services.SearchQueryUtil;
 import de.itlobby.discoverj.util.ImageUtil;
 import org.json.JSONObject;
 
@@ -21,7 +21,7 @@ public class ItunesCoverSearchEngine implements CoverSearchEngine {
 
     @Override
     public List<ImageFile> search(AudioWrapper audioWrapper) {
-        String searchString = URLEncoder.encode(SearchQueryService.createSearchString(audioWrapper), UTF_8);
+        String searchString = URLEncoder.encode(SearchQueryUtil.createSearchString(audioWrapper), UTF_8);
 
         Optional<JSONObject> jsonFromUrl = getJsonFromUrl(
                 format(ITUNES_SEARCH_QUERY, searchString)

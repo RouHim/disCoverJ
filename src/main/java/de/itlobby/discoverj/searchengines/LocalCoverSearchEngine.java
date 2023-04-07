@@ -14,9 +14,20 @@ import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-import static de.itlobby.discoverj.util.AudioUtil.*;
+import static de.itlobby.discoverj.util.AudioUtil.VALID_AUDIO_FILE_EXTENSION;
+import static de.itlobby.discoverj.util.AudioUtil.VALID_IMAGE_FILE_EXTENSION;
+import static de.itlobby.discoverj.util.AudioUtil.getAlbum;
+import static de.itlobby.discoverj.util.AudioUtil.getAlbumArtist;
+import static de.itlobby.discoverj.util.AudioUtil.getYear;
+import static de.itlobby.discoverj.util.AudioUtil.haveCover;
 
 public class LocalCoverSearchEngine implements CoverSearchEngine {
     private static final Map<String, List<LocalMatchInfo>> scanInfoCache = new HashMap<>();

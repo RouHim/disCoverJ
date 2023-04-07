@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DataHolder implements Service {
+public class DataHolder {
     private static final DataHolder instance = new DataHolder();
 
     private Map<String, List<AudioWrapper>> audioMap = new HashMap<>();

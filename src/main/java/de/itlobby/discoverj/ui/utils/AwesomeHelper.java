@@ -1,6 +1,5 @@
-package de.itlobby.discoverj.util.helper;
+package de.itlobby.discoverj.ui.utils;
 
-import de.itlobby.discoverj.util.GlyphsDude;
 import de.jensd.fx.glyphs.GlyphIcons;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;

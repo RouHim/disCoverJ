@@ -2,7 +2,7 @@ package de.itlobby.discoverj.searchengines;
 
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ImageFile;
-import de.itlobby.discoverj.services.SearchQueryService;
+import de.itlobby.discoverj.services.SearchQueryUtil;
 import de.itlobby.discoverj.settings.AppConfig;
 import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.util.ImageUtil;
@@ -65,7 +65,7 @@ public class SearxCoverSearchEngine implements CoverSearchEngine {
         AppConfig config = Settings.getInstance().getConfig();
 
         String googleSearchPattern = config.getGoogleSearchPattern();
-        String rawQuery = SearchQueryService.createQueryFromPattern(audioWrapper, googleSearchPattern);
+        String rawQuery = SearchQueryUtil.createQueryFromPattern(audioWrapper, googleSearchPattern);
         String query = StringUtil.encodeRfc3986(rawQuery);
 
         // Load instances from searX index

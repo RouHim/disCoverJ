@@ -245,11 +245,11 @@ public class ImageUtil {
 
             int firstFilledLine = 0;
             int lastFilledLine = 0;
-            int treshold = 5;
+            int threshold = 5;
 
             for (int i = 0; i < lineAvg.size(); i++) {
                 Integer lineVal = lineAvg.get(i);
-                if (lineVal >= treshold) {
+                if (lineVal >= threshold) {
                     firstFilledLine = i;
                     break;
                 }
@@ -257,7 +257,7 @@ public class ImageUtil {
 
             for (int i = lineAvg.size() - 1; i >= 0; i--) {
                 Integer lineVal = lineAvg.get(i);
-                if (lineVal >= treshold) {
+                if (lineVal >= threshold) {
                     lastFilledLine = i;
                     break;
                 }
@@ -347,26 +347,6 @@ public class ImageUtil {
         return squaredImage;
     }
 
-    public static Optional<BufferedImage> readRGBImageFromUrl(String imgUrl) {
-        try {
-            BufferedImage urlImage = ImageIO.read(new URL(imgUrl));
-
-            if (urlImage == null) {
-                return Optional.empty();
-            }
-
-            // Convert to RGB
-            BufferedImage rgbImage = new BufferedImage(urlImage.getWidth(), urlImage.getHeight(), BufferedImage.TYPE_INT_RGB);
-            rgbImage.createGraphics().drawImage(urlImage, 0, 0, null);
-
-            return Optional.of(rgbImage);
-        } catch (Exception e) {
-            log.error("{} from url {}", e.getMessage(), imgUrl);
-        }
-
-        return Optional.empty();
-    }
-
     public static Optional<ImageFile> downloadImageFromUrl(String imgUrl) {
         try {
             File file = SystemUtil.getTempFile();
@@ -433,7 +413,7 @@ public class ImageUtil {
     }
 
     public static Optional<Image> getFxImageFromBytes(byte[] data, int width, int height) {
-        if (data == null || data.length <= 0) {
+        if (data == null || data.length == 0) {
             return Optional.empty();
         }
 
@@ -453,7 +433,7 @@ public class ImageUtil {
     }
 
     public static Optional<Image> getFxImageFromBytes(byte[] data) {
-        if (data == null || data.length <= 0) {
+        if (data == null || data.length == 0) {
             return Optional.empty();
         }
 

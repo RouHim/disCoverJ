@@ -1,4 +1,4 @@
-package de.itlobby.discoverj.ui.helper;
+package de.itlobby.discoverj.util;
 
 import de.itlobby.discoverj.services.ExceptionService;
 import de.itlobby.discoverj.ui.core.ServiceLocator;

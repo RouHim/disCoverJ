@@ -2,7 +2,7 @@ package de.itlobby.discoverj.ui.viewcontroller;
 
 import de.itlobby.discoverj.services.InitialService;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
-import de.itlobby.discoverj.util.helper.AwesomeHelper;
+import de.itlobby.discoverj.ui.utils.AwesomeHelper;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.application.Platform;
 import javafx.event.EventHandler;

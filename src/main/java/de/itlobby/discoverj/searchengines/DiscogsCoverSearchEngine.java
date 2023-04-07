@@ -2,7 +2,7 @@ package de.itlobby.discoverj.searchengines;
 
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ImageFile;
-import de.itlobby.discoverj.services.SearchQueryService;
+import de.itlobby.discoverj.services.SearchQueryUtil;
 import de.itlobby.discoverj.settings.AppConfig;
 import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.util.AudioUtil;
@@ -48,7 +48,7 @@ public class DiscogsCoverSearchEngine implements CoverSearchEngine {
     }
 
     private List<ImageFile> findCoverByTags(AudioWrapper audioWrapper) {
-        String searchQuery = URLEncoder.encode(SearchQueryService.createSearchString(audioWrapper), UTF_8);
+        String searchQuery = URLEncoder.encode(SearchQueryUtil.createSearchString(audioWrapper), UTF_8);
         AppConfig config = Settings.getInstance().getConfig();
 
         String yearString = audioWrapper.getYear();

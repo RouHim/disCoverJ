@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import de.itlobby.discoverj.models.Language;
 import de.itlobby.discoverj.models.SearchEngine;
 import de.itlobby.discoverj.util.ConfigUtil;
-import de.itlobby.discoverj.util.StringUtil;
 
 import java.io.Serializable;
 import java.util.List;
@@ -18,10 +17,10 @@ public class AppConfig implements Serializable {
     private List<SearchEngine> searchEngineList = ConfigUtil.getDefaultSearchEngineList();
     private Language language = Language.fromLocale(Locale.getDefault());
     private boolean proxyEnabled = false;
-    private String proxyUrl = StringUtil.EMPTY_STRING;
-    private String proxyPort = StringUtil.EMPTY_STRING;
-    private String proxyUser = StringUtil.EMPTY_STRING;
-    private String proxyPassword = StringUtil.EMPTY_STRING;
+    private String proxyUrl = "";
+    private String proxyPort = "";
+    private String proxyUser = "";
+    private String proxyPassword = "";
     /**
      * Search timeout in seconds
      */

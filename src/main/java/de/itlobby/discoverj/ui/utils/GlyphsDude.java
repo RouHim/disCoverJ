@@ -1,4 +1,4 @@
-package de.itlobby.discoverj.util;
+package de.itlobby.discoverj.ui.utils;
 
 /**
  * Copyright (c) 2013-2016 Jens Deters http://www.jensd.de

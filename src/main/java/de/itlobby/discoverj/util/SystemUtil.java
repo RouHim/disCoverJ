@@ -7,7 +7,6 @@ import javafx.scene.Node;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,17 +23,6 @@ import static de.itlobby.discoverj.util.AudioUtil.VALID_IMAGE_FILE_EXTENSION;
 public class SystemUtil {
     public static final File DISCOVERJ_TEMP_DIR = Paths.get(System.getProperty("java.io.tmpdir"), "discoverj").toFile();
     private static final Logger log = LogManager.getLogger(SystemUtil.class);
-
-    static {
-        try {
-            if (DISCOVERJ_TEMP_DIR.exists()) {
-                FileUtils.deleteDirectory(DISCOVERJ_TEMP_DIR);
-            }
-            DISCOVERJ_TEMP_DIR.mkdir();
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-    }
 
     private SystemUtil() {
     }

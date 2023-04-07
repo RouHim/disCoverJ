@@ -9,7 +9,7 @@ import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.tasks.CoverSearchTask;
 import de.itlobby.discoverj.tasks.CoverSearchTaskExecutor;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
-import de.itlobby.discoverj.ui.helper.AsyncPipeline;
+import de.itlobby.discoverj.util.AsyncPipeline;
 import de.itlobby.discoverj.util.AudioUtil;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.LanguageUtil;
@@ -23,8 +23,17 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class CoverSearchService implements Service {
     private static final Logger log = LogManager.getLogger(CoverSearchService.class);
@@ -39,7 +48,8 @@ public class CoverSearchService implements Service {
 
     public void search() {
         // retrieve currently loaded metadata
-        DataHolder dataHolder = DataHolder.getInstance();
+        int audioFilesCount = DataHolder.getInstance().getAudioFilesCount();
+        Map<String, List<AudioWrapper>> audioMap = DataHolder.getInstance().getAudioMap();
 
         // cleanup
         interruptProgress = false;
@@ -51,17 +61,17 @@ public class CoverSearchService implements Service {
         getMainViewController().resetRightSide();
         getMainViewController().activateSearchState(
                 event -> stopSearch(),
-                dataHolder.getAudioFilesCount()
+                audioFilesCount
         );
 
-        List<AudioWrapper> audioWrapperList = dataHolder.getAudioMap()
+        // Sort audio files by path
+        List<AudioWrapper> audioWrapperList = audioMap
                 .values().stream()
                 .flatMap(Collection::stream)
                 .sorted()
                 .toList();
 
         try {
-
             boolean selectCoverManually = Settings.getInstance().getConfig().isGeneralManualImageSelection();
             if (selectCoverManually) {
                 AsyncPipeline
@@ -322,7 +332,7 @@ public class CoverSearchService implements Service {
 
     private Optional<ImageFile> letUserManuallySelectCover(AudioWrapper audioWrapper, List<ImageFile> images) {
         SystemUtil.requestUserAttentionInTaskbar();
-        String title = SearchQueryService.createSearchString(audioWrapper);
+        String title = SearchQueryUtil.createSearchString(audioWrapper);
         return new ImageSelectionService().openImageSelection(images, title);
     }
 

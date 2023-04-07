@@ -1,4 +1,4 @@
-package de.itlobby.discoverj.util.helper;
+package de.itlobby.discoverj.ui.utils;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;

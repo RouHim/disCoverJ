@@ -1,13 +1,8 @@
-package de.itlobby.discoverj.util.helper;
+package de.itlobby.discoverj.util;
 
-import de.itlobby.discoverj.util.ImageUtil;
 import javafx.scene.image.Image;
 import net.coobird.thumbnailator.Thumbnails;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,13 +13,11 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ImageCache {
-    private static final Logger LOG = LogManager.getLogger(ImageCache.class);
     private static final int MAX_CACHE_ENTRIES = Math.min(
             (int) (Runtime.getRuntime().maxMemory() / (1024 * 1024) / (7 * 3)), // check how big the ram is
             200 // max 200 entries
     );
     private static final Map<Integer, Image> fxImageCache = new ConcurrentHashMap<>();
-    private static final Map<Integer, BufferedImage> buffImageCache = new ConcurrentHashMap<>();
     private static ImageCache instance;
 
     private ImageCache() {
@@ -40,7 +33,6 @@ public class ImageCache {
 
     public void clear() {
         fxImageCache.clear();
-        buffImageCache.clear();
     }
 
     public Optional<Image> getImage(byte[] data) {
@@ -57,7 +49,7 @@ public class ImageCache {
     }
 
     public Optional<Image> getImage(byte[] data, int width, int height) {
-        if (data == null || data.length <= 0) {
+        if (data == null || data.length == 0) {
             return Optional.empty();
         }
 
@@ -93,23 +85,5 @@ public class ImageCache {
         }
 
         fxImageCache.put(hashCode, image);
-    }
-
-    public BufferedImage getBuffImage(byte[] data) {
-        try {
-            int hashCode = Arrays.hashCode(data);
-
-            if (buffImageCache.containsKey(hashCode)) {
-                return buffImageCache.get(hashCode);
-            } else {
-                BufferedImage image = ImageIO.read(new ByteArrayInputStream(data));
-                buffImageCache.put(hashCode, image);
-                return image;
-            }
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-        }
-
-        return null;
     }
 }

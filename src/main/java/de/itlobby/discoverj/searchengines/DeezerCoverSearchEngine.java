@@ -2,7 +2,7 @@ package de.itlobby.discoverj.searchengines;
 
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ImageFile;
-import de.itlobby.discoverj.services.SearchQueryService;
+import de.itlobby.discoverj.services.SearchQueryUtil;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.StringUtil;
 import org.json.JSONObject;
@@ -19,7 +19,7 @@ public class DeezerCoverSearchEngine implements CoverSearchEngine {
 
     @Override
     public List<ImageFile> search(AudioWrapper audioWrapper) {
-        String searchString = StringUtil.encodeRfc3986(SearchQueryService.createSearchString(audioWrapper));
+        String searchString = StringUtil.encodeRfc3986(SearchQueryUtil.createSearchString(audioWrapper));
 
         Optional<JSONObject> jsonFromUrl = getJsonFromUrl(DEEZER_API_REQUEST + searchString);
         if (jsonFromUrl.isEmpty()) {

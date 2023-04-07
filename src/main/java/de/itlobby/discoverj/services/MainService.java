@@ -9,7 +9,6 @@ import de.itlobby.discoverj.ui.core.Views;
 import de.itlobby.discoverj.ui.viewcontroller.MainViewController;
 import de.itlobby.discoverj.util.LanguageUtil;
 import de.itlobby.discoverj.util.SystemUtil;
-import de.itlobby.discoverj.util.helper.ImageCache;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.layout.HBox;
@@ -165,17 +164,5 @@ public class MainService implements Service {
                         LanguageUtil.getString("key.mainwindow.about.developed");
 
         ServiceLocator.get(LightBoxService.class).showTextDialog(LanguageUtil.getString("key.mainview.menu.about"), msg);
-    }
-
-    public void handleSearchThreadExecption(Throwable e) {
-        if (e instanceof OutOfMemoryError) {
-            ImageCache.getInstance().clear();
-            ServiceLocator.unload(InitialService.class);
-            ServiceLocator.unload(CoverSearchService.class);
-
-            ServiceLocator.get(LightBoxService.class).showTextDialog("Error", e.getMessage());
-        } else {
-            log.error(e.getMessage(), e);
-        }
     }
 }

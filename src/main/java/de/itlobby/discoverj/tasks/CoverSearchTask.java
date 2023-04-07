@@ -3,7 +3,7 @@ package de.itlobby.discoverj.tasks;
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ImageFile;
 import de.itlobby.discoverj.models.SearchEngine;
-import de.itlobby.discoverj.models.SearchEngineType;
+import de.itlobby.discoverj.models.SearchEngineTypes;
 import de.itlobby.discoverj.searchengines.CoverSearchEngine;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,11 +38,11 @@ public class CoverSearchTask implements Callable<List<ImageFile>> {
         return Collections.emptyList();
     }
 
-    private CoverSearchEngine createSearchEngineFromType(SearchEngineType searchEngineType) {
+    private CoverSearchEngine createSearchEngineFromType(SearchEngineTypes searchEngineTypes) {
         CoverSearchEngine coverSearchService = null;
 
         try {
-            Class<? extends CoverSearchEngine> clazz = searchEngineType.getServiceClass();
+            Class<? extends CoverSearchEngine> clazz = searchEngineTypes.getServiceClass();
             coverSearchService = clazz.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             log.error(e.getMessage(), e);

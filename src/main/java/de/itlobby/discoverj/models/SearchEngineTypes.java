@@ -1,11 +1,18 @@
 package de.itlobby.discoverj.models;
 
-import de.itlobby.discoverj.searchengines.*;
+import de.itlobby.discoverj.searchengines.CoverSearchEngine;
+import de.itlobby.discoverj.searchengines.DeezerCoverSearchEngine;
+import de.itlobby.discoverj.searchengines.DiscogsCoverSearchEngine;
+import de.itlobby.discoverj.searchengines.ItunesCoverSearchEngine;
+import de.itlobby.discoverj.searchengines.LocalCoverSearchEngine;
+import de.itlobby.discoverj.searchengines.MusicbrainzCoverSearchEngine;
+import de.itlobby.discoverj.searchengines.SearxCoverSearchEngine;
+import de.itlobby.discoverj.searchengines.SpotifyCoverSearchEngine;
 
 import java.io.Serializable;
 import java.util.Arrays;
 
-public enum SearchEngineType implements Serializable {
+public enum SearchEngineTypes implements Serializable {
     ITUNES("iTunes", "logos/itunes.png", ItunesCoverSearchEngine.class, true),
     DEEZER("Deezer", "logos/deezer.png", DeezerCoverSearchEngine.class, true),
     SPOTIFY("Spotify", "logos/spotify.png", SpotifyCoverSearchEngine.class, true),
@@ -19,16 +26,16 @@ public enum SearchEngineType implements Serializable {
     private final Class<? extends CoverSearchEngine> serviceClass;
     private final boolean returnsMultipleImages;
 
-    SearchEngineType(String name, String logoPath, Class<? extends CoverSearchEngine> serviceClass, boolean returnsMultipleImages) {
+    SearchEngineTypes(String name, String logoPath, Class<? extends CoverSearchEngine> serviceClass, boolean returnsMultipleImages) {
         this.name = name;
         this.logoPath = logoPath;
         this.serviceClass = serviceClass;
         this.returnsMultipleImages = returnsMultipleImages;
     }
 
-    public static SearchEngineType getByName(String name) {
+    public static SearchEngineTypes getByName(String name) {
         return Arrays.stream(values())
-                .filter(searchEngineType -> searchEngineType.getName().equals(name))
+                .filter(searchEngineTypes -> searchEngineTypes.getName().equals(name))
                 .findFirst()
                 .orElse(null);
     }

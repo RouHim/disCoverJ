@@ -15,8 +15,7 @@ public interface CoverSearchEngine {
      */
     static boolean reachesMinRequiredCoverSize(ImageFile image) {
         int minSize = Settings.getInstance().getConfig().getMinCoverSize();
-        return image.width() >= minSize && image.height()
-                >= minSize;
+        return image.width() >= minSize && image.height() >= minSize;
     }
 
     /**

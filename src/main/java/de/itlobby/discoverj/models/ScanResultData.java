@@ -9,6 +9,12 @@ public class ScanResultData {
     private int audioFilesCount;
     private int withCoverCount;
 
+    public ScanResultData(Map<String, List<AudioWrapper>> audioMap, int audioFilesCount, int withCoverCount) {
+        this.audioMap = audioMap;
+        this.audioFilesCount = audioFilesCount;
+        this.withCoverCount = withCoverCount;
+    }
+
     public Map<String, List<AudioWrapper>> getAudioMap() {
         return audioMap;
     }

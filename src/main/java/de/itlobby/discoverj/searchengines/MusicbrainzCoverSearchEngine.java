@@ -4,7 +4,6 @@ import de.itlobby.discoverj.mixcd.MixCd;
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ImageFile;
 import de.itlobby.discoverj.models.SearchTagWrapper;
-import de.itlobby.discoverj.services.SearchModelQueryService;
 import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.util.AudioUtil;
 import de.itlobby.discoverj.util.ImageUtil;
@@ -35,6 +34,28 @@ public class MusicbrainzCoverSearchEngine implements CoverSearchEngine {
     //https://coverartarchive.org/release/9c2d7cce-7c3b-48a0-90ec-456df13f5529
 
     private static final Logger log = LogManager.getLogger(MusicbrainzCoverSearchEngine.class);
+
+    public static SearchTagWrapper createSearchModel(AudioWrapper audioWrapper) {
+        SearchTagWrapper query = buildString(audioWrapper);
+
+        // Remove file extension
+        if (query.isEmpty()) {
+            String fileExtension = audioWrapper.getFileNameExtension();
+            query.setFileName(audioWrapper.getFileName().replace("." + fileExtension, ""));
+        }
+
+        query.clear();
+
+        return query;
+    }
+
+    private static SearchTagWrapper buildString(AudioWrapper audioFile) {
+        String album = audioFile.getAlbum();
+        String title = audioFile.getTitle();
+        String artist = audioFile.getArtist();
+
+        return new SearchTagWrapper(album, title, artist);
+    }
 
     @Override
     public List<ImageFile> search(AudioWrapper audioWrapper) {
@@ -93,7 +114,7 @@ public class MusicbrainzCoverSearchEngine implements CoverSearchEngine {
     }
 
     private String buildSearchQuery(AudioWrapper audioWrapper) {
-        SearchTagWrapper searchTag = SearchModelQueryService.createSearchModel(audioWrapper);
+        SearchTagWrapper searchTag = createSearchModel(audioWrapper);
         searchTag.escapeFields();
 
         boolean primarySingleCover = Settings.getInstance().getConfig().isPrimarySingleCover();

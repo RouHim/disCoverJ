@@ -14,8 +14,12 @@ import de.itlobby.discoverj.ui.viewcontroller.MainViewController;
 import de.itlobby.discoverj.ui.viewcontroller.OpenFileViewController;
 import de.itlobby.discoverj.ui.viewtask.PreCountViewTask;
 import de.itlobby.discoverj.ui.viewtask.ScanFileViewTask;
-import de.itlobby.discoverj.util.*;
-import de.itlobby.discoverj.util.helper.ImageCache;
+import de.itlobby.discoverj.util.AudioUtil;
+import de.itlobby.discoverj.util.ImageCache;
+import de.itlobby.discoverj.util.ImageClipboardUtil;
+import de.itlobby.discoverj.util.LanguageUtil;
+import de.itlobby.discoverj.util.StringUtil;
+import de.itlobby.discoverj.util.SystemUtil;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -94,12 +98,18 @@ public class InitialService implements Service {
         File musicFolder = new File(path);
 
         if (!musicFolder.exists()) {
-            ServiceLocator.get(LightBoxService.class).showTextDialog(LanguageUtil.getString("InitialController.warning"), LanguageUtil.getString("InitialController.folderDoesnotExists"));
+            ServiceLocator.get(LightBoxService.class).showTextDialog(
+                    LanguageUtil.getString("InitialController.warning"),
+                    LanguageUtil.getString("InitialController.folderDoesnotExists")
+            );
             return;
         }
 
         if (!musicFolder.isDirectory()) {
-            ServiceLocator.get(LightBoxService.class).showTextDialog(LanguageUtil.getString("InitialController.warning"), LanguageUtil.getString("InitialController.invalidFolder"));
+            ServiceLocator.get(LightBoxService.class).showTextDialog(
+                    LanguageUtil.getString("InitialController.warning"),
+                    LanguageUtil.getString("InitialController.invalidFolder")
+            );
             return;
         }
 
@@ -302,7 +312,7 @@ public class InitialService implements Service {
 
         if (lastSelected != null) {
             String googleSearchPattern = Settings.getInstance().getConfig().getGoogleSearchPattern();
-            String rawQuery = SearchQueryService.createQueryFromPattern(lastSelected.getWrapper(), googleSearchPattern);
+            String rawQuery = SearchQueryUtil.createQueryFromPattern(lastSelected.getWrapper(), googleSearchPattern);
             String query = StringUtil.encodeRfc3986(rawQuery);
 
             SystemUtil.browseUrl(String.format("https://www.google.com/search?q=%s&tbm=isch", query));

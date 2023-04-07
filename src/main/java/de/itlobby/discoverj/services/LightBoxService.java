@@ -1,9 +1,9 @@
 package de.itlobby.discoverj.services;
 
 import de.itlobby.discoverj.listeners.ActionListener;
+import de.itlobby.discoverj.ui.utils.UIUtil;
 import de.itlobby.discoverj.ui.viewcontroller.MainViewController;
 import de.itlobby.discoverj.util.LanguageUtil;
-import de.itlobby.discoverj.util.UIUtil;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;

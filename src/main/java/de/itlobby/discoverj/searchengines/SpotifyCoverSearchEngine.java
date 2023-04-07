@@ -2,7 +2,7 @@ package de.itlobby.discoverj.searchengines;
 
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ImageFile;
-import de.itlobby.discoverj.services.SearchQueryService;
+import de.itlobby.discoverj.services.SearchQueryUtil;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
@@ -16,7 +16,11 @@ import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.*;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -43,7 +47,7 @@ public class SpotifyCoverSearchEngine implements CoverSearchEngine {
         }
 
         try {
-            String searchString = URLEncoder.encode(SearchQueryService.createSearchString(audioWrapper), UTF_8);
+            String searchString = URLEncoder.encode(SearchQueryUtil.createSearchString(audioWrapper), UTF_8);
             String searchUrl = "https://api.spotify.com/v1/search?q=%s&type=album".formatted(searchString);
 
             String searchResponse = getRequest(searchUrl);
