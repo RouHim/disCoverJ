@@ -28,19 +28,11 @@ public class Main {
         SLF4JBridgeHandler.install();
     }
 
-    static {
-        try {
-            if (DISCOVERJ_TEMP_DIR.exists()) {
-                FileUtils.deleteDirectory(DISCOVERJ_TEMP_DIR);
-            }
-            DISCOVERJ_TEMP_DIR.mkdir();
-        } catch (
-                IOException e) {
-            log.error(e.getMessage(), e);
+    public static void main(String[] args) throws IOException {
+        if (DISCOVERJ_TEMP_DIR.exists()) {
+            FileUtils.deleteDirectory(DISCOVERJ_TEMP_DIR);
         }
-    }
 
-    public static void main(String[] args) {
         Platform.startup(() -> {
             Settings.getInstance().getConfig();
             SystemUtil.setProxy();

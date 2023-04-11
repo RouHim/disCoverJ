@@ -216,15 +216,16 @@ public class CoverSearchService implements Service {
         }
 
         AppConfig config = Settings.getInstance().getConfig();
-        getMainViewController().setEntryToProcessingState(audioWrapper);
 
         try {
             // No need or not able to search a new cover
             boolean noNeedToSearchCover = audioWrapper.hasCover() && !config.isOverwriteCover();
             if (noNeedToSearchCover || audioWrapper.isReadOnly()) {
-                SystemUtil.threadSleep(10);
+                SystemUtil.threadSleep(1);
                 return;
             }
+
+            getMainViewController().setEntryToProcessingState(audioWrapper);
 
             // Load from last file if possible
             if (canLoadCoverFromLastFile(config, audioWrapper)) {

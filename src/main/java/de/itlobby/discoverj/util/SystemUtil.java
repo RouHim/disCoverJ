@@ -190,6 +190,10 @@ public class SystemUtil {
     }
 
     public static File getTempFile() throws IOException {
+        if (!DISCOVERJ_TEMP_DIR.exists()) {
+            DISCOVERJ_TEMP_DIR.mkdir();
+        }
+
         return File.createTempFile("cover_", null, DISCOVERJ_TEMP_DIR);
     }
 }

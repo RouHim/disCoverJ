@@ -80,7 +80,7 @@ public class DiscogsCoverSearchEngine implements CoverSearchEngine {
 
     private List<ImageFile> getCoverByReleaseId(Integer releaseId) {
         try {
-            URL url = new URL("https://api.discogs.com/releases/" + releaseId + "?key=" + DISCOGS_API_KEY);
+            URL url = new URL("https://api.discogs.com/releases/%d?key=%s".formatted(releaseId, DISCOGS_API_KEY));
             String jsonResultString = IOUtils.toString(url, UTF_8);
             return new JSONObject(jsonResultString)
                     .getJSONArray("images").toList().stream()
