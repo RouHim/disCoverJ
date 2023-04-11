@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.Objects;
 
 public class Version implements Comparable<Version> {
-    private final Logger log = LogManager.getLogger(this.getClass());
+    private static final Logger log = LogManager.getLogger(Version.class);
     private Integer major = 0;
     private Integer minor = 0;
     private Integer revision = 0;

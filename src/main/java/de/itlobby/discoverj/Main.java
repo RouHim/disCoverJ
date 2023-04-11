@@ -9,11 +9,18 @@ import de.itlobby.discoverj.util.SystemUtil;
 import de.itlobby.discoverj.util.VersionDetector;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.Logger;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
+import java.io.IOException;
 import java.util.logging.LogManager;
 
+import static de.itlobby.discoverj.util.SystemUtil.DISCOVERJ_TEMP_DIR;
+
 public class Main {
+    private static final Logger log = org.apache.logging.log4j.LogManager.getLogger(Main.class);
+
     static {
         // disable java.util.logging
         LogManager.getLogManager().reset();
@@ -21,7 +28,11 @@ public class Main {
         SLF4JBridgeHandler.install();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        if (DISCOVERJ_TEMP_DIR.exists()) {
+            FileUtils.deleteDirectory(DISCOVERJ_TEMP_DIR);
+        }
+
         Platform.startup(() -> {
             Settings.getInstance().getConfig();
             SystemUtil.setProxy();

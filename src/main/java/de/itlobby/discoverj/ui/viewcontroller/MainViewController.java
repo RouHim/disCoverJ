@@ -1,40 +1,46 @@
 package de.itlobby.discoverj.ui.viewcontroller;
 
+import de.itlobby.discoverj.listeners.ActionListener;
 import de.itlobby.discoverj.listeners.ListenerStateProvider;
 import de.itlobby.discoverj.listeners.MultipleSelectionListener;
 import de.itlobby.discoverj.listeners.ParentKeyDeletedListener;
+import de.itlobby.discoverj.mixcd.MixCd;
 import de.itlobby.discoverj.models.AudioWrapper;
-import de.itlobby.discoverj.models.FlatAudioWrapper;
+import de.itlobby.discoverj.models.ImageFile;
 import de.itlobby.discoverj.models.ScanResultData;
+import de.itlobby.discoverj.services.CoverSearchService;
 import de.itlobby.discoverj.services.InitialService;
 import de.itlobby.discoverj.services.LightBoxService;
-import de.itlobby.discoverj.services.SearchService;
 import de.itlobby.discoverj.services.SelectionService;
 import de.itlobby.discoverj.ui.components.AudioListEntry;
 import de.itlobby.discoverj.ui.components.FolderListEntry;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.ui.core.ViewManager;
 import de.itlobby.discoverj.ui.core.Views;
+import de.itlobby.discoverj.ui.utils.AnimationHelper;
+import de.itlobby.discoverj.ui.utils.AwesomeHelper;
+import de.itlobby.discoverj.ui.utils.GlyphsDude;
 import de.itlobby.discoverj.util.AudioUtil;
-import de.itlobby.discoverj.util.GlyphsDude;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.LanguageUtil;
 import de.itlobby.discoverj.util.StringUtil;
 import de.itlobby.discoverj.util.SystemUtil;
-import de.itlobby.discoverj.util.helper.AnimationHelper;
-import de.itlobby.discoverj.util.helper.AwesomeHelper;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.materialicons.MaterialIcon;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
@@ -49,6 +55,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -58,15 +65,16 @@ import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jaudiotagger.audio.AudioFile;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainViewController implements ViewController, MultipleSelectionListener, ParentKeyDeletedListener {
     private static final Logger log = LogManager.getLogger(MainViewController.class);
@@ -76,17 +84,15 @@ public class MainViewController implements ViewController, MultipleSelectionList
     private static final String AUDIO_LINE_SELECTED = "audio-line-selected";
 
     public AnchorPane rootLayout;
+    public GridPane audioDetailsLayout;
     public Button btnFindFolder;
     public Label txtTotalAudioCount;
     public Label txtWithCoverAudioCount;
-    public Label txtWithoutCoverAudioCount;
     public Label txtFilename;
     public Label txtArtist;
     public Label txtTitle;
     public Label txtAlbum;
     public ImageView imgCurrentCover;
-    public ImageView imgNewCover;
-    public Label txtNewCoverResolution;
     public ProgressBar pbStatus;
     public Label txtState;
     public Label txtCurrentState;
@@ -107,21 +113,21 @@ public class MainViewController implements ViewController, MultipleSelectionList
     public Button btnSendFeedback;
     public Button btnReportBug;
     public VBox lwAudioList;
+    public ListView<AudioWrapper> audioList;
     public ScrollPane spAudioList;
     public Button btnActionCircle;
     public Button btnActionCircleIcon;
     public Button btnRemoveCover;
     public Button btnCopyCoverToClipBrd;
-    public Button btnHelpTranslate;
+    public Button btnPasteCoverFromClipBrd;
     public Label txtIsMixCD;
     public HBox multiSelectionLayout;
     public Button btnOpenGoogleImageSearch;
 
     private double totalAudioCount;
-    private double currentAudioCount;
+    private AtomicInteger currentAudioCount;
     private Text txtUpcountIndicatorValue;
     private long lastEventExcecFireTime = 0;
-    private FontAwesomeIcon currentIcon;
 
     private ContextMenu audioListContextMenu;
     private double progressMax;
@@ -134,18 +140,18 @@ public class MainViewController implements ViewController, MultipleSelectionList
         ft.play();
     }
 
-    public void showNewCover(BufferedImage cover, WritableImage fxImage) {
+    public void setNewCoverPreview(WritableImage fxImage, int width, int height) {
         Platform.runLater(() -> {
-            imgNewCover.setImage(fxImage);
-            txtNewCoverResolution.setText(String.format("(%dx%d)", cover.getWidth(), cover.getHeight()));
+            imgCurrentCover.setImage(fxImage);
+            txtCurrentAudioCoverRes.setText(String.format("(%dx%d)", width, height));
         });
     }
 
     public void activateSearchState(EventHandler<ActionEvent> stopEventHandler, int audioFilesCount) {
         activateActionButton(stopEventHandler, FontAwesomeIcon.TIMES);
-        txtMaxState.setText(audioFilesCount + "");
+        txtMaxState.setText(String.valueOf(audioFilesCount));
         setProgress(0, audioFilesCount);
-        unHighlightAll();
+        unhighlightAll();
     }
 
     @Override
@@ -161,55 +167,58 @@ public class MainViewController implements ViewController, MultipleSelectionList
         ListenerStateProvider.getInstance().setParentKeyDeletedListener(this);
     }
 
-    public void showScanResult(ScanResultData scanResultData, int withCoverCount) {
+    public void showScanResult(ScanResultData scanResultData) {
         Platform.runLater(() -> {
+            int withCoverCount = scanResultData.getWithCoverCount();
             hideBusyIndicator();
-            setState(MessageFormat.format(LanguageUtil.getString("InitialController.thereAre0Files"),
-                    scanResultData.getAudioFilesCount()));
 
-            int without = scanResultData.getAudioFilesCount() - withCoverCount;
+            setState(MessageFormat.format(
+                    LanguageUtil.getString("InitialController.thereAre0Files"),
+                    scanResultData.getAudioFilesCount()
+            ));
 
-            txtTotalAudioCount.setText(scanResultData.getAudioFilesCount() + "");
-            txtWithCoverAudioCount.setText(withCoverCount + "");
-            txtWithoutCoverAudioCount.setText(without + "");
+            int withoutCoverCount = scanResultData.getAudioFilesCount() - withCoverCount;
 
-            log.info(String.format("With cover: %s\tWithout cover: %s", withCoverCount, without));
+            txtTotalAudioCount.setText(String.valueOf(scanResultData.getAudioFilesCount()));
+            txtWithCoverAudioCount.setText(String.valueOf(withCoverCount));
+
+            log.info(String.format("With cover: %s\tWithout cover: %s", withCoverCount, withoutCoverCount));
 
             setAudioList(scanResultData);
 
             if (scanResultData.getAudioFilesCount() <= 0) {
                 deactivateActionButton();
             } else {
-                activateActionButton(event -> ServiceLocator.get(SearchService.class)
-                        .search(), FontAwesomeIcon.SEARCH);
+                activateActionButton(
+                        event -> ServiceLocator.get(CoverSearchService.class).search(), FontAwesomeIcon.SEARCH
+                );
             }
         });
     }
 
-    public void showAudioInfo(AudioWrapper audioWrapper) {
+    public void showAudioInfo(AudioWrapper audioWrapper, boolean showCover) {
         if (audioWrapper == null) {
             resetRightSide();
             return;
         }
 
-        AudioFile audioFile = audioWrapper.getAudioFile();
-        boolean isMixCD = AudioUtil.checkForMixCD(audioWrapper);
+        boolean isMixCD = MixCd.isMixCd(audioWrapper.getParentFilePath());
 
         Platform.runLater(() -> {
-            File file = audioWrapper.getFile();
-            String fileSize = StringUtil.sizeToHumanReadable(file.length());
-            txtFilename.setText(String.format("%s (%s)", file.getName(), fileSize));
-            txtTitle.setText(AudioUtil.getTitle(audioFile));
-            txtArtist.setText(AudioUtil.getArtist(audioFile));
-            txtAlbum.setText(AudioUtil.getAlbum(audioFile));
+            String fileSize = StringUtil.sizeToHumanReadable(audioWrapper.getFileLength());
+            txtFilename.setText(String.format("%s (%s)", audioWrapper.getFileName(), fileSize));
+            txtTitle.setText(audioWrapper.getTitle());
+            txtArtist.setText(audioWrapper.getArtist());
+            txtAlbum.setText(audioWrapper.getAlbum());
             txtIsMixCD.setVisible(isMixCD);
         });
 
-        setAudioCoverInformation(audioFile);
-    }
+        if (!showCover) {
+            return;
+        }
 
-    private void setAudioCoverInformation(AudioFile audioFile) {
-        Optional<Image> maybeCover = AudioUtil.getCover(audioFile);
+        Optional<Image> maybeCover = AudioUtil.getCover(audioWrapper.getFilePath());
+
         Platform.runLater(() -> {
             if (maybeCover.isPresent()) {
                 imgCurrentCover.setImage(maybeCover.get());
@@ -226,9 +235,9 @@ public class MainViewController implements ViewController, MultipleSelectionList
             this.progressMax = audioFileListSize;
             this.progressCurrent = (i + 1);
 
-            double value = progressCurrent / (double) audioFileListSize;
+            double value = progressCurrent / audioFileListSize;
             pbStatus.setProgress(value);
-            txtCurrentState.setText(i + 1 + "");
+            txtCurrentState.setText(String.valueOf(i + 1));
         });
     }
 
@@ -236,6 +245,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
         Platform.runLater(() -> {
             progressCurrent = progressCurrent + 1;
             pbStatus.setProgress(progressCurrent / progressMax);
+            txtCurrentState.setText(String.valueOf((int) progressCurrent));
         });
     }
 
@@ -265,18 +275,18 @@ public class MainViewController implements ViewController, MultipleSelectionList
     }
 
     private void createIconButtons() {
+        AwesomeHelper.createIconButton(btnFindFolder, FontAwesomeIcon.FOLDER_OPEN, MENU_ICON, LanguageUtil.getString("key.mainview.open.folder"), "24px");
+
         AwesomeHelper.createIconButton(btnOpenAbout, FontAwesomeIcon.INFO_CIRCLE, MENU_ICON, LanguageUtil.getString("key.mainview.menu.about"), "24px");
         AwesomeHelper.createIconButton(btnReportBug, FontAwesomeIcon.BUG, MENU_ICON, LanguageUtil.getString("key.mainview.menu.reportbug"), "24px");
-        AwesomeHelper.createIconButton(btnHelpTranslate, FontAwesomeIcon.LANGUAGE, MENU_ICON, LanguageUtil.getString("key.mainview.menu.helpTranslate"), "24px");
         AwesomeHelper.createIconButton(btnSendFeedback, FontAwesomeIcon.ENVELOPE, MENU_ICON, LanguageUtil.getString("key.mainview.menu.feedback"), "24px");
         AwesomeHelper.createIconButton(btnDonate, FontAwesomeIcon.HEART, MENU_ICON, LanguageUtil.getString("key.mainview.menu.donate"), "24px");
         AwesomeHelper.createIconButton(btnOpenSettings, FontAwesomeIcon.GEAR, MENU_ICON, LanguageUtil.getString("key.mainview.menu.program.settings"), "24px");
         AwesomeHelper.createIconButton(btnExitApp, FontAwesomeIcon.TIMES, MENU_ICON, LanguageUtil.getString("key.mainview.menu.program.shutdown"), "24px");
 
-        AwesomeHelper.createIconButton(btnFindFolder, FontAwesomeIcon.FOLDER_OPEN, DEFAULT_ICON, LanguageUtil.getString("key.mainview.open.folder"), "24px");
-
+        AwesomeHelper.createIconButton(btnPasteCoverFromClipBrd, MaterialIcon.CONTENT_PASTE, DEFAULT_ICON, LanguageUtil.getString("key.mainview.paste.from.clipbrd.cover"), "20px");
+        AwesomeHelper.createIconButton(btnCopyCoverToClipBrd, MaterialIcon.CONTENT_COPY, DEFAULT_ICON, LanguageUtil.getString("key.mainview.copy.clipbrd.cover"), "20px");
         AwesomeHelper.createIconButton(btnRemoveCover, FontAwesomeIcon.TRASH, DEFAULT_ICON, LanguageUtil.getString("key.mainview.remove.cover"), "24px");
-        AwesomeHelper.createIconButton(btnCopyCoverToClipBrd, FontAwesomeIcon.CLIPBOARD, DEFAULT_ICON, LanguageUtil.getString("key.mainview.copy.clipbrd.cover"), "20px");
         AwesomeHelper.createIconButton(btnOpenGoogleImageSearch, FontAwesomeIcon.GOOGLE, DEFAULT_ICON, LanguageUtil.getString("key.mainview.cm.google.image.search"), "20px");
 
         AwesomeHelper.createTextIcon(txtIsMixCD, FontAwesomeIcon.RANDOM, DEFAULT_ICON_TEXT, LanguageUtil.getString("key.mainview.isMixCD"), "15px");
@@ -284,13 +294,12 @@ public class MainViewController implements ViewController, MultipleSelectionList
 
     private void registerGeneralListener() {
         lwAudioList.getChildren().addListener((ListChangeListener<Node>) c -> {
-            if (!lwAudioList.getChildren().isEmpty()) {
-                if (currentIcon != FontAwesomeIcon.SEARCH) {
-                    activateActionButton(event -> ServiceLocator.get(SearchService.class).search(), FontAwesomeIcon.SEARCH);
-                }
-            } else {
+            if (lwAudioList.getChildren().isEmpty()) {
                 deactivateActionButton();
+                return;
             }
+
+            activateActionButton(event -> ServiceLocator.get(CoverSearchService.class).search(), FontAwesomeIcon.SEARCH);
         });
     }
 
@@ -300,45 +309,47 @@ public class MainViewController implements ViewController, MultipleSelectionList
 
         rootLayout.addEventHandler(KeyEvent.KEY_RELEASED, event ->
         {
-            if ((System.currentTimeMillis() - lastEventExcecFireTime) > 10) {
-                if (new KeyCodeCombination(KeyCode.A, KeyCombination.CONTROL_ANY).match(event)) {
-                    selectionService.selectAll();
-                    lastEventExcecFireTime = System.currentTimeMillis();
-                }
-                if (new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_ANY).match(event)) {
-                    initialService.findFolder();
-                    lastEventExcecFireTime = System.currentTimeMillis();
-                }
-                if (new KeyCodeCombination(KeyCode.DELETE).match(event)) {
-                    initialService.removeSelectedEntries();
-                    lastEventExcecFireTime = System.currentTimeMillis();
-                }
-                if (new KeyCodeCombination(KeyCode.HOME).match(event)) {
-                    selectionService.selectFirst();
-                    lastEventExcecFireTime = System.currentTimeMillis();
-                }
-                if (new KeyCodeCombination(KeyCode.UP).match(event)) {
-                    selectionService.selectUp();
-                    lastEventExcecFireTime = System.currentTimeMillis();
-                }
-                if (new KeyCodeCombination(KeyCode.DOWN).match(event)) {
-                    selectionService.selectDown();
-                    lastEventExcecFireTime = System.currentTimeMillis();
-                }
-                if (new KeyCodeCombination(KeyCode.END).match(event)) {
-                    selectionService.selectLast();
-                    lastEventExcecFireTime = System.currentTimeMillis();
-                }
-                if (new KeyCodeCombination(KeyCode.HOME, KeyCombination.SHIFT_ANY).match(event)) {
-                    selectionService.selectRangeToHome();
-                    scrollToLastSelected();
-                    lastEventExcecFireTime = System.currentTimeMillis();
-                }
-                if (new KeyCodeCombination(KeyCode.END, KeyCombination.SHIFT_ANY).match(event)) {
-                    selectionService.selectRangeToEnd();
-                    scrollToLastSelected();
-                    lastEventExcecFireTime = System.currentTimeMillis();
-                }
+            if ((System.currentTimeMillis() - lastEventExcecFireTime) <= 10) {
+                return;
+            }
+
+            if (new KeyCodeCombination(KeyCode.A, KeyCombination.CONTROL_ANY).match(event)) {
+                selectionService.selectAll();
+                lastEventExcecFireTime = System.currentTimeMillis();
+            }
+            if (new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_ANY).match(event)) {
+                initialService.findFolder();
+                lastEventExcecFireTime = System.currentTimeMillis();
+            }
+            if (new KeyCodeCombination(KeyCode.DELETE).match(event)) {
+                initialService.removeSelectedEntries();
+                lastEventExcecFireTime = System.currentTimeMillis();
+            }
+            if (new KeyCodeCombination(KeyCode.HOME).match(event)) {
+                selectionService.selectFirst();
+                lastEventExcecFireTime = System.currentTimeMillis();
+            }
+            if (new KeyCodeCombination(KeyCode.UP).match(event)) {
+                selectionService.selectUp();
+                lastEventExcecFireTime = System.currentTimeMillis();
+            }
+            if (new KeyCodeCombination(KeyCode.DOWN).match(event)) {
+                selectionService.selectDown();
+                lastEventExcecFireTime = System.currentTimeMillis();
+            }
+            if (new KeyCodeCombination(KeyCode.END).match(event)) {
+                selectionService.selectLast();
+                lastEventExcecFireTime = System.currentTimeMillis();
+            }
+            if (new KeyCodeCombination(KeyCode.HOME, KeyCombination.SHIFT_ANY).match(event)) {
+                selectionService.selectRangeToHome();
+                scrollToLastSelected();
+                lastEventExcecFireTime = System.currentTimeMillis();
+            }
+            if (new KeyCodeCombination(KeyCode.END, KeyCombination.SHIFT_ANY).match(event)) {
+                selectionService.selectRangeToEnd();
+                scrollToLastSelected();
+                lastEventExcecFireTime = System.currentTimeMillis();
             }
         });
     }
@@ -352,16 +363,17 @@ public class MainViewController implements ViewController, MultipleSelectionList
     }
 
     private void createBinding() {
+        audioDetailsLayout.visibleProperty().bind(txtFilename.textProperty().isNotEmpty());
+
         btnRemoveCover.visibleProperty().bind(imgCurrentCover.imageProperty().isNotNull());
         btnCopyCoverToClipBrd.visibleProperty().bind(imgCurrentCover.imageProperty().isNotNull());
         btnOpenGoogleImageSearch.visibleProperty().bind(imgCurrentCover.imageProperty().isNotNull());
-        pbStatus.progressProperty().addListener((observable, oldValue, newValue) ->
-                SystemUtil.setTaskbarProgress(newValue));
+
+        pbStatus.progressProperty().addListener((observable, oldValue, newValue) -> SystemUtil.setTaskbarProgress(newValue));
     }
 
     public void activateActionButton(EventHandler<ActionEvent> action, FontAwesomeIcon icon) {
         Platform.runLater(() -> {
-            currentIcon = icon;
 
             btnActionCircle.setOnAction(action);
             btnActionCircleIcon.setOnAction(action);
@@ -375,7 +387,6 @@ public class MainViewController implements ViewController, MultipleSelectionList
 
     public void deactivateActionButton() {
         Platform.runLater(() -> {
-            currentIcon = null;
 
             btnActionCircle.setOnAction(null);
             btnActionCircleIcon.setOnAction(null);
@@ -387,63 +398,53 @@ public class MainViewController implements ViewController, MultipleSelectionList
     private void setAudioList(ScanResultData scanResultData) {
         lwAudioList.getChildren().clear();
 
-        Map<String, List<FlatAudioWrapper>> audioMap = scanResultData.getAudioMap();
-
-        int iParent = 0;
-        for (Map.Entry<String, List<FlatAudioWrapper>> entry : audioMap.entrySet()) {
+        int parentIndex = 0;
+        for (Map.Entry<String, List<AudioWrapper>> entry : scanResultData.getAudioMap().entrySet()) {
             FolderListEntry folderEntry = new FolderListEntry(entry.getKey());
             lwAudioList.getChildren().add(folderEntry);
 
-            if (iParent > 0) {
+            if (parentIndex > 0) {
                 VBox.setMargin(folderEntry, new Insets(10, 0, 0, 0));
             }
 
-            for (FlatAudioWrapper flatAudioWrapper : entry.getValue()) {
-                lwAudioList.getChildren().add(new AudioListEntry(flatAudioWrapper));
-            }
+            entry.getValue().forEach(audioWrapper ->
+                    lwAudioList.getChildren().add(new AudioListEntry(audioWrapper)));
 
-            iParent++;
+            parentIndex++;
         }
     }
 
     public void resetRightSide() {
+        resetCurrentAudioInformation();
         Platform.runLater(() -> {
-            resetAudioInformation();
-            resetNewCoverInformation();
+            pbStatus.setProgress(0);
+            txtState.setText(null);
         });
     }
 
-    private void resetNewCoverInformation() {
-        imgNewCover.setImage(null);
-        txtNewCoverResolution.setText(null);
-        pbStatus.setProgress(0);
-        txtState.setText(null);
-    }
-
-    private void resetAudioInformation() {
-        txtFilename.setText(null);
-        txtArtist.setText(null);
-        txtTitle.setText(null);
-        txtAlbum.setText(null);
-        imgCurrentCover.setImage(null);
-        txtCurrentAudioCoverRes.setText(null);
-        txtIsMixCD.setVisible(false);
+    public void resetCurrentAudioInformation() {
+        Platform.runLater(() -> {
+            txtFilename.setText(null);
+            txtArtist.setText(null);
+            txtTitle.setText(null);
+            txtAlbum.setText(null);
+            imgCurrentCover.setImage(null);
+            txtCurrentAudioCoverRes.setText(null);
+            txtIsMixCD.setVisible(false);
+        });
     }
 
     public void setState(String msg) {
         Platform.runLater(() -> txtState.setText(msg));
     }
 
-    public void showBusyIndicator(String title) {
+    public void showBusyIndicator(String title, ActionListener cancelListener) {
         Platform.runLater(() -> {
-            LightBoxService lightBoxService = ServiceLocator.get(LightBoxService.class);
-
-            VBox layout = new VBox(10);
+            VBox layout = new VBox(25);
             progressScanIndicator = new ProgressIndicator();
             progressScanIndicator.setStyle("-fx-accent: #FF6F00; -fx-progress-color: #FF6F00;");
 
             txtAudioToLoad = new TextFlow();
-
             txtAudioToLoad.setTextAlignment(TextAlignment.CENTER);
 
             layout.getChildren().add(txtAudioToLoad);
@@ -454,9 +455,10 @@ public class MainViewController implements ViewController, MultipleSelectionList
             VBox.setVgrow(txtAudioToLoad, Priority.NEVER);
 
             layout.setMinWidth(300);
+            layout.setAlignment(Pos.TOP_CENTER);
             layout.setPadding(new Insets(10, 0, 10, 0));
 
-            lightBoxService.showDialog(title, layout, null, null, false, true);
+            ServiceLocator.get(LightBoxService.class).showDialog(title, layout, cancelListener, null, false, cancelListener == null);
         });
     }
 
@@ -468,37 +470,40 @@ public class MainViewController implements ViewController, MultipleSelectionList
     }
 
     public void setTotalAudioCountToLoad(int totalAudioCount) {
-        if (progressScanIndicator != null) {
-            this.totalAudioCount = totalAudioCount;
-            this.currentAudioCount = 0;
-            Platform.runLater(() -> {
-                Text fixPreText = new Text(LanguageUtil.getString("key.mainview.txtTotalMp3s") + " ");
-                txtUpcountIndicatorValue = new Text();
+        Platform.runLater(() -> {
+            if (progressScanIndicator == null) {
+                return;
+            }
 
-                txtAudioToLoad.getChildren().add(fixPreText);
-                txtAudioToLoad.getChildren().add(txtUpcountIndicatorValue);
-                txtAudioToLoad.getChildren().add(new Text(String.format(" / %s", totalAudioCount)));
-            });
-        }
+            this.totalAudioCount = totalAudioCount;
+            this.currentAudioCount = new AtomicInteger(0);
+
+            Text fixPreText = new Text(LanguageUtil.getString("key.mainview.txtTotalMp3s") + " ");
+            txtUpcountIndicatorValue = new Text();
+
+            txtAudioToLoad.getChildren().add(fixPreText);
+            txtAudioToLoad.getChildren().add(txtUpcountIndicatorValue);
+            txtAudioToLoad.getChildren().add(new Text(String.format(" / %s", totalAudioCount)));
+        });
     }
 
     public void countIndicatorUp() {
-        if (progressScanIndicator == null || txtUpcountIndicatorValue == null) {
-            return;
-        }
-
         Platform.runLater(() -> {
-            currentAudioCount++;
-            double value = currentAudioCount / totalAudioCount;
+            if (progressScanIndicator == null || txtUpcountIndicatorValue == null) {
+                return;
+            }
 
-            txtUpcountIndicatorValue.setText(String.valueOf((int) currentAudioCount));
+            currentAudioCount.incrementAndGet();
+            double value = currentAudioCount.doubleValue() / totalAudioCount;
+
+            txtUpcountIndicatorValue.setText(currentAudioCount.toString());
             progressScanIndicator.setProgress(value);
         });
     }
 
-    public void highlightInList(FlatAudioWrapper flatAudioWrapper) {
+    public void highlightInList(Integer audioWrapperId) {
         Platform.runLater(() -> {
-            int i = lwAudioList.getChildren().indexOf(getAudioListEntry(flatAudioWrapper));
+            int i = lwAudioList.getChildren().indexOf(getAudioListEntry(audioWrapperId));
             lwAudioList.getChildren().get(i).getStyleClass().add(AUDIO_LINE_SELECTED);
         });
     }
@@ -513,8 +518,8 @@ public class MainViewController implements ViewController, MultipleSelectionList
     public void highlightRangeInList(AudioListEntry from, AudioListEntry to) {
         Platform.runLater(() -> {
             ArrayList<AudioListEntry> selectedEntries = new ArrayList<>();
-            FlatAudioWrapper fromWrapper = from.getSimpleAudioWrapper();
-            FlatAudioWrapper toWrapper = to.getSimpleAudioWrapper();
+            AudioWrapper fromWrapper = from.getWrapper();
+            AudioWrapper toWrapper = to.getWrapper();
 
             boolean isInRange = false;
             List<AudioListEntry> children = lwAudioList
@@ -527,15 +532,15 @@ public class MainViewController implements ViewController, MultipleSelectionList
             int toIndex = children.indexOf(to);
 
             if (fromIndex > toIndex) {
-                fromWrapper = to.getSimpleAudioWrapper();
-                toWrapper = from.getSimpleAudioWrapper();
+                fromWrapper = to.getWrapper();
+                toWrapper = from.getWrapper();
             }
 
             for (AudioListEntry entry : children) {
-                if (entry.getSimpleAudioWrapper().getId().equals(fromWrapper.getId())) {
+                if (entry.getWrapper().getId().equals(fromWrapper.getId())) {
                     isInRange = true;
                 }
-                if (entry.getSimpleAudioWrapper().getId().equals(toWrapper.getId())) {
+                if (entry.getWrapper().getId().equals(toWrapper.getId())) {
                     entry.getStyleClass().add(AUDIO_LINE_SELECTED);
                     selectedEntries.add(entry);
                     isInRange = false;
@@ -551,21 +556,16 @@ public class MainViewController implements ViewController, MultipleSelectionList
         });
     }
 
-    public void unHighlightInList(FlatAudioWrapper currentAudio) {
-        Platform.runLater(() -> {
-            lwAudioList.getChildren().stream()
-                    .filter(AudioListEntry.class::isInstance)
-                    .map(AudioListEntry.class::cast)
-                    .filter(
-                            x -> x.getSimpleAudioWrapper().getId().equals(currentAudio.getId())
-                    )
-                    .forEach(x -> x.getStyleClass().removeAll(AUDIO_LINE_SELECTED));
-
-            resetAudioInformation();
-        });
+    public void unhighlightInList(Integer audioWrapperId) {
+        Platform.runLater(() ->
+                lwAudioList.getChildren().stream()
+                        .filter(AudioListEntry.class::isInstance)
+                        .map(AudioListEntry.class::cast)
+                        .filter(entry -> entry.getWrapper().getId().equals(audioWrapperId))
+                        .forEach(entry -> entry.getStyleClass().removeAll(AUDIO_LINE_SELECTED)));
     }
 
-    public void unHighlightAll() {
+    public void unhighlightAll() {
         Platform.runLater(() ->
                 lwAudioList.getChildren().stream()
                         .map(x -> ((HBox) x))
@@ -575,52 +575,80 @@ public class MainViewController implements ViewController, MultipleSelectionList
     public void highlightAll() {
         Platform.runLater(() ->
                 lwAudioList.getChildren().stream()
-                        .filter(x -> x instanceof AudioListEntry)
+                        .filter(AudioListEntry.class::isInstance)
                         .map(x -> ((AudioListEntry) x))
                         .forEach(x -> x.getStyleClass().add(AUDIO_LINE_SELECTED))
         );
     }
 
-    public void updateListItem(FlatAudioWrapper currentAudio, WritableImage newCover) {
-        AudioListEntry listEntry = getAudioListEntry(currentAudio);
-
-        if (listEntry == null) {
-            return;
-        }
-
+    public void setNewCoverToListItem(AudioWrapper currentAudio, ImageFile newCover) {
         Platform.runLater(() -> {
-            listEntry.getSimpleAudioWrapper().setHasCover(true);
-            createSingleLineAnimation(ImageUtil.resize(newCover, 36, 36), listEntry);
+            AudioListEntry listEntry = getAudioListEntry(currentAudio.getId());
+
+            if (listEntry == null) {
+                return;
+            }
+
+            try {
+                Image previewImage = new Image(
+                        new FileInputStream(newCover.filePath()),
+                        36,
+                        36,
+                        true,
+                        false
+                );
+                createSingleLineAnimation(previewImage, listEntry);
+                listEntry.getIconView().setIcon(FontAwesomeIcon.CHECK);
+                listEntry.getWrapper().setHasCover(true);
+            } catch (FileNotFoundException e) {
+                log.error(e.getMessage(), e);
+            }
+        });
+    }
+
+    public void setNewCoverToListItem(AudioWrapper currentAudio, BufferedImage newCover) {
+        Platform.runLater(() -> {
+            AudioListEntry listEntry = getAudioListEntry(currentAudio.getId());
+
+            if (listEntry == null) {
+                return;
+            }
+
+            Image previewImage = SwingFXUtils.toFXImage(
+                    ImageUtil.resize(newCover, 36, 36),
+                    null
+            );
+            createSingleLineAnimation(previewImage, listEntry);
             listEntry.getIconView().setIcon(FontAwesomeIcon.CHECK);
+            listEntry.getWrapper().setHasCover(true);
         });
     }
 
     public void createSingleLineAnimation(Image coverImage, AudioListEntry entry) {
-        ImageView imageView = entry.getImageView();
-        if (imageView == null) {
-            return;
-        }
-
         Platform.runLater(() -> {
+            ImageView imageView = entry.getImageView();
+            if (imageView == null) {
+                return;
+            }
             createFadeAnimation(imageView);
             imageView.setImage(coverImage);
         });
     }
 
-    public AudioListEntry getAudioListEntry(FlatAudioWrapper currentAudio) {
+    public AudioListEntry getAudioListEntry(Integer audioWrapperId) {
         return lwAudioList.getChildren()
                 .stream()
-                .filter(x -> x instanceof AudioListEntry)
+                .filter(AudioListEntry.class::isInstance)
                 .map(x -> (AudioListEntry) x)
-                .filter(x -> x.getSimpleAudioWrapper().getId().equals(currentAudio.getId()))
+                .filter(x -> x.getWrapper().getId().equals(audioWrapperId))
                 .findFirst()
                 .orElse(null);
     }
 
-    public void scrollToNodeInList(FlatAudioWrapper currentAudio) {
+    public void scrollToNodeInList(AudioWrapper currentAudio) {
         Platform.runLater(() -> {
-            scrollTo(getAudioListEntry(currentAudio));
-            ServiceLocator.get(SelectionService.class).addSelection(getAudioListEntry(currentAudio));
+            scrollTo(getAudioListEntry(currentAudio.getId()));
+            ServiceLocator.get(SelectionService.class).addSelection(getAudioListEntry(currentAudio.getId()));
         });
     }
 
@@ -667,7 +695,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
     public void onParentListEntryDeleted(String key) {
         List<FolderListEntry> entriesToRemove = lwAudioList.getChildren()
                 .stream()
-                .filter(x -> x instanceof FolderListEntry)
+                .filter(FolderListEntry.class::isInstance)
                 .map(x -> ((FolderListEntry) x))
                 .filter(x -> x.getPath().equalsIgnoreCase(key))
                 .toList();
@@ -675,19 +703,27 @@ public class MainViewController implements ViewController, MultipleSelectionList
         lwAudioList.getChildren().removeAll(entriesToRemove);
     }
 
-    public void setAudioLineBusy(FlatAudioWrapper flatAudioWrapper, boolean isBusy) {
-        getAudioListEntry(flatAudioWrapper).setBusy(isBusy);
+    public void setAudioNodeBusy(boolean isBusy, Integer audioWrapperId) {
+        getAudioListEntry(audioWrapperId).setBusy(isBusy);
     }
 
-    public void setEntryToProcessingState(AudioWrapper audioWrapper, FlatAudioWrapper flatAudioWrapper) {
-        showAudioInfo(audioWrapper);
-        highlightInList(flatAudioWrapper);
-        setAudioLineBusy(flatAudioWrapper, true);
+    public void setEntryToProcessingState(AudioWrapper audioWrapper) {
+        showAudioInfo(audioWrapper, false);
+        highlightInList(audioWrapper.getId());
+        setAudioNodeBusy(true, audioWrapper.getId());
     }
 
-    public void setEntryToFinishedState(FlatAudioWrapper flatAudioWrapper) {
-        unHighlightInList(flatAudioWrapper);
-        setAudioLineBusy(flatAudioWrapper, false);
+    public void setEntryToFinishedState(Integer audioWrapperId) {
+        unhighlightInList(audioWrapperId);
+        setAudioNodeBusy(false, audioWrapperId);
         increaseProgress();
     }
+
+    public void setBusyIndicatorStatusText(String text) {
+        Platform.runLater(() -> {
+            txtAudioToLoad.getChildren().clear();
+            txtAudioToLoad.getChildren().add(new Text(text));
+        });
+    }
+
 }

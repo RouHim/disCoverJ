@@ -2,11 +2,10 @@
 <Configuration status="INFO">
     <Appenders>
         <Console name="console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5p %m%n"/>
         </Console>
-        <File name="file" fileName="${sys:user.home}/.config/disCoverJ/disCoverJ.log" immediateFlush="false"
-              append="false">
-            <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        <File name="file" fileName="${sys:user.home}/.config/disCoverJ/disCoverJ.log" append="true">
+            <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5p %m%n"/>
         </File>
     </Appenders>
     <Loggers>

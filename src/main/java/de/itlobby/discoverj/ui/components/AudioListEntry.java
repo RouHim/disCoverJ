@@ -1,6 +1,6 @@
 package de.itlobby.discoverj.ui.components;
 
-import de.itlobby.discoverj.models.FlatAudioWrapper;
+import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.services.InitialService;
 import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
@@ -25,19 +25,19 @@ import java.awt.image.BufferedImage;
 import java.util.Objects;
 
 public class AudioListEntry extends HBox {
-    private final FlatAudioWrapper flatAudioWrapper;
+    private final AudioWrapper audioWrapper;
     private ImageView imageView;
     private FontAwesomeIconView iconView;
     private Label txtPath;
     private RotateTransition rotateTransition;
 
-    public AudioListEntry(FlatAudioWrapper flatAudioWrapper) {
-        this.flatAudioWrapper = flatAudioWrapper;
+    public AudioListEntry(AudioWrapper audioWrapper) {
+        this.audioWrapper = audioWrapper;
         createLayout();
     }
 
     private void createLayout() {
-        txtPath = new Label(flatAudioWrapper.getDisplayValue());
+        txtPath = new Label(audioWrapper.getDisplayValue());
         iconView = new FontAwesomeIconView();
 
         updateStatusIcon();
@@ -78,8 +78,8 @@ public class AudioListEntry extends HBox {
         initAnimation();
     }
 
-    public FlatAudioWrapper getSimpleAudioWrapper() {
-        return flatAudioWrapper;
+    public AudioWrapper getWrapper() {
+        return audioWrapper;
     }
 
     public ImageView getImageView() {
@@ -95,14 +95,14 @@ public class AudioListEntry extends HBox {
             imageView.setImage(null);
         }
         iconView.setIcon(FontAwesomeIcon.TIMES);
-        flatAudioWrapper.setHasCover(false);
+        audioWrapper.setHasCover(false);
     }
 
     public void replaceCover(BufferedImage img) {
         WritableImage fxImg = ImageUtil.toFXImage(img, (int) imageView.getFitWidth(), (int) imageView.getFitHeight());
         imageView.setImage(fxImg);
         iconView.setIcon(FontAwesomeIcon.CHECK);
-        flatAudioWrapper.setHasCover(true);
+        audioWrapper.setHasCover(true);
     }
 
     @Override
@@ -116,16 +116,16 @@ public class AudioListEntry extends HBox {
 
         AudioListEntry that = (AudioListEntry) o;
 
-        if (!Objects.equals(flatAudioWrapper, that.flatAudioWrapper)) {
+        if (!Objects.equals(audioWrapper, that.getWrapper())) {
             return false;
         }
 
-        return flatAudioWrapper.equals(((AudioListEntry) o).getSimpleAudioWrapper());
+        return audioWrapper.equals(((AudioListEntry) o).getWrapper());
     }
 
     @Override
     public int hashCode() {
-        int result = flatAudioWrapper != null ? flatAudioWrapper.hashCode() : 0;
+        int result = audioWrapper != null ? audioWrapper.hashCode() : 0;
         result = 31 * result + (imageView != null ? imageView.hashCode() : 0);
         result = 31 * result + (iconView != null ? iconView.hashCode() : 0);
         result = 31 * result + (txtPath != null ? txtPath.hashCode() : 0);
@@ -145,12 +145,12 @@ public class AudioListEntry extends HBox {
     private void updateStatusIcon() {
         FontAwesomeIcon icon;
 
-        if (flatAudioWrapper.isHasCover()) {
+        if (audioWrapper.hasCover()) {
             icon = FontAwesomeIcon.CHECK;
         } else {
             icon = FontAwesomeIcon.TIMES;
         }
-        if (flatAudioWrapper.isReadOnly()) {
+        if (audioWrapper.isReadOnly()) {
             icon = FontAwesomeIcon.LOCK;
             Tooltip.install(iconView, new Tooltip(LanguageUtil.getString("audiofile.readonly")));
         }
@@ -166,11 +166,10 @@ public class AudioListEntry extends HBox {
         rotateTransition.setAutoReverse(false);
         rotateTransition.statusProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue == Animation.Status.STOPPED) {
-                RotateTransition transition = new RotateTransition(Duration.millis(10), iconView);
+                RotateTransition transition = new RotateTransition(Duration.millis(100), iconView);
                 transition.setFromAngle(iconView.getRotate());
                 transition.setToAngle(0);
                 transition.setCycleCount(1);
-                transition.setAutoReverse(true);
                 transition.play();
             }
         });

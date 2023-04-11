@@ -4,11 +4,16 @@ import java.util.Arrays;
 import java.util.Locale;
 
 public enum Language {
-    //To add a new language just add translated .properties file & add new enum constant
+    // To add a new language just add translated .properties file & add new enum constant & image
+    // Get flags from here: https://hampusborgos.github.io/country-flags/ e.g.: https://raw.githubusercontent.com/hampusborgos/country-flags/main/png100px/ad.png
+    // Convert with: for file in *.png; do convert "$file" -resize 32x32\> -gravity center -background transparent -extent 32x32 "$file"; done
     ENGLISH(Locale.US, "languages/disCoverJ_en.properties", "/images/flags/us.png"),
     GERMAN(Locale.GERMAN, "languages/disCoverJ_de.properties", "/images/flags/de.png"),
     SPANISH(Locale.forLanguageTag("es-ES"), "languages/disCoverJ_es.properties", "/images/flags/es.png"),
-    HEBREW(Locale.forLanguageTag("he"), "languages/disCoverJ_he.properties", "/images/flags/he.png");
+    HEBREW(Locale.forLanguageTag("he"), "languages/disCoverJ_he.properties", "/images/flags/il.png"),
+    CHINESE(Locale.SIMPLIFIED_CHINESE, "languages/disCoverJ_zh.properties", "/images/flags/cn.png"),
+    HINDI(new Locale("hi", "IN"), "languages/disCoverJ_hi.properties", "/images/flags/in.png"),
+    ;
 
     private final String imagePath;
     private final Locale locale;

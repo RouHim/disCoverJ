@@ -31,16 +31,14 @@ public class LanguageUtil {
     }
 
     private static PropertyResourceBundle readBundleForLanguage(Language language) {
-        PropertyResourceBundle bundle = null;
-
         try {
             URL url = SystemUtil.getResourceURL(language.getBundlePath());
             InputStreamReader inputStream = new InputStreamReader(url.openStream(), StandardCharsets.UTF_8);
-            bundle = new PropertyResourceBundle(inputStream);
+            return new PropertyResourceBundle(inputStream);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
-        return bundle;
     }
 
     public static String getString(String bundleKey) {

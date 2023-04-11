@@ -1,7 +1,6 @@
 package de.itlobby.discoverj.ui.viewtask;
 
 import de.itlobby.discoverj.models.AudioWrapper;
-import de.itlobby.discoverj.models.FlatAudioWrapper;
 import de.itlobby.discoverj.models.ScanResultData;
 import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.ui.components.AudioListEntry;
@@ -12,13 +11,11 @@ import javafx.scene.image.Image;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jaudiotagger.audio.AudioFile;
-import org.jaudiotagger.audio.AudioFileIO;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,99 +27,85 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
     private final List<String> filesToLoad;
     private final MainViewController mainViewController;
     private final int totalAudioCountToLoad;
-    private final List<AudioWrapper> audioWrapperList;
-    private final ScanResultData scanResultData;
-    private Map<String, List<FlatAudioWrapper>> audioData;
+    private List<AudioWrapper> audioWrapperList;
     private Integer idCount;
     private int withCover;
-    private File parentFileLastScanning;
 
     public ScanFileViewTask(List<String> filesToLoad, MainViewController mainViewController) {
         this.filesToLoad = filesToLoad;
         this.mainViewController = mainViewController;
         totalAudioCountToLoad = filesToLoad.size();
-        scanResultData = new ScanResultData();
-
         idCount = 0;
 
         audioWrapperList = new ArrayList<>();
-        audioData = new HashMap<>();
     }
 
     @Override
     public void work() {
-        if (totalAudioCountToLoad > 0) {
-            filesToLoad.forEach(this::scanFile);
+        if (totalAudioCountToLoad <= 0) {
+            log.info("No files to load");
+            return;
         }
 
+        // Load audio information of all files
+        filesToLoad.forEach(this::scanFile);
+
+        // Sort audio list by file path
         try {
             Collections.sort(audioWrapperList);
         } catch (Exception e) {
             log.error("ERROR while trying to sortByKey mp3 list", e);
-            audioWrapperList.sort(Comparator.comparing(o -> o.getFile().getAbsolutePath()));
+            audioWrapperList.sort(Comparator.comparing(AudioWrapper::getFilePath));
         }
 
+        // Add audio list to audioData list
+        int audioFilesCount = audioWrapperList.size();
 
-        for (AudioWrapper audioWrapper : audioWrapperList) {
-            File file = audioWrapper.getAudioFile().getFile();
+        // Group audio list by parent file path and sort by key
+        Map<String, List<AudioWrapper>> audioData =
+                audioWrapperList.stream()
+                        .collect(Collectors.groupingBy(AudioWrapper::getParentFilePath))
+                        .entrySet().stream()
+                        .sorted(Map.Entry.comparingByKey())
+                        .collect(
+                                Collectors.toMap(
+                                        Map.Entry::getKey,
+                                        Map.Entry::getValue,
+                                        (oldValue, newValue) -> oldValue,
+                                        LinkedHashMap::new
+                                )
+                        );
 
-            FlatAudioWrapper flatAudioWrapper = new FlatAudioWrapper();
-            flatAudioWrapper.setHasCover(audioWrapper.hasCover());
-            flatAudioWrapper.setPath(file.getAbsolutePath());
-            flatAudioWrapper.setDisplayValue(AudioUtil.buildDisplayValue(audioWrapper));
-            flatAudioWrapper.setReadOnly(!audioWrapper.getAudioFile().getFile().canWrite());
-            flatAudioWrapper.setId(audioWrapper.getId());
-
-            addAudioData(audioWrapper.getFile().getParent(), flatAudioWrapper);
-        }
-
-        audioData = sortByKey(audioData);
-        audioWrapperList.sort(Comparator.comparing(x -> x.getFile().getAbsolutePath()));
-
-        scanResultData.setAudioFilesCount(audioWrapperList.size());
-        scanResultData.setWithCover(withCover);
-        scanResultData.setAudioMap(audioData);
-
+        // If there are less than 300 audio files, load cover images async
         if (totalAudioCountToLoad <= 300) {
             Settings.getInstance().setCoverLoadingDisabled(false);
-            new Thread(() -> lazyLoadCoverImages(audioWrapperList)).start();
+            // Create map with id and file path and handover to the lazy load thread
+            var idPathMap = audioWrapperList.stream().collect(
+                    Collectors.toMap(AudioWrapper::getId, AudioWrapper::getFilePath)
+            );
+            new Thread(() -> lazyLoadCoverImages(idPathMap)).start();
         } else {
             Settings.getInstance().setCoverLoadingDisabled(true);
         }
 
-        setResult(scanResultData);
+        // Unload audioWrapperList
+        audioWrapperList = null;
+
+        // Handover result data to tne next task
+        setResult(new ScanResultData(audioData, audioFilesCount, withCover));
     }
 
-    private Map<String, List<FlatAudioWrapper>> sortByKey(Map<String, List<FlatAudioWrapper>> audioData) {
-        return audioData.entrySet().stream()
-                .sorted(Map.Entry.comparingByKey())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
-                        (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-    }
-
-    private void addAudioData(String parent, FlatAudioWrapper flatAudioWrapper) {
-        try {
-            if (audioData.containsKey(parent)) {
-                audioData.get(parent).add(flatAudioWrapper);
-            } else {
-                audioData.put(parent, new ArrayList<>(Collections.singletonList(flatAudioWrapper)));
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
-    private void lazyLoadCoverImages(List<AudioWrapper> audioList) {
+    private void lazyLoadCoverImages(Map<Integer, String> audioList) {
         while (mainViewController.lwAudioList.getChildren().size() < audioList.size() && !isCancelled()) {
             SystemUtil.threadSleep(100);
         }
 
-        for (AudioWrapper audioWrapper : audioList) {
+        for (Map.Entry<Integer, String> audioEntry : audioList.entrySet()) {
             if (isCancelled()) {
                 return;
             }
 
-            Optional<Image> coverImage = AudioUtil.getCover(audioWrapper.getAudioFile(), 36, 36);
+            Optional<Image> coverImage = AudioUtil.getCover(audioEntry.getValue(), 36, 36);
 
             if (coverImage.isEmpty()) {
                 continue;
@@ -132,7 +115,7 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
                     .stream()
                     .filter(AudioListEntry.class::isInstance)
                     .map(AudioListEntry.class::cast)
-                    .filter(x -> x.getSimpleAudioWrapper().getId().equals(audioWrapper.getId()))
+                    .filter(x -> x.getWrapper().getId().equals(audioEntry.getKey()))
                     .findFirst()
                     .ifPresent(audioListEntry ->
                             mainViewController.createSingleLineAnimation(coverImage.get(), audioListEntry));
@@ -148,7 +131,7 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
             return;
         }
 
-        if (!file.isDirectory()) {
+        if (file.isFile()) {
             validateAndAddFile(file);
             return;
         }
@@ -171,42 +154,39 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
         }
     }
 
-    private void validateAndAddFile(File fileObj) {
-        if (AudioUtil.isAudioFile(fileObj)) {
-            try {
-                addAudioToList(fileObj.getAbsolutePath());
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
+    private void validateAndAddFile(File file) {
+        if (!AudioUtil.isAudioFile(file)) {
+            return;
+        }
+
+        try {
+            addAudioToList(file.getAbsolutePath());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
     }
 
-    private void addAudioToList(String filePath) throws Exception {
-        AudioWrapper wrapper = new AudioWrapper();
-        File file = new File(filePath);
-        File parent = file.getParentFile();
-        AudioFile audioFile = AudioFileIO.read(file);
-        wrapper.setAudioFile(audioFile);
+    private void addAudioToList(String filePath) {
+        var maybeAudioFile = AudioUtil.readAudioFile(filePath);
+        if (maybeAudioFile.isEmpty()) {
+            return;
+        }
+        AudioFile audioFile = maybeAudioFile.get();
 
-        if (AudioUtil.haveCover(audioFile)) {
-            wrapper.setHasCover(true);
+        AudioWrapper wrapper = new AudioWrapper(
+                idCount,
+                audioFile
+        );
+
+        audioWrapperList.add(wrapper);
+
+        if (wrapper.hasCover()) {
             withCover++;
         }
 
-        wrapper.setId(idCount);
-
-        if (!parent.equals(parentFileLastScanning)) {
-            parentFileLastScanning = parent;
-            new Thread(() -> AudioUtil.checkForMixCD(wrapper)).start();
-        }
-
-        audioWrapperList.add(wrapper);
         idCount++;
 
-        updateProgress();
-    }
-
-    private void updateProgress() {
         mainViewController.countIndicatorUp();
     }
+
 }

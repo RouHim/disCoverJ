@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class StringUtil {
-    public static final String EMPTY_STRING = "";
     protected static final List<String> ARTISTS_SEPARATOR_KEYWORDS = Stream.of("&amp;", "+", "&", "feat", "ft", "featuring", "vs", "versus")
             .flatMap(entry -> mutate(entry).stream())
             .toList();

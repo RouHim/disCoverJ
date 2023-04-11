@@ -1,6 +1,5 @@
 package de.itlobby.discoverj.ui.viewcontroller;
 
-import de.itlobby.discoverj.models.FlatAudioWrapper;
 import de.itlobby.discoverj.ui.core.ViewManager;
 import de.itlobby.discoverj.ui.core.Views;
 import de.itlobby.discoverj.util.ImageUtil;
@@ -9,8 +8,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-
-import java.util.Optional;
 
 public class CoverDetailViewController implements ViewController {
     public TextFlow txtCoverInfo;
@@ -48,17 +45,14 @@ public class CoverDetailViewController implements ViewController {
         }
     }
 
-    public void createCoverInfo(FlatAudioWrapper wrapper) {
-        Optional<Image> maybeImage = wrapper.getImage();
+    public void createCoverInfo(Image coverImage) {
+        txtCoverInfo.getChildren()
+                .add(
+                        new Text(ImageUtil.createImageResolutionString(coverImage.getWidth(), coverImage.getHeight()))
+                );
+    }
 
-        if (wrapper.isHasCover() && maybeImage.isPresent()) {
-            Image image = maybeImage.get();
-            txtCoverInfo.getChildren().add(
-                    new Text(
-                            ImageUtil.createImageResolutionString(image.getWidth(), image.getHeight()))
-            );
-        } else {
-            txtCoverInfo.getChildren().clear();
-        }
+    public void clearCoverInfo() {
+        txtCoverInfo.getChildren().clear();
     }
 }

@@ -5,15 +5,21 @@ import java.util.List;
 import java.util.Map;
 
 public class ScanResultData {
-    private Map<String, List<FlatAudioWrapper>> audioMap = new HashMap<>();
+    private Map<String, List<AudioWrapper>> audioMap = new HashMap<>();
     private int audioFilesCount;
-    private int withCover;
+    private int withCoverCount;
 
-    public Map<String, List<FlatAudioWrapper>> getAudioMap() {
+    public ScanResultData(Map<String, List<AudioWrapper>> audioMap, int audioFilesCount, int withCoverCount) {
+        this.audioMap = audioMap;
+        this.audioFilesCount = audioFilesCount;
+        this.withCoverCount = withCoverCount;
+    }
+
+    public Map<String, List<AudioWrapper>> getAudioMap() {
         return audioMap;
     }
 
-    public void setAudioMap(Map<String, List<FlatAudioWrapper>> audioMap) {
+    public void setAudioMap(Map<String, List<AudioWrapper>> audioMap) {
         this.audioMap = audioMap;
     }
 
@@ -25,11 +31,11 @@ public class ScanResultData {
         this.audioFilesCount = audioFilesCount;
     }
 
-    public int getWithCover() {
-        return withCover;
+    public int getWithCoverCount() {
+        return withCoverCount;
     }
 
-    public void setWithCover(int withCover) {
-        this.withCover = withCover;
+    public void setWithCoverCount(int withCoverCount) {
+        this.withCoverCount = withCoverCount;
     }
 }

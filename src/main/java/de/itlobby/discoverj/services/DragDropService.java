@@ -2,14 +2,13 @@ package de.itlobby.discoverj.services;
 
 import de.itlobby.discoverj.listeners.ActionListener;
 import de.itlobby.discoverj.models.AudioWrapper;
-import de.itlobby.discoverj.models.FlatAudioWrapper;
 import de.itlobby.discoverj.ui.components.AudioListEntry;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.ui.core.ViewManager;
 import de.itlobby.discoverj.ui.core.Views;
+import de.itlobby.discoverj.ui.utils.GlyphsDude;
 import de.itlobby.discoverj.ui.viewcontroller.OpenFileViewController;
 import de.itlobby.discoverj.util.AudioUtil;
-import de.itlobby.discoverj.util.GlyphsDude;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.LanguageUtil;
 import de.itlobby.discoverj.util.SystemUtil;
@@ -70,7 +69,7 @@ public class DragDropService implements Service {
             return;
         }
 
-        getMainViewController().showBusyIndicator(LanguageUtil.getString("add.images.to.audiofiles"));
+        getMainViewController().showBusyIndicator(LanguageUtil.getString("add.images.to.audiofiles"), null);
 
         new Thread(() ->
                 addCoverToEntries(
@@ -93,10 +92,10 @@ public class DragDropService implements Service {
 
             for (AudioListEntry selectedEntry : selectedEntries) {
                 getMainViewController().countIndicatorUp();
-                FlatAudioWrapper audioWrapper = selectedEntry.getSimpleAudioWrapper();
-                AudioFile audioFile = AudioFileIO.read(new File(audioWrapper.getPath()));
+                AudioWrapper audioWrapper = selectedEntry.getWrapper();
+                AudioFile audioFile = AudioFileIO.read(new File(audioWrapper.getFilePath()));
 
-                List<FlatAudioWrapper> audioList = ServiceLocator.get(DataService.class).getAudioList();
+                List<AudioWrapper> audioList = DataHolder.getInstance().getAudioList();
 
                 audioList.stream()
                         .filter(x -> x.getId().equals(audioWrapper.getId()))
@@ -106,11 +105,11 @@ public class DragDropService implements Service {
                         .stream()
                         .filter(AudioListEntry.class::isInstance)
                         .map(AudioListEntry.class::cast)
-                        .filter(audioEntry -> audioEntry.getSimpleAudioWrapper().getId().equals(audioWrapper.getId()))
+                        .filter(audioEntry -> audioEntry.getWrapper().getId().equals(audioWrapper.getId()))
                         .forEach(wrapper -> wrapper.replaceCover(img.get()));
             }
 
-            getMainViewController().showAudioInfo(new AudioWrapper(selectedEntries.get(0).getSimpleAudioWrapper()));
+            getMainViewController().showAudioInfo(selectedEntries.get(0).getWrapper(), true);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         } finally {

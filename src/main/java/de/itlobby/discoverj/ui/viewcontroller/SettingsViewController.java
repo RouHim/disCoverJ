@@ -1,9 +1,9 @@
 package de.itlobby.discoverj.ui.viewcontroller;
 
 import de.itlobby.discoverj.models.Language;
-import de.itlobby.discoverj.searchservice.SearxService;
+import de.itlobby.discoverj.searchengines.SearxCoverSearchEngine;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
-import de.itlobby.discoverj.util.helper.AwesomeHelper;
+import de.itlobby.discoverj.ui.utils.AwesomeHelper;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -136,7 +136,7 @@ public class SettingsViewController implements ViewController {
     }
 
     private void checkHoster() {
-        Optional<String> errorMessage = ServiceLocator.get(SearxService.class).checkInstance(txtCustomSearxInstance.getText());
+        Optional<String> errorMessage = ServiceLocator.get(SearxCoverSearchEngine.class).checkInstance(txtCustomSearxInstance.getText());
 
         if (errorMessage.isEmpty()) {
             txtSearxHosterValid.setText(getString("key.settingsview.settings.searx.validHoster"));

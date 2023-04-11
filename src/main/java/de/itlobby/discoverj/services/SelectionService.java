@@ -1,10 +1,8 @@
 package de.itlobby.discoverj.services;
 
 import de.itlobby.discoverj.listeners.ListenerStateProvider;
-import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.ui.components.AudioListEntry;
 import de.itlobby.discoverj.ui.components.FolderListEntry;
-import de.itlobby.discoverj.ui.core.ServiceLocator;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 
@@ -109,12 +107,13 @@ public class SelectionService implements Service {
             return;
         }
 
-        getMainViewController().showAudioInfo(new AudioWrapper(lastSelected.get().getSimpleAudioWrapper()));
+        getMainViewController().showAudioInfo(lastSelected.get().getWrapper(), true);
     }
 
     public void removeSelection(AudioListEntry entry) {
         selectedEntries.remove(entry);
-        getMainViewController().unHighlightInList(entry.getSimpleAudioWrapper());
+        getMainViewController().unhighlightInList(entry.getWrapper().getId());
+        getMainViewController().resetCurrentAudioInformation();
 
         if (lastSelected.get().equals(entry)) {
             lastSelected.set(null);
@@ -140,7 +139,7 @@ public class SelectionService implements Service {
 
         selectedEntries.clear();
         lastSelected.set(null);
-        getMainViewController().unHighlightAll();
+        getMainViewController().unhighlightAll();
         getMainViewController().resetRightSide();
 
         checkMultiSelectionMode();
@@ -208,12 +207,11 @@ public class SelectionService implements Service {
     }
 
     private List<AudioListEntry> getEntriesForFolder(FolderListEntry folder) {
-        return ServiceLocator.get(DataService.class)
-                .getScanResultData()
+        return DataHolder.getInstance()
                 .getAudioMap()
                 .get(folder.getPath())
                 .stream()
-                .map(simpleAudioWrapper -> getMainViewController().getAudioListEntry(simpleAudioWrapper))
+                .map(simpleAudioWrapper -> getMainViewController().getAudioListEntry(simpleAudioWrapper.getId()))
                 .toList();
     }
 
