@@ -24,6 +24,13 @@
         <twelvemonkeys.version>3.9.4</twelvemonkeys.version>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <!--JavaFX-->
         <dependency>
@@ -113,9 +120,9 @@
 
         <!-- audio processing -->
         <dependency>
-            <groupId>net.jthink</groupId>
+            <groupId>com.github.Adonai</groupId>
             <artifactId>jaudiotagger</artifactId>
-            <version>3.0.1</version>
+            <version>2.3.14</version>
         </dependency>
 
         <!-- image processing -->

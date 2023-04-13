@@ -26,10 +26,10 @@
 
 ## Features
 
-**Supported audio types:** mp3, mp4, m4a, m4r, ogg, oga, flac, wma, ra
+**Supported audio types:** mp3, mp4, m4a, m4r, ogg, oga, flac, wma, ra, opus
 
 **Search engines:** iTunes, Deezer, searX, Discogs, Spotify, Musicbrainz, Local search
 
-**Powered by:** [IntelliJ IDEA](https://www.jetbrains.com/idea), [jaudiotagger](https://bitbucket.org/ijabz/jaudiotagger), [jDeploy](https://www.jdeploy.com)
+**Powered by:** [IntelliJ IDEA](https://www.jetbrains.com/idea), [jaudiotagger](https://github.com/Kaned1as/jaudiotagger), [jDeploy](https://www.jdeploy.com)
 
 <sub><sub><sub>(20e4da7da541dfc4fb79764b6818baaf6301bfde88e914f03126655484b768ed)</sub></sub></sub>
