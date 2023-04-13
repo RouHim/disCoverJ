@@ -31,5 +31,3 @@
 **Search engines:** iTunes, Deezer, searX, Discogs, Spotify, Musicbrainz, Local search
 
 **Powered by:** [IntelliJ IDEA](https://www.jetbrains.com/idea), [jaudiotagger](https://bitbucket.org/ijabz/jaudiotagger), [jDeploy](https://www.jdeploy.com)
-
-(20e4da7da541dfc4fb79764b6818baaf6301bfde88e914f03126655484b768ed)
