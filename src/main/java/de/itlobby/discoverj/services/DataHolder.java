@@ -5,10 +5,8 @@ import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ScanResultData;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class DataHolder {
     private static final DataHolder instance = new DataHolder();
@@ -94,5 +92,51 @@ public class DataHolder {
         this.audioMap = null;
         this.withCoverCount = 0;
         this.audioFilesCount = 0;
+    }
+
+    public void removeItemsWithCover() {
+        this.withCoverCount = 0;
+        List<AudioWrapper> withoutCover = audioMap.entrySet().stream()
+                .flatMap(x -> x.getValue().stream())
+                .filter(x -> !x.hasCover())
+                .toList();
+
+        audioMap = withoutCover.stream()
+                .collect(Collectors.groupingBy(AudioWrapper::getParentFilePath))
+                .entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .collect(
+                        Collectors.toMap(
+                                Map.Entry::getKey,
+                                Map.Entry::getValue,
+                                (oldValue, newValue) -> oldValue,
+                                LinkedHashMap::new
+                        )
+                );
+
+        this.audioFilesCount = withoutCover.size();
+    }
+
+    public void removeItemsById(List<Integer> idsToRemove) {
+        List<AudioWrapper> toKeep = audioMap.entrySet().stream()
+                .flatMap(x -> x.getValue().stream())
+                .filter(x -> !idsToRemove.contains(x.getId()))
+                .toList();
+
+        audioMap = toKeep.stream()
+                .collect(Collectors.groupingBy(AudioWrapper::getParentFilePath))
+                .entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .collect(
+                        Collectors.toMap(
+                                Map.Entry::getKey,
+                                Map.Entry::getValue,
+                                (oldValue, newValue) -> oldValue,
+                                LinkedHashMap::new
+                        )
+                );
+
+        this.withCoverCount = (int) toKeep.stream().filter(AudioWrapper::hasCover).count();
+        this.audioFilesCount = toKeep.size();
     }
 }

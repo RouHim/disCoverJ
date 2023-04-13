@@ -7,7 +7,6 @@ import de.itlobby.discoverj.listeners.ParentKeyDeletedListener;
 import de.itlobby.discoverj.mixcd.MixCd;
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ImageFile;
-import de.itlobby.discoverj.models.ScanResultData;
 import de.itlobby.discoverj.services.CoverSearchService;
 import de.itlobby.discoverj.services.InitialService;
 import de.itlobby.discoverj.services.LightBoxService;
@@ -70,10 +69,7 @@ import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainViewController implements ViewController, MultipleSelectionListener, ParentKeyDeletedListener {
@@ -167,26 +163,25 @@ public class MainViewController implements ViewController, MultipleSelectionList
         ListenerStateProvider.getInstance().setParentKeyDeletedListener(this);
     }
 
-    public void showScanResult(ScanResultData scanResultData) {
+    public void showScanResult(int withCoverCount, int audioFilesCount, Map<String, List<AudioWrapper>> audioDirectory) {
         Platform.runLater(() -> {
-            int withCoverCount = scanResultData.getWithCoverCount();
             hideBusyIndicator();
 
             setState(MessageFormat.format(
                     LanguageUtil.getString("InitialController.thereAre0Files"),
-                    scanResultData.getAudioFilesCount()
+                    audioFilesCount
             ));
 
-            int withoutCoverCount = scanResultData.getAudioFilesCount() - withCoverCount;
+            int withoutCoverCount = audioFilesCount - withCoverCount;
 
-            txtTotalAudioCount.setText(String.valueOf(scanResultData.getAudioFilesCount()));
+            txtTotalAudioCount.setText(String.valueOf(audioFilesCount));
             txtWithCoverAudioCount.setText(String.valueOf(withCoverCount));
 
             log.info(String.format("With cover: %s\tWithout cover: %s", withCoverCount, withoutCoverCount));
 
-            setAudioList(scanResultData);
+            setAudioList(audioDirectory);
 
-            if (scanResultData.getAudioFilesCount() <= 0) {
+            if (audioFilesCount <= 0) {
                 deactivateActionButton();
             } else {
                 activateActionButton(
@@ -251,14 +246,23 @@ public class MainViewController implements ViewController, MultipleSelectionList
 
     private void initContextMenu() {
         audioListContextMenu = new ContextMenu();
+        InitialService initialService = ServiceLocator.get(InitialService.class);
 
         MenuItem alCmItemSearchGoogleImages = new MenuItem(LanguageUtil.getString("key.mainview.cm.google.image.search"), GlyphsDude.createIcon(FontAwesomeIcon.GOOGLE));
-        alCmItemSearchGoogleImages.setOnAction(e -> ServiceLocator.get(InitialService.class).searchOnGoogleImages());
+        alCmItemSearchGoogleImages.setOnAction(e -> initialService.searchOnGoogleImages());
+
+        MenuItem alCmItemRemoveWithCover = new MenuItem(LanguageUtil.getString("key.mainview.cm.remove.all.with.cover"), GlyphsDude.createIcon(FontAwesomeIcon.TIMES_CIRCLE));
+        alCmItemRemoveWithCover.setOnAction(e -> initialService.clearWithCoverListEntries());
+
+        MenuItem alCmItemRemoveSelected = new MenuItem(LanguageUtil.getString("key.mainview.cm.remove.all.selected"), GlyphsDude.createIcon(FontAwesomeIcon.TIMES_CIRCLE));
+        alCmItemRemoveSelected.setOnAction(e -> initialService.clearSelectedEntries());
 
         MenuItem alCmItemRemoveAll = new MenuItem(LanguageUtil.getString("key.mainview.cm.remove.all"), GlyphsDude.createIcon(FontAwesomeIcon.TIMES_CIRCLE));
-        alCmItemRemoveAll.setOnAction(e -> ServiceLocator.get(InitialService.class).clearAllListEntries());
+        alCmItemRemoveAll.setOnAction(e -> initialService.clearAllListEntries());
 
         audioListContextMenu.getItems().add(alCmItemSearchGoogleImages);
+        audioListContextMenu.getItems().add(alCmItemRemoveWithCover);
+        audioListContextMenu.getItems().add(alCmItemRemoveSelected);
         audioListContextMenu.getItems().add(alCmItemRemoveAll);
 
         lwAudioList.addEventHandler(
@@ -395,11 +399,11 @@ public class MainViewController implements ViewController, MultipleSelectionList
         });
     }
 
-    private void setAudioList(ScanResultData scanResultData) {
+    private void setAudioList(Map<String, List<AudioWrapper>> audioDirectory) {
         lwAudioList.getChildren().clear();
 
         int parentIndex = 0;
-        for (Map.Entry<String, List<AudioWrapper>> entry : scanResultData.getAudioMap().entrySet()) {
+        for (Map.Entry<String, List<AudioWrapper>> entry : audioDirectory.entrySet()) {
             FolderListEntry folderEntry = new FolderListEntry(entry.getKey());
             lwAudioList.getChildren().add(folderEntry);
 

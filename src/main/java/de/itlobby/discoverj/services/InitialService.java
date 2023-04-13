@@ -14,12 +14,7 @@ import de.itlobby.discoverj.ui.viewcontroller.MainViewController;
 import de.itlobby.discoverj.ui.viewcontroller.OpenFileViewController;
 import de.itlobby.discoverj.ui.viewtask.PreCountViewTask;
 import de.itlobby.discoverj.ui.viewtask.ScanFileViewTask;
-import de.itlobby.discoverj.util.AudioUtil;
-import de.itlobby.discoverj.util.ImageCache;
-import de.itlobby.discoverj.util.ImageClipboardUtil;
-import de.itlobby.discoverj.util.LanguageUtil;
-import de.itlobby.discoverj.util.StringUtil;
-import de.itlobby.discoverj.util.SystemUtil;
+import de.itlobby.discoverj.util.*;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -160,7 +155,7 @@ public class InitialService implements Service {
 
     private void scanFinished(ScanResultData scanResultData) {
         DataHolder.getInstance().setFromScanResult(scanResultData);
-        getMainViewController().showScanResult(scanResultData);
+        getMainViewController().showScanResult(scanResultData.getWithCoverCount(), scanResultData.getAudioFilesCount(), scanResultData.getAudioMap());
 
         ServiceLocator.get(SelectionService.class).clearAll();
     }
@@ -304,6 +299,37 @@ public class InitialService implements Service {
     public void clearAllListEntries() {
         DataHolder.getInstance().clear();
         getMainViewController().lwAudioList.getChildren().clear();
+        ServiceLocator.get(SelectionService.class).clearAll();
+    }
+
+    public void clearWithCoverListEntries() {
+        DataHolder dataHolder = DataHolder.getInstance();
+        dataHolder.removeItemsWithCover();
+
+        getMainViewController().showScanResult(
+                dataHolder.getWithCoverCount(),
+                dataHolder.getAudioFilesCount(),
+                dataHolder.getAudioMap()
+        );
+
+        ServiceLocator.get(SelectionService.class).clearAll();
+    }
+
+    public void clearSelectedEntries() {
+        List<Integer> selectedIds = ServiceLocator.get(SelectionService.class).getSelectedEntries()
+                .stream()
+                .map(x -> x.getWrapper().getId())
+                .toList();
+
+        DataHolder dataHolder = DataHolder.getInstance();
+        dataHolder.removeItemsById(selectedIds);
+
+        getMainViewController().showScanResult(
+                dataHolder.getWithCoverCount(),
+                dataHolder.getAudioFilesCount(),
+                dataHolder.getAudioMap()
+        );
+
         ServiceLocator.get(SelectionService.class).clearAll();
     }
 
