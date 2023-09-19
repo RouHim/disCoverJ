@@ -14,7 +14,7 @@
         "title": "disCoverJ"
     },
     "dependencies": {
-        "njre": "^0.3.0",
+        "njre": "^1.0.0",
         "shelljs": "^0.8.4"
     },
     "license": "GPL-2.0 License",
