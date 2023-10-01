@@ -1,3 +1,10 @@
+## [412.1.1](https://github.com/RouHim/disCoverJ/compare/412.1.0...412.1.1) (2023-10-01)
+
+
+### Bug Fixes
+
+* **app:** revert to java 17 ([dea4705](https://github.com/RouHim/disCoverJ/commit/dea47055e9e63e34237b9ab77cb62dd743b05eed))
+
 # [412.1.0](https://github.com/RouHim/disCoverJ/compare/412.0.0...412.1.0) (2023-10-01)
 
 
