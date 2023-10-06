@@ -1,3 +1,10 @@
+## [412.1.4](https://github.com/RouHim/disCoverJ/compare/412.1.3...412.1.4) (2023-10-06)
+
+
+### Bug Fixes
+
+* **jdeploy:** java version ([e55d864](https://github.com/RouHim/disCoverJ/commit/e55d864b11ad9d9c4e6bfa73b6cf84aab4a3019b))
+
 ## [412.1.3](https://github.com/RouHim/disCoverJ/compare/412.1.2...412.1.3) (2023-10-04)
 
 ## [412.1.2](https://github.com/RouHim/disCoverJ/compare/412.1.1...412.1.2) (2023-10-01)
