@@ -121,6 +121,7 @@ jobs:
       - name: Publish with jDeploy
         run: |
           npm version ${{ env.VERSION }}
+          git status
           npx jdeploy publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
