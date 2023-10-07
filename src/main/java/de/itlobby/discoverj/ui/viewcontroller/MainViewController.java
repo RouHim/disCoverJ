@@ -69,7 +69,10 @@ import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainViewController implements ViewController, MultipleSelectionListener, ParentKeyDeletedListener {
@@ -692,7 +695,9 @@ public class MainViewController implements ViewController, MultipleSelectionList
 
     @Override
     public void onMultipleSelectionEnded() {
-        AnimationHelper.slide(multiSelectionLayout, 1, 0, 5, 150);
+        Platform.runLater(() -> {
+            AnimationHelper.slide(multiSelectionLayout, 1, 0, 5, 150);
+        });
     }
 
     @Override
@@ -712,15 +717,19 @@ public class MainViewController implements ViewController, MultipleSelectionList
     }
 
     public void setEntryToProcessingState(AudioWrapper audioWrapper) {
-        showAudioInfo(audioWrapper, false);
-        highlightInList(audioWrapper.getId());
-        setAudioNodeBusy(true, audioWrapper.getId());
+        Platform.runLater(() -> {
+            showAudioInfo(audioWrapper, false);
+            highlightInList(audioWrapper.getId());
+            setAudioNodeBusy(true, audioWrapper.getId());
+        });
     }
 
     public void setEntryToFinishedState(Integer audioWrapperId) {
-        unhighlightInList(audioWrapperId);
-        setAudioNodeBusy(false, audioWrapperId);
-        increaseProgress();
+        Platform.runLater(() -> {
+            unhighlightInList(audioWrapperId);
+            setAudioNodeBusy(false, audioWrapperId);
+            increaseProgress();
+        });
     }
 
     public void setBusyIndicatorStatusText(String text) {

@@ -15,11 +15,8 @@ import org.jaudiotagger.audio.AudioFileIO;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static de.itlobby.discoverj.util.AudioUtil.VALID_AUDIO_FILE_EXTENSION;
@@ -30,7 +27,6 @@ import static de.itlobby.discoverj.util.AudioUtil.getYear;
 import static de.itlobby.discoverj.util.AudioUtil.haveCover;
 
 public class LocalCoverSearchEngine implements CoverSearchEngine {
-    private static final Map<String, List<LocalMatchInfo>> scanInfoCache = new HashMap<>();
     private final Logger log = LogManager.getLogger(this.getClass());
 
     @Override
@@ -66,20 +62,12 @@ public class LocalCoverSearchEngine implements CoverSearchEngine {
                 audioWrapper.hasCover()
         );
 
-        long s = System.currentTimeMillis();
-        fillLocalScannerCache(
-                new File(parentFilePath),
-                audioWrapper
-        );
-        log.info("Built cache in: {}ms", System.currentTimeMillis() - s);
+        long timestamp = System.currentTimeMillis();
+        List<LocalMatchInfo> filesInFolder = getFilesInFolder(new File(parentFilePath));
 
-        if (!scanInfoCache.containsKey(parentFilePath)) {
-            return Collections.emptyList();
-        }
-
-        s = System.currentTimeMillis();
-        List<ImageFile> foundImages = scanInfoCache.get(parentFilePath)
+        List<ImageFile> foundImages = filesInFolder
                 .parallelStream()
+                .filter(file -> !file.filePath().equals(audioWrapper.getFilePath()))
                 .filter(LocalMatchInfo::haveCover)
                 .filter(otherFile -> matchesCriteria(currentMatchInfos, otherFile, config))
                 .map(otherFile -> AudioUtil.getAudioFile(otherFile.filePath()))
@@ -88,7 +76,9 @@ public class LocalCoverSearchEngine implements CoverSearchEngine {
                 .flatMap(Optional::stream)
                 .filter(CoverSearchEngine::reachesMinRequiredCoverSize)
                 .toList();
-        log.info("Matched in: {}ms", System.currentTimeMillis() - s);
+
+        log.info("Matched in: {}ms", System.currentTimeMillis() - timestamp);
+
         return foundImages;
     }
 
@@ -131,12 +121,12 @@ public class LocalCoverSearchEngine implements CoverSearchEngine {
     /**
      * Load images located in the same folder as the audio file.
      *
-     * @param parentDir
+     * @param parentDir the parent directory of the audio file
      * @return the found list of images
      */
     private List<ImageFile> getCoverFromAudioFolder(File parentDir) {
-        return FileUtils.listFiles(parentDir, VALID_IMAGE_FILE_EXTENSION, false).stream()
-                .parallel()
+        return FileUtils.listFiles(parentDir, VALID_IMAGE_FILE_EXTENSION, false)
+                .parallelStream()
                 .map(ImageUtil::readImageFile)
                 .flatMap(Optional::stream)
                 .filter(CoverSearchEngine::reachesMinRequiredCoverSize)
@@ -148,19 +138,12 @@ public class LocalCoverSearchEngine implements CoverSearchEngine {
         return (x, y) -> Integer.compare(x.height() * x.width(), y.height() * y.width()) * -1;
     }
 
-    public void fillLocalScannerCache(File parent, AudioWrapper audioWrapper) {
-        if (scanInfoCache.containsKey(parent.getAbsolutePath())) {
-            return;
-        }
-
-        List<LocalMatchInfo> scanInfoList = FileUtils.listFiles(parent, VALID_AUDIO_FILE_EXTENSION, false)
+    public List<LocalMatchInfo> getFilesInFolder(File parent) {
+        return FileUtils.listFiles(parent, VALID_AUDIO_FILE_EXTENSION, false)
                 .parallelStream()
-                .filter(file -> !file.equals(new File(audioWrapper.getFilePath())))
                 .map(this::buildCriteriaMatcher)
                 .flatMap(Optional::stream)
                 .toList();
-
-        scanInfoCache.put(parent.getAbsolutePath(), scanInfoList);
     }
 
     private Optional<LocalMatchInfo> buildCriteriaMatcher(File file) {

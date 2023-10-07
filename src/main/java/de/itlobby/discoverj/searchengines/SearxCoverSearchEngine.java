@@ -8,6 +8,7 @@ import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.StringUtil;
 import org.apache.commons.io.IOUtils;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.net.URL;
@@ -71,7 +72,7 @@ public class SearxCoverSearchEngine implements CoverSearchEngine {
         // Load instances from searX index
         if (instances == null) {
             instances = getJsonFromUrl(SEARX_INSTANCES_INDEX)
-                    .map(response -> response.getJSONObject("instances").toMap().keySet().stream().toList())
+                    .map(response -> getInstances(response))
                     .orElse(Collections.emptyList());
         }
 
@@ -89,6 +90,16 @@ public class SearxCoverSearchEngine implements CoverSearchEngine {
         }
 
         return Collections.emptyList();
+    }
+
+    @NotNull
+    private static List<String> getInstances(JSONObject response) {
+        return response.getJSONObject("instances")
+                .toMap()
+                .keySet()
+                .stream()
+                .filter(instanceUrl -> !instanceUrl.endsWith(".onion/") && !instanceUrl.endsWith(".i2p/"))
+                .toList();
     }
 
     /**

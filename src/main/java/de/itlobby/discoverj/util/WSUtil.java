@@ -22,7 +22,7 @@ public class WSUtil {
         try {
             return Optional.of(new JSONObject(IOUtils.toString(new URL(url), UTF_8)));
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            log.debug(e.getMessage(), e);
         }
 
         return Optional.empty();
