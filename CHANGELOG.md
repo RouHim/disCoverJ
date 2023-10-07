@@ -1,3 +1,10 @@
+## [412.1.5](https://github.com/RouHim/disCoverJ/compare/412.1.4...412.1.5) (2023-10-07)
+
+
+### Bug Fixes
+
+* **app:** broken version & other minor bugs ([1bdb8f4](https://github.com/RouHim/disCoverJ/commit/1bdb8f48114861d90bde0e6362c9a83e945eece7))
+
 ## [412.1.4](https://github.com/RouHim/disCoverJ/compare/412.1.3...412.1.4) (2023-10-06)
 
 
