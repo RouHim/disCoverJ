@@ -117,10 +117,8 @@ jobs:
         run: |
           mvn versions:set -DnewVersion=${{ env.VERSION }}
           mvn clean package -q -DskipTests
-
-      - name: Test git status
-        run: |
-          git status
+          // Revert pom file changes to have a clean working copy
+          git stash
 
       - name: Publish with jDeploy
         run: |
