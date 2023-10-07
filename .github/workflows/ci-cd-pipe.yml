@@ -116,12 +116,15 @@ jobs:
       - name: Build jar with Maven
         run: |
           mvn versions:set -DnewVersion=${{ env.VERSION }}
-          mvn clean package -q -DskipTests          
+          mvn clean package -q -DskipTests
+
+      - name: Test git status
+        run: |
+          git status
 
       - name: Publish with jDeploy
         run: |
           npm version ${{ env.VERSION }}
-          git status
           npx jdeploy publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
