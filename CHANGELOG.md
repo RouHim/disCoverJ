@@ -1,3 +1,5 @@
+## [412.1.11](https://github.com/RouHim/disCoverJ/compare/412.1.10...412.1.11) (2023-10-14)
+
 ## [412.1.10](https://github.com/RouHim/disCoverJ/compare/412.1.9...412.1.10) (2023-10-13)
 
 ## [412.1.9](https://github.com/RouHim/disCoverJ/compare/412.1.8...412.1.9) (2023-10-07)
