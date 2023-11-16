@@ -24,7 +24,7 @@ public class AppConfig implements Serializable {
     /**
      * Search timeout in seconds
      */
-    private int searchTimeout = 60;
+    private int searchTimeout = 30;
     private boolean overwriteOnlyHigher = false;
     private String localAdditionalFolderPath = "";
     private String localNamePattern = "%artist% - %title%";
