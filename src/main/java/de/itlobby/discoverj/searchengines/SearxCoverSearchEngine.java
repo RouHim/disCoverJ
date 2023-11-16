@@ -61,6 +61,16 @@ public class SearxCoverSearchEngine implements CoverSearchEngine {
         return Stream.concat(httpStream, base64Stream).toList();
     }
 
+    @NotNull
+    private static List<String> getInstances(JSONObject response) {
+        return response.getJSONObject("instances")
+                .toMap()
+                .keySet()
+                .stream()
+                .filter(instanceUrl -> !instanceUrl.endsWith(".onion/") && !instanceUrl.endsWith(".i2p/"))
+                .toList();
+    }
+
     @Override
     public List<ImageFile> search(AudioWrapper audioWrapper) {
         AppConfig config = Settings.getInstance().getConfig();
@@ -90,16 +100,6 @@ public class SearxCoverSearchEngine implements CoverSearchEngine {
         }
 
         return Collections.emptyList();
-    }
-
-    @NotNull
-    private static List<String> getInstances(JSONObject response) {
-        return response.getJSONObject("instances")
-                .toMap()
-                .keySet()
-                .stream()
-                .filter(instanceUrl -> !instanceUrl.endsWith(".onion/") && !instanceUrl.endsWith(".i2p/"))
-                .toList();
     }
 
     /**

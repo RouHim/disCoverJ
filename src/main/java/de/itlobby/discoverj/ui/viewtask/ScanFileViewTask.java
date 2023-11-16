@@ -83,7 +83,7 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
             var idPathMap = audioWrapperList.stream().collect(
                     Collectors.toMap(AudioWrapper::getId, AudioWrapper::getFilePath)
             );
-            new Thread(() -> lazyLoadCoverImages(idPathMap)).start();
+            Thread.ofVirtual().start(() -> lazyLoadCoverImages(idPathMap));
         } else {
             Settings.getInstance().setCoverLoadingDisabled(true);
         }

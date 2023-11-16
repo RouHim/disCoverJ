@@ -185,7 +185,7 @@ public class SystemUtil {
 
     public static void setTaskbarProgress(Number value) {
         if (Taskbar.isTaskbarSupported() && Taskbar.getTaskbar().isSupported(Taskbar.Feature.PROGRESS_VALUE)) {
-            new Thread(() -> Taskbar.getTaskbar().setProgressValue((int) (value.doubleValue() * 100))).start();
+            Thread.ofVirtual().start(() -> Taskbar.getTaskbar().setProgressValue((int) (value.doubleValue() * 100)));
         }
     }
 

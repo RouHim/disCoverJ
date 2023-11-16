@@ -81,9 +81,9 @@ public class ImageSelectionService implements Service {
                 viewController.setImagesToView(elements)
         );
 
-        Thread thread = new Thread(() -> threadFinishedListener.onAction(postProcessImagesAndGetNodes()));
-        thread.setUncaughtExceptionHandler(ServiceLocator.get(ExceptionService.class));
-        thread.start();
+        Thread.ofVirtual()
+                .uncaughtExceptionHandler(ServiceLocator.get(ExceptionService.class))
+                .start(() -> threadFinishedListener.onAction(postProcessImagesAndGetNodes()));
     }
 
     private List<VBox> postProcessImagesAndGetNodes() {

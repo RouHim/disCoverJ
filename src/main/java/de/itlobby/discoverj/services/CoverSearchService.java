@@ -305,28 +305,27 @@ public class CoverSearchService implements Service {
                 .toList();
         getMainViewController().setBusyIndicatorStatusText("Loading covers for: \n" + audioWrapper.getFileName());
 
-        ExecutorService executorService = Executors.newFixedThreadPool(activeSearchEngines.size());
+        // Start cover search per active search engine
+        try (ExecutorService executorService = Executors.newFixedThreadPool(activeSearchEngines.size())) {
+            List<Future<List<ImageFile>>> searchEngineFutures = activeSearchEngines.stream()
+                    .map(searchEngine -> executorService.submit(new CoverSearchTask(searchEngine, audioWrapper)))
+                    .toList();
 
-        List<Future<List<ImageFile>>> searchEngineFutures = activeSearchEngines.stream()
-                .map(searchEngine -> executorService.submit(new CoverSearchTask(searchEngine, audioWrapper)))
-                .toList();
+            int searchTimeout = Settings.getInstance().getConfig().getSearchTimeout();
 
-        int searchTimeout = Settings.getInstance().getConfig().getSearchTimeout();
-
-        List<ImageFile> allCovers = Collections.synchronizedList(new ArrayList<>());
-        for (Future<List<ImageFile>> searchFuture : searchEngineFutures) {
-            try {
-                allCovers.addAll(searchFuture.get(searchTimeout, TimeUnit.SECONDS));
-            } catch (TimeoutException e) {
-                log.error("{} seconds Timout for search engine {}", searchTimeout, e.getMessage());
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
+            List<ImageFile> allCovers = Collections.synchronizedList(new ArrayList<>());
+            for (Future<List<ImageFile>> searchFuture : searchEngineFutures) {
+                try {
+                    allCovers.addAll(searchFuture.get(searchTimeout, TimeUnit.SECONDS));
+                } catch (TimeoutException e) {
+                    log.error("{} seconds Timout for search engine {}", searchTimeout, e.getMessage());
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
             }
+
+            coverPersistentService.persistImages(audioWrapper, allCovers);
         }
-
-        executorService.shutdownNow();
-
-        coverPersistentService.persistImages(audioWrapper, allCovers);
 
         getMainViewController().countIndicatorUp();
     }

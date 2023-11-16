@@ -109,7 +109,7 @@ public class MainService implements Service {
     private void sendFeedback() {
         Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
 
-        new Thread(() -> {
+        Thread.ofVirtual().start(() -> {
             if (desktop != null && desktop.isSupported(Desktop.Action.MAIL)) {
                 try {
                     URI emailURL = new URIBuilder()
@@ -124,7 +124,7 @@ public class MainService implements Service {
             } else {
                 log.info("Send mail to rouven(at)himmelstein.info");
             }
-        }).start();
+        });
     }
 
     private void donate() {

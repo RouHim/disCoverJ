@@ -71,13 +71,13 @@ public class DragDropService implements Service {
 
         getMainViewController().showBusyIndicator(LanguageUtil.getString("add.images.to.audiofiles"), null);
 
-        new Thread(() ->
+        Runnable taskToExecute = () ->
                 addCoverToEntries(
                         imgFile,
                         selectedEntries,
                         () -> getMainViewController().hideBusyIndicator()
-                ))
-                .start();
+                );
+        Thread.ofVirtual().start(taskToExecute);
     }
 
     private void addCoverToEntries(File imgFile, List<AudioListEntry> selectedEntries, ActionListener threadFinishedListener) {

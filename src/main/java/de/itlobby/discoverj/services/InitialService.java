@@ -130,9 +130,10 @@ public class InitialService implements Service {
         try {
             preCountTask = new PreCountViewTask(musicObjects);
             preCountTask.setFinishedListener(this::scanFiles);
-            Thread thread = new Thread(preCountTask);
-            thread.setUncaughtExceptionHandler(ServiceLocator.get(ExceptionService.class));
-            thread.start();
+
+            Thread.ofVirtual()
+                    .uncaughtExceptionHandler(ServiceLocator.get(ExceptionService.class))
+                    .start(preCountTask);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -150,9 +151,10 @@ public class InitialService implements Service {
         try {
             scanFileTask = new ScanFileViewTask(fileList, getMainViewController());
             scanFileTask.setFinishedListener(this::scanFinished);
-            Thread thread = new Thread(scanFileTask);
-            thread.setUncaughtExceptionHandler(ServiceLocator.get(ExceptionService.class));
-            thread.start();
+
+            Thread.ofVirtual()
+                    .uncaughtExceptionHandler(ServiceLocator.get(ExceptionService.class))
+                    .start(scanFileTask);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -262,13 +264,13 @@ public class InitialService implements Service {
 
         if (audioWrapper.hasCover()) {
             audioWrapper.loadImage().ifPresent(image ->
-                    new Thread(() -> new ImageClipboardUtil().setImage(image)).start()
+                    Thread.ofVirtual().start(() -> new ImageClipboardUtil().setImage(image))
             );
         }
     }
 
     public void pasteCoverFromClipBrd() {
-        new Thread(() -> {
+        Thread.ofVirtual().start(() -> {
             AudioListEntry audioListEntry = ServiceLocator.get(SelectionService.class).getLastSelected();
             AudioWrapper audioWrapper = audioListEntry.getWrapper();
             audioWrapper.setHasCover(true);
@@ -283,7 +285,7 @@ public class InitialService implements Service {
                 getMainViewController().setNewCoverToListItem(audioWrapper, coverImage);
                 getMainViewController().showAudioInfo(audioWrapper, true);
             });
-        }).start();
+        });
     }
 
     public void removeSelectedEntries() {
