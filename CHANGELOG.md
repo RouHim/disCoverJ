@@ -1,3 +1,10 @@
+# [412.2.0](https://github.com/RouHim/disCoverJ/compare/412.1.28...412.2.0) (2023-11-16)
+
+
+### Features
+
+* **search:** reduce default search timeout to 30 sec ([2e479c9](https://github.com/RouHim/disCoverJ/commit/2e479c990166fc7f102b2ed91f160a28fcb99b79))
+
 ## [412.1.28](https://github.com/RouHim/disCoverJ/compare/412.1.27...412.1.28) (2023-11-16)
 
 ## [412.1.27](https://github.com/RouHim/disCoverJ/compare/412.1.26...412.1.27) (2023-11-10)
