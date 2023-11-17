@@ -7,6 +7,7 @@ import de.itlobby.discoverj.settings.AppConfig;
 import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.util.AudioUtil;
 import de.itlobby.discoverj.util.ImageUtil;
+import de.itlobby.discoverj.util.SystemUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -93,6 +94,9 @@ public class DiscogsCoverSearchEngine implements CoverSearchEngine {
                     .toList();
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        } finally {
+            // Wait a bit to avoid exceeding the api request limit
+            SystemUtil.threadSleep(250);
         }
 
         return Collections.emptyList();
