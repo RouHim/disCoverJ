@@ -65,7 +65,7 @@ public class SearchQueryUtil {
         return "";
     }
 
-    public static String createQueryFromPattern(AudioWrapper audioWrapper, String pattern) {
+    public static String createSearchQueryFromPattern(AudioWrapper audioWrapper, String pattern) {
         String query = pattern;
 
         query = query.replace("%auto%", createSearchString(audioWrapper));

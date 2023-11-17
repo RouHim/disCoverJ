@@ -18,6 +18,7 @@ import de.itlobby.discoverj.util.AudioUtil;
 import de.itlobby.discoverj.util.ImageCache;
 import de.itlobby.discoverj.util.ImageClipboardUtil;
 import de.itlobby.discoverj.util.LanguageUtil;
+import de.itlobby.discoverj.util.SearXUtil;
 import de.itlobby.discoverj.util.StringUtil;
 import de.itlobby.discoverj.util.SystemUtil;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
@@ -130,9 +131,10 @@ public class InitialService implements Service {
         try {
             preCountTask = new PreCountViewTask(musicObjects);
             preCountTask.setFinishedListener(this::scanFiles);
-            Thread thread = new Thread(preCountTask);
-            thread.setUncaughtExceptionHandler(ServiceLocator.get(ExceptionService.class));
-            thread.start();
+
+            Thread.ofVirtual()
+                    .uncaughtExceptionHandler(ServiceLocator.get(ExceptionService.class))
+                    .start(preCountTask);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -150,9 +152,10 @@ public class InitialService implements Service {
         try {
             scanFileTask = new ScanFileViewTask(fileList, getMainViewController());
             scanFileTask.setFinishedListener(this::scanFinished);
-            Thread thread = new Thread(scanFileTask);
-            thread.setUncaughtExceptionHandler(ServiceLocator.get(ExceptionService.class));
-            thread.start();
+
+            Thread.ofVirtual()
+                    .uncaughtExceptionHandler(ServiceLocator.get(ExceptionService.class))
+                    .start(scanFileTask);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -262,13 +265,13 @@ public class InitialService implements Service {
 
         if (audioWrapper.hasCover()) {
             audioWrapper.loadImage().ifPresent(image ->
-                    new Thread(() -> new ImageClipboardUtil().setImage(image)).start()
+                    Thread.ofVirtual().start(() -> new ImageClipboardUtil().setImage(image))
             );
         }
     }
 
     public void pasteCoverFromClipBrd() {
-        new Thread(() -> {
+        Thread.ofVirtual().start(() -> {
             AudioListEntry audioListEntry = ServiceLocator.get(SelectionService.class).getLastSelected();
             AudioWrapper audioWrapper = audioListEntry.getWrapper();
             audioWrapper.setHasCover(true);
@@ -283,7 +286,7 @@ public class InitialService implements Service {
                 getMainViewController().setNewCoverToListItem(audioWrapper, coverImage);
                 getMainViewController().showAudioInfo(audioWrapper, true);
             });
-        }).start();
+        });
     }
 
     public void removeSelectedEntries() {
@@ -338,12 +341,28 @@ public class InitialService implements Service {
         ServiceLocator.get(SelectionService.class).clearAll();
     }
 
+    public void searchOnSearXImages() {
+        AudioListEntry lastSelected = ServiceLocator.get(SelectionService.class).getLastSelected();
+
+        if (lastSelected != null) {
+            String googleSearchPattern = Settings.getInstance().getConfig().getGoogleSearchPattern();
+            String rawQuery = SearchQueryUtil.createSearchQueryFromPattern(lastSelected.getWrapper(), googleSearchPattern);
+            String query = StringUtil.encodeRfc3986(rawQuery);
+
+            Thread.ofPlatform().start(() -> {
+                String url = SearXUtil.getInstances().get(0);
+                SystemUtil.browseUrl(String.format(url + "/search?q=%s&category_images", query));
+            });
+            openSelectImageDialog();
+        }
+    }
+
     public void searchOnGoogleImages() {
         AudioListEntry lastSelected = ServiceLocator.get(SelectionService.class).getLastSelected();
 
         if (lastSelected != null) {
             String googleSearchPattern = Settings.getInstance().getConfig().getGoogleSearchPattern();
-            String rawQuery = SearchQueryUtil.createQueryFromPattern(lastSelected.getWrapper(), googleSearchPattern);
+            String rawQuery = SearchQueryUtil.createSearchQueryFromPattern(lastSelected.getWrapper(), googleSearchPattern);
             String query = StringUtil.encodeRfc3986(rawQuery);
 
             SystemUtil.browseUrl(String.format("https://www.google.com/search?q=%s&tbm=isch", query));

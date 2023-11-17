@@ -30,6 +30,7 @@ import org.jaudiotagger.audio.AudioFileIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
@@ -54,7 +55,7 @@ public class DragDropService implements Service {
 
     private void insertDroppedCover(String url) {
         try {
-            URL imgUrl = new URL(url);
+            URL imgUrl = URI.create(url).toURL();
             File imgFile = SystemUtil.getTempFileFromUrl(imgUrl);
             FileUtils.copyURLToFile(imgUrl, imgFile);
             insertDroppedCover(imgFile);
@@ -71,13 +72,13 @@ public class DragDropService implements Service {
 
         getMainViewController().showBusyIndicator(LanguageUtil.getString("add.images.to.audiofiles"), null);
 
-        new Thread(() ->
+        Runnable taskToExecute = () ->
                 addCoverToEntries(
                         imgFile,
                         selectedEntries,
                         () -> getMainViewController().hideBusyIndicator()
-                ))
-                .start();
+                );
+        Thread.ofVirtual().start(taskToExecute);
     }
 
     private void addCoverToEntries(File imgFile, List<AudioListEntry> selectedEntries, ActionListener threadFinishedListener) {

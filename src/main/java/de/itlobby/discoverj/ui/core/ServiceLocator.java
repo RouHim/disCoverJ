@@ -38,6 +38,7 @@ public class ServiceLocator {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private <T> T getService(Class<T> clazz) {
         T obj = (T) services.get(clazz);
 

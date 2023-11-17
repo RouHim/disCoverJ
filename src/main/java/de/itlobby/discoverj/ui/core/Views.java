@@ -20,6 +20,7 @@ public enum Views {
     private final Class<ViewController> clazz;
     private final String title;
 
+    @SuppressWarnings("unchecked")
     Views(String path, String title, Class<?> clazz) {
         this.path = path;
         this.title = title;

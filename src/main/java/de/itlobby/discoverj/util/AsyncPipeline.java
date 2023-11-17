@@ -27,17 +27,18 @@ public class AsyncPipeline {
      * Starts the async process and runs the defined functions after completion sequential
      */
     public void begin() {
-        Thread pipeThread = new Thread(() ->
-                toExecute.forEach(runnable -> {
-                    try {
-                        Thread t = new Thread(runnable);
-                        t.start();
-                        t.join();
-                    } catch (Exception e) {
-                        throw new RuntimeException(e.getMessage(), e);
-                    }
-                }));
-        pipeThread.setUncaughtExceptionHandler(ServiceLocator.get(ExceptionService.class));
-        pipeThread.start();
+        Thread.ofVirtual()
+                .uncaughtExceptionHandler(ServiceLocator.get(ExceptionService.class))
+                .start(() ->
+                        toExecute.forEach(runnable -> {
+                            try {
+                                Thread.ofVirtual()
+                                        .start(runnable)
+                                        .join();
+                            } catch (Exception e) {
+                                throw new RuntimeException(e.getMessage(), e);
+                            }
+                        })
+                );
     }
 }
