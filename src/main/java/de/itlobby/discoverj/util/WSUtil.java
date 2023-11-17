@@ -14,7 +14,6 @@ public class WSUtil {
     private static final Logger log = LogManager.getLogger(WSUtil.class);
 
     private WSUtil() {
-        // static class
     }
 
     public static Optional<JSONObject> getJsonFromUrl(String url) {
@@ -22,6 +21,8 @@ public class WSUtil {
             URI requestUri = URI.create(url);
             String jsonString = IOUtils.toString(requestUri, UTF_8);
             return Optional.of(new JSONObject(jsonString));
+        } catch (IllegalArgumentException e) {
+            log.error(e.getMessage(), e);
         } catch (Exception e) {
             log.debug(e.getMessage(), e);
         }
