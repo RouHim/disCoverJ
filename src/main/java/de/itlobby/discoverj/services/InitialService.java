@@ -18,6 +18,7 @@ import de.itlobby.discoverj.util.AudioUtil;
 import de.itlobby.discoverj.util.ImageCache;
 import de.itlobby.discoverj.util.ImageClipboardUtil;
 import de.itlobby.discoverj.util.LanguageUtil;
+import de.itlobby.discoverj.util.SearXUtil;
 import de.itlobby.discoverj.util.StringUtil;
 import de.itlobby.discoverj.util.SystemUtil;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
@@ -340,12 +341,28 @@ public class InitialService implements Service {
         ServiceLocator.get(SelectionService.class).clearAll();
     }
 
+    public void searchOnSearXImages() {
+        AudioListEntry lastSelected = ServiceLocator.get(SelectionService.class).getLastSelected();
+
+        if (lastSelected != null) {
+            String googleSearchPattern = Settings.getInstance().getConfig().getGoogleSearchPattern();
+            String rawQuery = SearchQueryUtil.createSearchQueryFromPattern(lastSelected.getWrapper(), googleSearchPattern);
+            String query = StringUtil.encodeRfc3986(rawQuery);
+
+            Thread.ofPlatform().start(() -> {
+                String url = SearXUtil.getInstances().get(0);
+                SystemUtil.browseUrl(String.format(url + "/search?q=%s&category_images", query));
+            });
+            openSelectImageDialog();
+        }
+    }
+
     public void searchOnGoogleImages() {
         AudioListEntry lastSelected = ServiceLocator.get(SelectionService.class).getLastSelected();
 
         if (lastSelected != null) {
             String googleSearchPattern = Settings.getInstance().getConfig().getGoogleSearchPattern();
-            String rawQuery = SearchQueryUtil.createQueryFromPattern(lastSelected.getWrapper(), googleSearchPattern);
+            String rawQuery = SearchQueryUtil.createSearchQueryFromPattern(lastSelected.getWrapper(), googleSearchPattern);
             String query = StringUtil.encodeRfc3986(rawQuery);
 
             SystemUtil.browseUrl(String.format("https://www.google.com/search?q=%s&tbm=isch", query));

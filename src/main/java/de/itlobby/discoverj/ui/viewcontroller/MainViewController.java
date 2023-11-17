@@ -44,6 +44,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
@@ -251,6 +252,9 @@ public class MainViewController implements ViewController, MultipleSelectionList
         audioListContextMenu = new ContextMenu();
         InitialService initialService = ServiceLocator.get(InitialService.class);
 
+        MenuItem alCmItemSearchSearXImages = new MenuItem(LanguageUtil.getString("key.mainview.cm.searx.image.search"), GlyphsDude.createIcon(FontAwesomeIcon.SEARCH_PLUS));
+        alCmItemSearchSearXImages.setOnAction(e -> initialService.searchOnSearXImages());
+
         MenuItem alCmItemSearchGoogleImages = new MenuItem(LanguageUtil.getString("key.mainview.cm.google.image.search"), GlyphsDude.createIcon(FontAwesomeIcon.GOOGLE));
         alCmItemSearchGoogleImages.setOnAction(e -> initialService.searchOnGoogleImages());
 
@@ -263,7 +267,9 @@ public class MainViewController implements ViewController, MultipleSelectionList
         MenuItem alCmItemRemoveAll = new MenuItem(LanguageUtil.getString("key.mainview.cm.remove.all"), GlyphsDude.createIcon(FontAwesomeIcon.TIMES_CIRCLE));
         alCmItemRemoveAll.setOnAction(e -> initialService.clearAllListEntries());
 
+        audioListContextMenu.getItems().add(alCmItemSearchSearXImages);
         audioListContextMenu.getItems().add(alCmItemSearchGoogleImages);
+        audioListContextMenu.getItems().add(new SeparatorMenuItem());
         audioListContextMenu.getItems().add(alCmItemRemoveWithCover);
         audioListContextMenu.getItems().add(alCmItemRemoveSelected);
         audioListContextMenu.getItems().add(alCmItemRemoveAll);

@@ -6,9 +6,9 @@ import de.itlobby.discoverj.services.SearchQueryUtil;
 import de.itlobby.discoverj.settings.AppConfig;
 import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.util.ImageUtil;
+import de.itlobby.discoverj.util.SearXUtil;
 import de.itlobby.discoverj.util.StringUtil;
 import org.apache.commons.io.IOUtils;
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.net.URI;
@@ -24,7 +24,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class SearxCoverSearchEngine implements CoverSearchEngine {
     private static final int MAX_RESULTS = 10;
-    private static final String SEARX_INSTANCES_INDEX = "https://searx.space/data/instances.json";
     private static final String API_REQUEST = "search?categories=images&engines=bing%20images,duckduckgo%20images,google%20images,qwant%20images&format=json&q=";
     private List<String> instances = null;
 
@@ -61,29 +60,17 @@ public class SearxCoverSearchEngine implements CoverSearchEngine {
         return Stream.concat(httpStream, base64Stream).toList();
     }
 
-    @NotNull
-    private static List<String> getInstances(JSONObject response) {
-        return response.getJSONObject("instances")
-                .toMap()
-                .keySet()
-                .stream()
-                .filter(instanceUrl -> !instanceUrl.endsWith(".onion/") && !instanceUrl.endsWith(".i2p/"))
-                .toList();
-    }
-
     @Override
     public List<ImageFile> search(AudioWrapper audioWrapper) {
         AppConfig config = Settings.getInstance().getConfig();
 
         String googleSearchPattern = config.getGoogleSearchPattern();
-        String rawQuery = SearchQueryUtil.createQueryFromPattern(audioWrapper, googleSearchPattern);
+        String rawQuery = SearchQueryUtil.createSearchQueryFromPattern(audioWrapper, googleSearchPattern);
         String query = StringUtil.encodeRfc3986(rawQuery);
 
         // Load instances from searX index
         if (instances == null) {
-            instances = getJsonFromUrl(SEARX_INSTANCES_INDEX)
-                    .map(SearxCoverSearchEngine::getInstances)
-                    .orElse(Collections.emptyList());
+            instances = SearXUtil.getInstances();
         }
 
         // If a manual searX instance is configured set to the start
