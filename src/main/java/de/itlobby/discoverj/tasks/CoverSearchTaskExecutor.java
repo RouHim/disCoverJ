@@ -34,6 +34,8 @@ public class CoverSearchTaskExecutor {
             } catch (InterruptedException | ExecutionException __) {
                 // do nothing, just go ahead returning empty response
             }
+
+            executor.shutdownNow();
         }
 
         return Optional.empty();

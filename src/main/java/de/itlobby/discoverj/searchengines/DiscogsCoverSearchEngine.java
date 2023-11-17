@@ -96,7 +96,7 @@ public class DiscogsCoverSearchEngine implements CoverSearchEngine {
             log.error(e.getMessage(), e);
         } finally {
             // Wait a bit to avoid exceeding the api request limit
-            SystemUtil.threadSleep(250);
+            SystemUtil.threadSleep(1000);
         }
 
         return Collections.emptyList();

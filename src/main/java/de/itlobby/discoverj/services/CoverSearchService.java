@@ -329,11 +329,13 @@ public class CoverSearchService implements Service {
                 try {
                     allCovers.addAll(searchFuture.get(searchTimeout, TimeUnit.SECONDS));
                 } catch (TimeoutException e) {
-                    log.error("{} seconds Timout for search engine {}", searchTimeout, e.getMessage());
+                    log.error("{} seconds timeout for search engine ???", searchTimeout);
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }
             }
+
+            executorService.shutdownNow();
 
             coverPersistentService.persistImages(audioWrapper, allCovers);
         }
