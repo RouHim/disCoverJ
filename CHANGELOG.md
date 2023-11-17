@@ -1,3 +1,11 @@
+## [412.3.1](https://github.com/RouHim/disCoverJ/compare/412.3.0...412.3.1) (2023-11-17)
+
+
+### Bug Fixes
+
+* **search:** terminate search if covers where found ([be282f4](https://github.com/RouHim/disCoverJ/commit/be282f4f3b959c67b9c85067b0de94bc3d63aa15))
+* **search:** terminate search if covers where found ([f441fdd](https://github.com/RouHim/disCoverJ/commit/f441fdd8ebb039341541e6e72d2fd65096013056))
+
 # [412.3.0](https://github.com/RouHim/disCoverJ/compare/412.2.1...412.3.0) (2023-11-17)
 
 
