@@ -114,6 +114,16 @@ public class CoverSearchService implements Service {
                 return;
             }
 
+            // Check if the first manual user image selection of this album folder was empty,
+            // if so skip the manual folder selection for the rest of the folder
+            boolean lastManualSelectionWasEmpty = config.isGeneralAutoLastAudio() &&
+                    lastAudioFilePath != null &&
+                    AudioUtil.hasSameFolderAndAlbumAsLast(audioWrapper, lastAudioFilePath) &&
+                    lastAudioCover == null;
+            if (lastManualSelectionWasEmpty) {
+                return;
+            }
+
             // Load from last file if possible
             if (canLoadCoverFromLastFile(config, audioWrapper)) {
                 saveCoverToFile(lastAudioCover, audioWrapper);
@@ -130,6 +140,7 @@ public class CoverSearchService implements Service {
             Optional<ImageFile> manuallySelectedCover = letUserManuallySelectCover(audioWrapper, potentialCovers);
             if (manuallySelectedCover.isEmpty()) {
                 log.info("No valid cover selected by user");
+                lastAudioCover = null;
                 return;
             }
 
