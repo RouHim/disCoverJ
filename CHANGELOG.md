@@ -1,3 +1,23 @@
+# [412.3.0](https://github.com/RouHim/disCoverJ/compare/412.2.1...412.3.0) (2023-11-17)
+
+
+### Bug Fixes
+
+* **java:** fix compiler warnings after java upgrade ([6003d2e](https://github.com/RouHim/disCoverJ/commit/6003d2e9d410008d2b0791c7c66e832b1d950917))
+* **musicbrainz:** fix too much api requests ([7556398](https://github.com/RouHim/disCoverJ/commit/755639897c90e17ccb84f2902d0ca756b8d768c9))
+* **musicbrainz:** fix wrong url encoding ([7875ca1](https://github.com/RouHim/disCoverJ/commit/7875ca11087bbec8bc1d9ac50e74ad0b0d2e6df6))
+* **search:** [#71](https://github.com/RouHim/disCoverJ/issues/71) fix manual cover selection for albums on empty selection ([7c7c528](https://github.com/RouHim/disCoverJ/commit/7c7c528c8cf15289a33934e43705de6367d3566d))
+* **ui:** fix wrong stage size for settings window ([4ab6c71](https://github.com/RouHim/disCoverJ/commit/4ab6c7123c10558ee1eaa66d6e1e8c5a6d27c435))
+
+
+### Features
+
+* **context-menu:** add searx to image search option ([dc39886](https://github.com/RouHim/disCoverJ/commit/dc39886eef9b92f388f9328411edbf9b11b66db7))
+* **java:** migrate to java 21 ([22c4c9a](https://github.com/RouHim/disCoverJ/commit/22c4c9ab42ed38ce04aa5de09fbb86ef8d0b9cce))
+* **pipeline:** improve trivy scanner ([69948ea](https://github.com/RouHim/disCoverJ/commit/69948ea9e2254b5cc1b4a8420a0ed7863430621b))
+* **pipeline:** improve trivy scanner ([874b375](https://github.com/RouHim/disCoverJ/commit/874b375ca32cee3d51c3cf7929edb71dd32141fc))
+* **search:** reduce default search timeout to 30 sec ([555701c](https://github.com/RouHim/disCoverJ/commit/555701cc4ebf8ccaddb307556d85d0aca6fec2da))
+
 ## [412.2.1](https://github.com/RouHim/disCoverJ/compare/412.2.0...412.2.1) (2023-11-17)
 
 
