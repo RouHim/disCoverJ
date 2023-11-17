@@ -1,3 +1,10 @@
+## [412.2.1](https://github.com/RouHim/disCoverJ/compare/412.2.0...412.2.1) (2023-11-17)
+
+
+### Bug Fixes
+
+* **search:** [#71](https://github.com/RouHim/disCoverJ/issues/71) fix manual cover selection for albums on empty selection ([60626f1](https://github.com/RouHim/disCoverJ/commit/60626f18640c9d02e6d726e45bcd4507d38fd657))
+
 # [412.2.0](https://github.com/RouHim/disCoverJ/compare/412.1.28...412.2.0) (2023-11-16)
 
 
