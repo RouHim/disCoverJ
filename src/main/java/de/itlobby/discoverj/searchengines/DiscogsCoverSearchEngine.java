@@ -15,7 +15,7 @@ import org.jaudiotagger.audio.AudioFile;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.util.Collections;
@@ -80,7 +80,7 @@ public class DiscogsCoverSearchEngine implements CoverSearchEngine {
 
     private List<ImageFile> getCoverByReleaseId(Integer releaseId) {
         try {
-            URL url = new URL("https://api.discogs.com/releases/%d?key=%s".formatted(releaseId, DISCOGS_API_KEY));
+            URI url = URI.create("https://api.discogs.com/releases/%d?key=%s".formatted(releaseId, DISCOGS_API_KEY));
             String jsonResultString = IOUtils.toString(url, UTF_8);
             return new JSONObject(jsonResultString)
                     .getJSONArray("images").toList().stream()

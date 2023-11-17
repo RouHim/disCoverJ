@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -96,18 +96,18 @@ public class SystemUtil {
 
     public static void browseUrl(String urlString) {
         try {
-            browseUrl(new URL(urlString));
-        } catch (MalformedURLException e) {
+            browseUrl(URI.create(urlString));
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    public static void browseUrl(URL url) {
+    public static void browseUrl(URI uri) {
         java.awt.Desktop desktop = java.awt.Desktop.isDesktopSupported() ? java.awt.Desktop.getDesktop() : null;
         if (desktop != null && desktop.isSupported(java.awt.Desktop.Action.BROWSE)) {
             new Thread(() -> {
                 try {
-                    desktop.browse(url.toURI());
+                    desktop.browse(uri);
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }
@@ -168,7 +168,7 @@ public class SystemUtil {
 
     public static boolean isImage(String sUrl) {
         try {
-            String contentType = new URL(sUrl).openConnection().getContentType();
+            String contentType = URI.create(sUrl).toURL().openConnection().getContentType();
             return !StringUtil.isNullOrEmpty(contentType) && contentType.split("/")[0].equalsIgnoreCase("image");
         } catch (IOException e) {
             log.error(e.getMessage(), e);

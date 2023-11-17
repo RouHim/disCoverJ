@@ -30,7 +30,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -350,7 +350,7 @@ public class ImageUtil {
     public static Optional<ImageFile> downloadImageFromUrl(String imgUrl) {
         try {
             File file = SystemUtil.getTempFile();
-            FileUtils.copyURLToFile(new URL(imgUrl), file);
+            FileUtils.copyURLToFile(URI.create(imgUrl).toURL(), file);
 
             if (!file.exists()) {
                 return Optional.empty();

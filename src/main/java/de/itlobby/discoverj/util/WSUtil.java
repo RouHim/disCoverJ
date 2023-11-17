@@ -5,8 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -20,8 +19,10 @@ public class WSUtil {
 
     public static Optional<JSONObject> getJsonFromUrl(String url) {
         try {
-            return Optional.of(new JSONObject(IOUtils.toString(new URL(url), UTF_8)));
-        } catch (IOException e) {
+            URI requestUri = URI.create(url);
+            String jsonString = IOUtils.toString(requestUri, UTF_8);
+            return Optional.of(new JSONObject(jsonString));
+        } catch (Exception e) {
             log.debug(e.getMessage(), e);
         }
 

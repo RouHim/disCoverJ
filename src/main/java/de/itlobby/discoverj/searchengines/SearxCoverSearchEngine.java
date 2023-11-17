@@ -11,7 +11,7 @@ import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +82,7 @@ public class SearxCoverSearchEngine implements CoverSearchEngine {
         // Load instances from searX index
         if (instances == null) {
             instances = getJsonFromUrl(SEARX_INSTANCES_INDEX)
-                    .map(response -> getInstances(response))
+                    .map(SearxCoverSearchEngine::getInstances)
                     .orElse(Collections.emptyList());
         }
 
@@ -110,7 +110,7 @@ public class SearxCoverSearchEngine implements CoverSearchEngine {
      */
     public Optional<String> checkInstance(String searxInstanceUrl) {
         try {
-            JSONObject result = new JSONObject(IOUtils.toString(new URL(searxInstanceUrl + API_REQUEST + "test"), UTF_8));
+            JSONObject result = new JSONObject(IOUtils.toString(URI.create(searxInstanceUrl + API_REQUEST + "test"), UTF_8));
             return result.has("results") ? Optional.empty() : Optional.of("Api returned no results");
         } catch (Exception e) {
             return Optional.of(e.getMessage());

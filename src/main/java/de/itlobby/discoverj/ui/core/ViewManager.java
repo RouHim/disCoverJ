@@ -1,12 +1,10 @@
 package de.itlobby.discoverj.ui.core;
 
-import de.itlobby.discoverj.listeners.KeyPressedListener;
 import de.itlobby.discoverj.ui.viewcontroller.ViewController;
 import de.itlobby.discoverj.util.LanguageUtil;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCodeCombination;
 import javafx.stage.Stage;
 
 public class ViewManager {
@@ -45,6 +43,7 @@ public class ViewManager {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public <T extends ViewController> T getViewController(Views view) {
         return (T) (view.getClazz()).cast(fxmlFactory.getViewController(view, view.getClazz()));
     }
@@ -53,19 +52,8 @@ public class ViewManager {
         return fxmlFactory.createLayoutFromView(view);
     }
 
-    public Stage getPrimaryStage() {
-        return primaryStage;
-    }
-
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
-    }
-
-    public void registerKeyPressedListener(Views view, KeyCodeCombination keyCodeCombination, KeyPressedListener keyPressedListener) {
-        this.fxmlFactory.getView(view).getAccelerators().put(
-                keyCodeCombination,
-                keyPressedListener::keyPressed
-        );
     }
 
     public void showViewAsStage(Views viewToShow) {
