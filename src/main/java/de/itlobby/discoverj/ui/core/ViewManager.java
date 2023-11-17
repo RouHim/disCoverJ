@@ -64,6 +64,12 @@ public class ViewManager {
         stage.setScene(scene);
         stage.setTitle(LanguageUtil.getBundle().getString(viewToShow.getTitle()));
         stage.show();
+
+        // Set the height and width of the stage
+        // This is needed since some JavaFX update, if not the size recommendation of the scene is not applied
+        // Must be set after stage.show()
+        stage.setHeight(scene.getHeight());
+        stage.setWidth(scene.getWidth());
     }
 
     public void closeView(Views viewToClose) {
