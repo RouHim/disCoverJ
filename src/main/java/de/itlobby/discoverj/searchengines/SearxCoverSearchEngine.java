@@ -75,18 +75,14 @@ public class SearxCoverSearchEngine implements CoverSearchEngine {
 
         // If a manual searX instance is configured set to the start
         if (config.isSearxCustomInstanceActive()) {
-            instances.add(0, config.getSearxCustomInstance());
+            instances.addFirst(config.getSearxCustomInstance());
         }
 
-        for (String instanceUrl : instances) {
-            List<ImageFile> response = startSearch(query, instanceUrl);
-
-            if (!response.isEmpty()) {
-                return response;
-            }
-        }
-
-        return Collections.emptyList();
+        return instances.parallelStream()
+                .map(instanceUrl -> startSearch(query, instanceUrl))
+                .filter(response -> !response.isEmpty())
+                .findFirst()
+                .orElse(Collections.emptyList());
     }
 
     /**
