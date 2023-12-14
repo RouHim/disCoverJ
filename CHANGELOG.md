@@ -1,3 +1,10 @@
+## [412.3.8](https://github.com/RouHim/disCoverJ/compare/412.3.7...412.3.8) (2023-12-14)
+
+
+### Bug Fixes
+
+* **searx:** fix broken searx search ([7e5cf5c](https://github.com/RouHim/disCoverJ/commit/7e5cf5c5a407ab5be3badbea0717ab6ff437e7a3))
+
 ## [412.3.7](https://github.com/RouHim/disCoverJ/compare/412.3.6...412.3.7) (2023-12-01)
 
 ## [412.3.6](https://github.com/RouHim/disCoverJ/compare/412.3.5...412.3.6) (2023-11-30)
