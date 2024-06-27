@@ -22,7 +22,7 @@
         <main.class>de.itlobby.discoverj.Main</main.class>
 
         <twelvemonkeys.version>3.11.0</twelvemonkeys.version>
-        <junit-jupiter-version>5.10.2</junit-jupiter-version>
+        <junit-jupiter-version>5.10.3</junit-jupiter-version>
         <javafx.version>23-ea+22</javafx.version>
     </properties>
 
