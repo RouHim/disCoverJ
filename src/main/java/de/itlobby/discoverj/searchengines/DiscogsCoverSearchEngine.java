@@ -74,7 +74,7 @@ public class DiscogsCoverSearchEngine implements CoverSearchEngine {
         return jsonFromUrl.get()
                 .getJSONArray("results").toList().stream()
                 .map(result -> new JSONObject((Map) result))
-                .map(result -> result.getInt("id"))
+                .map(result -> (Integer) result.getInt("id"))
                 .flatMap(releaseId -> getCoverByReleaseId(releaseId).stream())
                 .toList();
     }
@@ -103,7 +103,7 @@ public class DiscogsCoverSearchEngine implements CoverSearchEngine {
     }
 
     private boolean correctResolution(JSONObject image) {
-        Integer minCoverSize = Settings.getInstance().getConfig().getMinCoverSize();
+        Integer minCoverSize = (Integer) Settings.getInstance().getConfig().getMinCoverSize();
 
         Integer height = (Integer) image.get("height");
         Integer width = (Integer) image.get("width");

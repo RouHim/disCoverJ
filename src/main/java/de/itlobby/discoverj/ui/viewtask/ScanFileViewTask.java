@@ -61,7 +61,7 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
         // Add audio list to audioData list
         int audioFilesCount = audioWrapperList.size();
 
-        // Group audio list by parent file path and sort by key
+        // Group audio list by parent file path and sort by folder name
         Map<String, List<AudioWrapper>> audioData =
                 audioWrapperList.stream()
                         .collect(Collectors.groupingBy(AudioWrapper::getParentFilePath))
