@@ -58,8 +58,6 @@ public class SearxCoverSearchEngine implements CoverSearchEngine {
             return Collections.emptyList();
         }
 
-        System.out.println("Searx instance start: " + searxInstance);
-
         List<String> searchResultData = jsonFromUrl.get()
                 .getJSONArray("results").toList().stream()
                 .map(result -> new JSONObject((Map) result))
@@ -83,8 +81,6 @@ public class SearxCoverSearchEngine implements CoverSearchEngine {
                 .map(ImageUtil::downloadImageFromUrl)
                 .flatMap(Optional::stream)
                 .filter(CoverSearchEngine::reachesMinRequiredCoverSize);
-
-        System.out.println("Searx instance end: " + searxInstance);
 
         return Stream.concat(httpStream, base64Stream).toList();
     }
