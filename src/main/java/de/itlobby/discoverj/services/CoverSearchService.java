@@ -18,6 +18,7 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jaudiotagger.audio.AudioFile;
+import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -34,6 +35,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 public class CoverSearchService implements Service {
     private static final Logger log = LogManager.getLogger(CoverSearchService.class);
@@ -82,7 +84,7 @@ public class CoverSearchService implements Service {
                             );
                             getMainViewController().setTotalAudioCountToLoad(audioWrapperList.size());
                         })
-                        .andThen(() -> audioWrapperList.parallelStream().forEach(this::collectAllCoverForAudioFile))
+                        .andThen(() -> collectAllCoverForAudioFiles(audioWrapperList))
                         .andThen(() -> getMainViewController().hideBusyIndicator())
                         .andThen(() -> audioWrapperList.forEach(this::letUserSelectCover))
                         .andThen(this::finishTotal)
@@ -97,6 +99,48 @@ public class CoverSearchService implements Service {
         } catch (ProgressInterruptedException ignored) {
             // ignore
         }
+    }
+
+    /**
+     * Collects all cover images for the given list of audio files.
+     * <p>
+     * This method groups the audio files by their parent directory and sorts them.
+     * If all audio files in a directory have the same search query, only the first
+     * audio file is kept for cover search to avoid duplicate searches.
+     * <p>
+     * The method then flattens the grouped audio files into a list and performs
+     * a parallel search for cover images for each audio file.
+     *
+     * @param audioWrapperList the list of audio files to collect covers for
+     */
+    private void collectAllCoverForAudioFiles(List<AudioWrapper> audioWrapperList) {
+        // Group and sort by parent directory, and sort by parent directory
+        Map<String, List<AudioWrapper>> audioMap = audioWrapperList.stream()
+                .collect(Collectors.groupingBy(AudioWrapper::getParentFilePath))
+                .entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        audioMap.forEach((parentPath, audioWrappers) -> {
+            boolean sameSearchQuery = audioWrappers.stream()
+                    .map(SearchQueryUtil::createSearchString)
+                    .distinct()
+                    .count() == 1;
+
+            if (sameSearchQuery) {
+                AudioWrapper first = audioWrappers.getFirst();
+                audioMap.put(parentPath, List.of(first));
+            }
+        });
+
+        // Flatten the map to a list
+        Collection<AudioWrapper> audioWrapperListFlat = audioMap.values().stream()
+                .flatMap(Collection::stream)
+                // Distinct by createSearchString, to avoid duplicate search queries
+                .collect(Collectors.toMap(SearchQueryUtil::createSearchString, audioWrapper -> audioWrapper, (a, b) -> a))
+                .values();
+
+        // Load covers for audio files
+        audioWrapperListFlat.parallelStream().forEach(this::collectAllCoverForAudioFile);
     }
 
     /**
@@ -132,7 +176,7 @@ public class CoverSearchService implements Service {
 
             List<ImageFile> potentialCovers = coverPersistentService.getCoversForAudioFile(audioWrapper);
 
-            if (potentialCovers.isEmpty()) {
+            if (potentialCovers == null || potentialCovers.isEmpty()) {
                 log.info("No covers to set.");
                 return;
             }

@@ -27,6 +27,31 @@ public class SearxCoverSearchEngine implements CoverSearchEngine {
     private static final String API_REQUEST = "search?categories=images&engines=bing%20images,duckduckgo%20images,google%20images,qwant%20images&format=json&q=";
     private List<String> instances = null;
 
+    @Override
+    public List<ImageFile> search(AudioWrapper audioWrapper) {
+        AppConfig config = Settings.getInstance().getConfig();
+
+        String googleSearchPattern = config.getGoogleSearchPattern();
+        String rawQuery = SearchQueryUtil.createSearchQueryFromPattern(audioWrapper, googleSearchPattern);
+        String query = StringUtil.encodeRfc3986(rawQuery);
+
+        // Load instances from searX index
+        if (instances == null) {
+            instances = SearXUtil.getInstances();
+        }
+
+        // If a manual searX instance is configured set to the start
+        if (config.isSearxCustomInstanceActive()) {
+            instances.addFirst(config.getSearxCustomInstance());
+        }
+
+        return instances.parallelStream()
+                .map(instanceUrl -> startSearch(query, instanceUrl))
+                .filter(response -> !response.isEmpty())
+                .findFirst()
+                .orElse(Collections.emptyList());
+    }
+
     private static List<ImageFile> startSearch(String query, String searxInstance) {
         Optional<JSONObject> jsonFromUrl = getJsonFromUrl(searxInstance + API_REQUEST + query);
         if (jsonFromUrl.isEmpty()) {
@@ -58,31 +83,6 @@ public class SearxCoverSearchEngine implements CoverSearchEngine {
                 .filter(CoverSearchEngine::reachesMinRequiredCoverSize);
 
         return Stream.concat(httpStream, base64Stream).toList();
-    }
-
-    @Override
-    public List<ImageFile> search(AudioWrapper audioWrapper) {
-        AppConfig config = Settings.getInstance().getConfig();
-
-        String googleSearchPattern = config.getGoogleSearchPattern();
-        String rawQuery = SearchQueryUtil.createSearchQueryFromPattern(audioWrapper, googleSearchPattern);
-        String query = StringUtil.encodeRfc3986(rawQuery);
-
-        // Load instances from searX index
-        if (instances == null) {
-            instances = SearXUtil.getInstances();
-        }
-
-        // If a manual searX instance is configured set to the start
-        if (config.isSearxCustomInstanceActive()) {
-            instances.addFirst(config.getSearxCustomInstance());
-        }
-
-        return instances.parallelStream()
-                .map(instanceUrl -> startSearch(query, instanceUrl))
-                .filter(response -> !response.isEmpty())
-                .findFirst()
-                .orElse(Collections.emptyList());
     }
 
     /**

@@ -44,6 +44,7 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
     public void work() {
         if (totalAudioCountToLoad <= 0) {
             log.info("No files to load");
+            setResult(new ScanResultData(new LinkedHashMap<>(), 0, 0));
             return;
         }
 
@@ -61,7 +62,7 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
         // Add audio list to audioData list
         int audioFilesCount = audioWrapperList.size();
 
-        // Group audio list by parent file path and sort by key
+        // Group audio list by parent file path and sort by folder name
         Map<String, List<AudioWrapper>> audioData =
                 audioWrapperList.stream()
                         .collect(Collectors.groupingBy(AudioWrapper::getParentFilePath))
