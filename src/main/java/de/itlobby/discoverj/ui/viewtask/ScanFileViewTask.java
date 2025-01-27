@@ -44,6 +44,7 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
     public void work() {
         if (totalAudioCountToLoad <= 0) {
             log.info("No files to load");
+            setResult(new ScanResultData(new LinkedHashMap<>(), 0, 0));
             return;
         }
 
