@@ -9,11 +9,7 @@ import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.tasks.CoverSearchTask;
 import de.itlobby.discoverj.tasks.CoverSearchTaskExecutor;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
-import de.itlobby.discoverj.util.AsyncPipeline;
-import de.itlobby.discoverj.util.AudioUtil;
-import de.itlobby.discoverj.util.ImageUtil;
-import de.itlobby.discoverj.util.LanguageUtil;
-import de.itlobby.discoverj.util.SystemUtil;
+import de.itlobby.discoverj.util.*;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -132,15 +128,10 @@ public class CoverSearchService implements Service {
             }
         });
 
-        // Flatten the map to a list
-        Collection<AudioWrapper> audioWrapperListFlat = audioMap.values().stream()
-                .flatMap(Collection::stream)
-                // Distinct by createSearchString, to avoid duplicate search queries
-                .collect(Collectors.toMap(SearchQueryUtil::createSearchString, audioWrapper -> audioWrapper, (a, b) -> a))
-                .values();
-
         // Load covers for audio files
-        audioWrapperListFlat.parallelStream().forEach(this::collectAllCoverForAudioFile);
+        audioMap.values().stream()
+                .flatMap(Collection::stream)
+                .forEach(this::collectAllCoverForAudioFile);
     }
 
     /**
@@ -358,22 +349,29 @@ public class CoverSearchService implements Service {
                 .stream()
                 .filter(SearchEngine::isEnabled)
                 .toList();
-        getMainViewController().setBusyIndicatorStatusText("Loading covers for: \n" + audioWrapper.getFileName());
+
+        getMainViewController().setBusyIndicatorStatusText(
+                "Loading covers for: \n" + SearchQueryUtil.createSearchString(audioWrapper)
+        );
 
         // Start cover search per active search engine
         try (ExecutorService executorService = Executors.newFixedThreadPool(activeSearchEngines.size())) {
-            List<Future<List<ImageFile>>> searchEngineFutures = activeSearchEngines.stream()
-                    .map(searchEngine -> executorService.submit(new CoverSearchTask(searchEngine, audioWrapper)))
+            List<SearchEngineFuture> searchEngineFutures = activeSearchEngines.stream()
+                    .map(searchEngine -> new SearchEngineFuture(
+                                    executorService.submit(new CoverSearchTask(searchEngine, audioWrapper)),
+                                    searchEngine.getType().getName()
+                            )
+                    )
                     .toList();
 
             int searchTimeout = Settings.getInstance().getConfig().getSearchTimeout();
 
             List<ImageFile> allCovers = Collections.synchronizedList(new ArrayList<>());
-            for (Future<List<ImageFile>> searchFuture : searchEngineFutures) {
+            for (SearchEngineFuture searchFuture : searchEngineFutures) {
                 try {
-                    allCovers.addAll(searchFuture.get(searchTimeout, TimeUnit.SECONDS));
+                    allCovers.addAll(searchFuture.getFuture().get(searchTimeout, TimeUnit.SECONDS));
                 } catch (TimeoutException e) {
-                    log.error("{} seconds timeout for search engine ???", searchTimeout);
+                    log.error("{} seconds timeout for search engine: {}", searchTimeout, searchFuture.getName());
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }

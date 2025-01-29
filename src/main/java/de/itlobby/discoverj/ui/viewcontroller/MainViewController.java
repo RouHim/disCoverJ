@@ -201,7 +201,6 @@ public class MainViewController implements ViewController, MultipleSelectionList
             return;
         }
 
-        boolean isMixCD = MixCd.isMixCd(audioWrapper.getParentFilePath());
 
         Platform.runLater(() -> {
             String fileSize = StringUtil.sizeToHumanReadable(audioWrapper.getFileLength());
@@ -209,23 +208,29 @@ public class MainViewController implements ViewController, MultipleSelectionList
             txtTitle.setText(audioWrapper.getTitle());
             txtArtist.setText(audioWrapper.getArtist());
             txtAlbum.setText(audioWrapper.getAlbum());
-            txtIsMixCD.setVisible(isMixCD);
         });
+
+        // Start new thread, and set mix cd info
+        Thread.ofVirtual().start(() -> {
+            boolean isMixCD = MixCd.isMixCd(audioWrapper.getParentFilePath());
+            Platform.runLater(() -> txtIsMixCD.setVisible(isMixCD));
+        }).start();
 
         if (!showCover) {
             return;
         }
 
-        Optional<Image> maybeCover = AudioUtil.getCover(audioWrapper.getFilePath());
-
-        Platform.runLater(() -> {
-            if (maybeCover.isPresent()) {
-                imgCurrentCover.setImage(maybeCover.get());
-                txtCurrentAudioCoverRes.setText(AudioUtil.getImageResolutionString(maybeCover.get()));
-            } else {
-                imgCurrentCover.setImage(null);
-                txtCurrentAudioCoverRes.setText(null);
-            }
+        Thread.ofVirtual().start(() -> {
+            Optional<Image> maybeCover = AudioUtil.getCover(audioWrapper.getFilePath());
+            Platform.runLater(() -> {
+                if (maybeCover.isPresent()) {
+                    imgCurrentCover.setImage(maybeCover.get());
+                    txtCurrentAudioCoverRes.setText(AudioUtil.getImageResolutionString(maybeCover.get()));
+                } else {
+                    imgCurrentCover.setImage(null);
+                    txtCurrentAudioCoverRes.setText(null);
+                }
+            });
         });
     }
 
