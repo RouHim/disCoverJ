@@ -77,8 +77,8 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
                                 )
                         );
 
-        // If there are less than 300 audio files, load cover images async
-        if (totalAudioCountToLoad <= 300) {
+        // If there are less than 500 audio files, load cover images async
+        if (totalAudioCountToLoad <= 500) {
             Settings.getInstance().setCoverLoadingDisabled(false);
             // Create map with id and file path and handover to the lazy load thread
             var idPathMap = audioWrapperList.stream().collect(
