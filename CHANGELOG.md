@@ -1,3 +1,10 @@
+## [412.4.1](https://github.com/RouHim/disCoverJ/compare/412.4.0...412.4.1) (2025-01-30)
+
+
+### Bug Fixes
+
+* wrong thread starting ([7af3ead](https://github.com/RouHim/disCoverJ/commit/7af3ead8886ed42b9e02e44cf32edf658cc92c87))
+
 # [412.4.0](https://github.com/RouHim/disCoverJ/compare/412.3.96...412.4.0) (2025-01-30)
 
 
