@@ -1,3 +1,18 @@
+# [412.4.0](https://github.com/RouHim/disCoverJ/compare/412.3.96...412.4.0) (2025-01-30)
+
+
+### Bug Fixes
+
+* disable flacky test ([86a097d](https://github.com/RouHim/disCoverJ/commit/86a097d8486a49e28f137dab79553f2553a44b01))
+* **searx:** faster timeout for searx ([090ce6d](https://github.com/RouHim/disCoverJ/commit/090ce6decf693a9764fe1671e15836f961bc390a))
+* **searx:** faster timeout for searx ([8794a4d](https://github.com/RouHim/disCoverJ/commit/8794a4d96222d378f3c673b016b290d8a9468cd2))
+
+
+### Features
+
+* add faster cover fetching ([d850a21](https://github.com/RouHim/disCoverJ/commit/d850a2124de7ed2edfdfe1e551d68cc80f971d13))
+* improve perf ([bb92013](https://github.com/RouHim/disCoverJ/commit/bb920131ed16d0bd83628dd827cafb08ac2162c8))
+
 ## [412.3.96](https://github.com/RouHim/disCoverJ/compare/412.3.95...412.3.96) (2025-01-26)
 
 ## [412.3.95](https://github.com/RouHim/disCoverJ/compare/412.3.94...412.3.95) (2025-01-19)
