@@ -214,7 +214,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
         Thread.ofVirtual().start(() -> {
             boolean isMixCD = MixCd.isMixCd(audioWrapper.getParentFilePath());
             Platform.runLater(() -> txtIsMixCD.setVisible(isMixCD));
-        }).start();
+        });
 
         if (!showCover) {
             return;
