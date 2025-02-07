@@ -1,3 +1,10 @@
+## [412.5.1](https://github.com/RouHim/disCoverJ/compare/412.5.0...412.5.1) (2025-02-07)
+
+
+### Bug Fixes
+
+* broken music brainz cover art redirects ([7f43a45](https://github.com/RouHim/disCoverJ/commit/7f43a4570b10c6a71597739f02314f25164bcd43))
+
 # [412.5.0](https://github.com/RouHim/disCoverJ/compare/412.4.2...412.5.0) (2025-02-07)
 
 
