@@ -20,6 +20,7 @@ public class WSUtil {
     public static Optional<JSONObject> getJsonFromUrl(String url) {
         try (HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(10))
+                .followRedirects(HttpClient.Redirect.NORMAL)
                 .build()) {
             HttpRequest request = HttpRequest.newBuilder(new URI(url)).build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
