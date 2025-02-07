@@ -1,3 +1,10 @@
+# [412.5.0](https://github.com/RouHim/disCoverJ/compare/412.4.2...412.5.0) (2025-02-07)
+
+
+### Features
+
+* improve drag drop performance & improve remove all cover images dialog ([8cc31bb](https://github.com/RouHim/disCoverJ/commit/8cc31bb1f183cc9d61b2f4784b9b50d177cfba0b))
+
 ## [412.4.2](https://github.com/RouHim/disCoverJ/compare/412.4.1...412.4.2) (2025-01-31)
 
 ## [412.4.1](https://github.com/RouHim/disCoverJ/compare/412.4.0...412.4.1) (2025-01-30)
