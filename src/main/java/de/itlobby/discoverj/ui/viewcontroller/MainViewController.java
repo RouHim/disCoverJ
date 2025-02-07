@@ -110,7 +110,6 @@ public class MainViewController implements ViewController, MultipleSelectionList
     public Button btnExitApp;
     public Button btnOpenAbout;
     public Button btnDonate;
-    public Button btnSendFeedback;
     public Button btnReportBug;
     public VBox lwAudioList;
     public ListView<AudioWrapper> audioList;
@@ -169,6 +168,9 @@ public class MainViewController implements ViewController, MultipleSelectionList
 
     public void showScanResult(int withCoverCount, int audioFilesCount, Map<String, List<AudioWrapper>> audioDirectory) {
         Platform.runLater(() -> {
+
+            tryClearLeftSide();
+
             hideBusyIndicator();
 
             setState(MessageFormat.format(
@@ -193,6 +195,23 @@ public class MainViewController implements ViewController, MultipleSelectionList
                 );
             }
         });
+    }
+
+    /**
+     * We do this, because the listview is not always cleared correctly and throws duplicate exceptions.
+     */
+    private void tryClearLeftSide() {
+        int attempts = 0;
+        while (attempts < 10) {
+            try {
+                lwAudioList.getChildren().clear();
+                break;
+            } catch (Exception e) {
+                log.error("Attempt #{} to clear audio list failed", attempts);
+                attempts++;
+                SystemUtil.threadSleep(100);
+            }
+        }
     }
 
     public void showAudioInfo(AudioWrapper audioWrapper, boolean showCover) {
@@ -297,7 +316,6 @@ public class MainViewController implements ViewController, MultipleSelectionList
 
         AwesomeHelper.createIconButton(btnOpenAbout, FontAwesomeIcon.INFO_CIRCLE, MENU_ICON, LanguageUtil.getString("key.mainview.menu.about"), "24px");
         AwesomeHelper.createIconButton(btnReportBug, FontAwesomeIcon.BUG, MENU_ICON, LanguageUtil.getString("key.mainview.menu.reportbug"), "24px");
-        AwesomeHelper.createIconButton(btnSendFeedback, FontAwesomeIcon.ENVELOPE, MENU_ICON, LanguageUtil.getString("key.mainview.menu.feedback"), "24px");
         AwesomeHelper.createIconButton(btnDonate, FontAwesomeIcon.HEART, MENU_ICON, LanguageUtil.getString("key.mainview.menu.donate"), "24px");
         AwesomeHelper.createIconButton(btnOpenSettings, FontAwesomeIcon.GEAR, MENU_ICON, LanguageUtil.getString("key.mainview.menu.program.settings"), "24px");
         AwesomeHelper.createIconButton(btnExitApp, FontAwesomeIcon.TIMES, MENU_ICON, LanguageUtil.getString("key.mainview.menu.program.shutdown"), "24px");
@@ -414,8 +432,6 @@ public class MainViewController implements ViewController, MultipleSelectionList
     }
 
     private void setAudioList(Map<String, List<AudioWrapper>> audioDirectory) {
-        lwAudioList.getChildren().clear();
-
         int parentIndex = 0;
         for (Map.Entry<String, List<AudioWrapper>> entry : audioDirectory.entrySet()) {
             FolderListEntry folderEntry = new FolderListEntry(entry.getKey());
@@ -425,8 +441,12 @@ public class MainViewController implements ViewController, MultipleSelectionList
                 VBox.setMargin(folderEntry, new Insets(10, 0, 0, 0));
             }
 
-            entry.getValue().forEach(audioWrapper ->
-                    lwAudioList.getChildren().add(new AudioListEntry(audioWrapper)));
+            entry.getValue()
+                    .forEach(audioWrapper ->
+                            lwAudioList
+                                    .getChildren()
+                                    .add(new AudioListEntry(audioWrapper))
+                    );
 
             parentIndex++;
         }

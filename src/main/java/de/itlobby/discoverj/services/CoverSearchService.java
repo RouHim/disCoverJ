@@ -81,7 +81,6 @@ public class CoverSearchService implements Service {
                                     LanguageUtil.getString("CoverSearchService.loadingCovers"),
                                     () -> ServiceLocator.get(CoverSearchService.class).interruptProgress = true
                             );
-                            getMainViewController().setTotalAudioCountToLoad(audioWrapperList.size());
                         })
                         .andThen(() -> collectAllCoverForAudioFiles(audioWrapperList))
                         .andThen(() -> getMainViewController().hideBusyIndicator())
@@ -130,6 +129,9 @@ public class CoverSearchService implements Service {
                 audioMap.put(parentPath, List.of(first));
             }
         });
+
+
+        getMainViewController().setTotalAudioCountToLoad(audioMap.size());
 
         // Load covers for audio files
         audioMap.values().stream()

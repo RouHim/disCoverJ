@@ -14,6 +14,7 @@ import de.itlobby.discoverj.ui.viewcontroller.MainViewController;
 import de.itlobby.discoverj.ui.viewcontroller.OpenFileViewController;
 import de.itlobby.discoverj.ui.viewtask.PreCountViewTask;
 import de.itlobby.discoverj.ui.viewtask.ScanFileViewTask;
+import de.itlobby.discoverj.util.AsyncPipeline;
 import de.itlobby.discoverj.util.AudioUtil;
 import de.itlobby.discoverj.util.ImageCache;
 import de.itlobby.discoverj.util.ImageClipboardUtil;
@@ -22,6 +23,7 @@ import de.itlobby.discoverj.util.SearXUtil;
 import de.itlobby.discoverj.util.StringUtil;
 import de.itlobby.discoverj.util.SystemUtil;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.input.MouseEvent;
@@ -163,7 +165,12 @@ public class InitialService implements Service {
 
     private void scanFinished(ScanResultData scanResultData) {
         DataHolder.getInstance().setFromScanResult(scanResultData);
-        getMainViewController().showScanResult(scanResultData.getWithCoverCount(), scanResultData.getAudioFilesCount(), scanResultData.getAudioMap());
+
+        getMainViewController().showScanResult(
+                scanResultData.getWithCoverCount(),
+                scanResultData.getAudioFilesCount(),
+                scanResultData.getAudioMap()
+        );
 
         ServiceLocator.get(SelectionService.class).clearAll();
     }
@@ -239,22 +246,39 @@ public class InitialService implements Service {
     public void removeAllSelectedCover() {
         DataHolder dataHolder = DataHolder.getInstance();
         SelectionService selectionService = ServiceLocator.get(SelectionService.class);
-
         List<AudioListEntry> selectedEntries = selectionService.getSelectedEntries();
 
-        selectedEntries.stream()
-                .map(AudioListEntry::getWrapper)
-                .filter(AudioWrapper::hasCover)
-                .forEach(entry -> {
-                    removeCover(entry);
-                    dataHolder.updateResultEntry(entry);
-                    getMainViewController().lwAudioList.getChildren()
-                            .stream()
-                            .filter(AudioListEntry.class::isInstance)
-                            .map(AudioListEntry.class::cast)
-                            .filter(x -> x.getWrapper().getId().equals(entry.getId()))
-                            .forEach(AudioListEntry::removeCover);
-                });
+        AsyncPipeline.run(
+                        () -> {
+                            getMainViewController().showBusyIndicator(LanguageUtil.getString("key.mainview.cm.remove.all.selected"), null);
+                            getMainViewController().setTotalAudioCountToLoad(selectedEntries.size());
+                        }
+                )
+                .andThen(
+                        () -> selectedEntries.stream()
+                                .map(AudioListEntry::getWrapper)
+                                .filter(AudioWrapper::hasCover)
+                                .forEach((audioEntry) -> {
+                                    getMainViewController().countIndicatorUp();
+                                    AudioUtil.removeCover(audioEntry);
+                                }))
+                .andThen(
+                        () -> selectedEntries.stream()
+                                .map(AudioListEntry::getWrapper)
+                                .forEach(dataHolder::updateResultEntry))
+                .andThen(
+                        () -> Platform.runLater(() -> {
+                            getMainViewController().lwAudioList.getChildren()
+                                    .stream()
+                                    .filter(AudioListEntry.class::isInstance)
+                                    .map(AudioListEntry.class::cast)
+                                    .filter(x -> selectedEntries.stream().anyMatch(y -> y.getWrapper().getId().equals(x.getWrapper().getId())))
+                                    .forEach(AudioListEntry::removeCover);
+                        })
+                )
+                // hide busy indicator
+                .andThen(() -> getMainViewController().hideBusyIndicator())
+                .begin();
 
         selectionService.setSelectedEntries(selectedEntries);
     }

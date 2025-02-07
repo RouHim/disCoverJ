@@ -34,6 +34,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class DragDropService implements Service {
     private static final Logger LOG = LogManager.getLogger(DragDropService.class);
@@ -132,17 +133,31 @@ public class DragDropService implements Service {
                     Dragboard db = event.getDragboard();
                     List<File> files = db.getFiles();
 
-                    int audioCount = (int) files.stream().filter(AudioUtil::isAudioFile).count();
-                    int dirCount = (int) files.stream().filter(File::isDirectory).count();
-                    int imgCount = (int) files.stream().filter(SystemUtil::isImageFile).count();
+                    AtomicInteger audioCount = new AtomicInteger();
+                    AtomicInteger dirCount = new AtomicInteger();
+                    AtomicInteger imgCount = new AtomicInteger();
 
-                    boolean isLink = db.hasUrl() && db.getUrl().startsWith("http") && SystemUtil.isImage(db.getUrl());
+                    files.parallelStream().forEach(file -> {
+                        if (AudioUtil.isAudioFile(file)) {
+                            audioCount.getAndIncrement();
+                        }
+                        if (file.isDirectory()) {
+                            dirCount.getAndIncrement();
+                        }
+                        if (SystemUtil.isImageFile(file)) {
+                            imgCount.getAndIncrement();
+                        }
+                    });
 
-                    if (audioCount > 0 || dirCount > 0) {
-                        imgCount = 0;
+                    boolean isImageLink = db.hasUrl()
+                            && db.getUrl().startsWith("http")
+                            && SystemUtil.isImage(db.getUrl());
+
+                    if (audioCount.get() > 0 || dirCount.get() > 0) {
+                        imgCount.set(0);
                     }
 
-                    createDragOverAnimation(audioCount, imgCount, dirCount, isLink);
+                    createDragOverAnimation(audioCount.get(), imgCount.get(), dirCount.get(), isImageLink);
                     event.consume();
                 }
         );
@@ -164,7 +179,8 @@ public class DragDropService implements Service {
 
         if (db.hasFiles() && (dirCount > 0 || audioCount > 0)) {
             File[] fileArray = new File[files.size()];
-            ServiceLocator.get(InitialService.class).beginScanFiles(files.toArray(fileArray));
+            InitialService initialService = ServiceLocator.get(InitialService.class);
+            initialService.beginScanFiles(files.toArray(fileArray));
             success = true;
         } else if (isValidLink) {
             insertDroppedCover(db.getUrl());

@@ -41,7 +41,6 @@ public class MainService implements Service {
         viewController.btnExitApp.setOnAction(event -> exitApplication());
         viewController.btnOpenAbout.setOnAction(event -> openAbout());
         viewController.btnDonate.setOnAction(event -> donate());
-        viewController.btnSendFeedback.setOnAction(event -> sendFeedback());
         viewController.btnReportBug.setOnAction(event -> reportBug());
         ListenerStateProvider.getInstance().setSettingsSavedListener(SystemUtil::setProxy);
 
@@ -103,27 +102,6 @@ public class MainService implements Service {
             getMainViewController().txtJavaCurrentMem.setText(String.valueOf(curMem));
             getMainViewController().txtJavaMaxMem.setText(maxMem + "M");
             getMainViewController().pbJavaMemory.setProgress(percentage);
-        });
-    }
-
-    private void sendFeedback() {
-        Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-
-        Thread.ofVirtual().start(() -> {
-            if (desktop != null && desktop.isSupported(Desktop.Action.MAIL)) {
-                try {
-                    URI emailURL = new URIBuilder()
-                            .setScheme("mailto")
-                            .setPath("rouven@himmelstein.info")
-                            .build();
-
-                    desktop.mail(emailURL);
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
-                }
-            } else {
-                log.info("Send mail to rouven(at)himmelstein.info");
-            }
         });
     }
 

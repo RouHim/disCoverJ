@@ -55,7 +55,6 @@
                         </HBox>
                         <HBox alignment="CENTER_RIGHT" spacing="5.0" HBox.hgrow="ALWAYS">
                             <children>
-                                <Button fx:id="btnSendFeedback"/>
                                 <Button fx:id="btnReportBug"/>
                                 <Button fx:id="btnDonate"/>
                                 <Button fx:id="btnOpenAbout"/>
