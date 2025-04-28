@@ -1,3 +1,10 @@
+## [412.5.13](https://github.com/RouHim/disCoverJ/compare/412.5.12...412.5.13) (2025-04-28)
+
+
+### Bug Fixes
+
+* [#87](https://github.com/RouHim/disCoverJ/issues/87) and [#89](https://github.com/RouHim/disCoverJ/issues/89) update jaudiotagger dependency to version 1.4.0 ([7a4924d](https://github.com/RouHim/disCoverJ/commit/7a4924daa38e6950c24a3d22fa1330a50f479e97))
+
 ## [412.5.12](https://github.com/RouHim/disCoverJ/compare/412.5.11...412.5.12) (2025-04-25)
 
 ## [412.5.11](https://github.com/RouHim/disCoverJ/compare/412.5.10...412.5.11) (2025-04-25)
