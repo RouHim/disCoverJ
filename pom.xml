@@ -119,7 +119,7 @@
         <dependency>
             <groupId>com.github.RouHim</groupId>
             <artifactId>jaudiotagger</artifactId>
-            <version>1.4.3</version>
+            <version>1.4.4</version>
         </dependency>
 
         <!-- image processing -->
