@@ -15,7 +15,7 @@
     },
     "dependencies": {
         "njre": "^1.0.0",
-        "shelljs": "^0.9.0"
+        "shelljs": "^0.10.0"
     },
     "license": "GPL-2.0 License",
     "name": "discoverj",
