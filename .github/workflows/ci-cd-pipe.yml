@@ -11,7 +11,7 @@ jobs:
   analyse:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Build and upload Trivy vulnerability report
         if: github.ref_name == 'main'
@@ -41,7 +41,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -62,7 +62,7 @@ jobs:
       - test
       - analyse
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # Create a new release based on semantic versioning
       - name: Set up Node.js
@@ -92,7 +92,7 @@ jobs:
     if: github.ref_name == 'main'
     needs: release
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set latest version to environment
         if: github.ref == 'refs/heads/main'
