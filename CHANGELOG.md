@@ -1,3 +1,10 @@
+## [412.5.55](https://github.com/RouHim/disCoverJ/compare/412.5.54...412.5.55) (2025-08-13)
+
+
+### Bug Fixes
+
+* **deps:** update commons-io to 2.20.0 and fix empty string issue ([fb5a76e](https://github.com/RouHim/disCoverJ/commit/fb5a76efa9ea9512d718de0edd172226cd758ecc))
+
 ## [412.5.54](https://github.com/RouHim/disCoverJ/compare/412.5.53...412.5.54) (2025-08-12)
 
 ## [412.5.53](https://github.com/RouHim/disCoverJ/compare/412.5.52...412.5.53) (2025-08-11)
