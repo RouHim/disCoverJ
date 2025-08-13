@@ -23,7 +23,7 @@
 
         <twelvemonkeys.version>3.12.0</twelvemonkeys.version>
         <junit-jupiter-version>5.13.4</junit-jupiter-version>
-        <javafx.version>24-ea+5</javafx.version>
+        <javafx.version>26-ea+3</javafx.version>
     </properties>
 
     <repositories>
