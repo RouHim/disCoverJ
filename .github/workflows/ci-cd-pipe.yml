@@ -66,7 +66,7 @@ jobs:
 
       # Create a new release based on semantic versioning
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 21
 
@@ -111,7 +111,7 @@ jobs:
           cache: maven
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'
