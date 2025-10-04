@@ -5,14 +5,14 @@ import de.itlobby.discoverj.models.ImageFile;
 import de.itlobby.discoverj.models.SearchEngine;
 import de.itlobby.discoverj.models.SearchEngineTypes;
 import de.itlobby.discoverj.searchengines.CoverSearchEngine;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class CoverSearchTask implements Callable<List<ImageFile>> {
+
     private static final Logger log = LogManager.getLogger(CoverSearchTask.class);
 
     private final CoverSearchEngine coverSearchEngine;
@@ -49,7 +49,6 @@ public class CoverSearchTask implements Callable<List<ImageFile>> {
         }
 
         return coverSearchService;
-
     }
 
     public String getAudioFileName() {

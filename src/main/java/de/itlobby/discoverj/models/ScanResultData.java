@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ScanResultData {
+
     private Map<String, List<AudioWrapper>> audioMap = new HashMap<>();
     private int audioFilesCount;
     private int withCoverCount;

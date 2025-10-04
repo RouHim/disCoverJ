@@ -15,8 +15,7 @@ public enum Language {
     SPANISH(Locale.forLanguageTag("es-ES"), "languages/disCoverJ_es.properties", "/images/flags/es.png"),
     HEBREW(Locale.forLanguageTag("he"), "languages/disCoverJ_he.properties", "/images/flags/il.png"),
     CHINESE(Locale.SIMPLIFIED_CHINESE, "languages/disCoverJ_zh.properties", "/images/flags/cn.png"),
-    HINDI(Locale.of("hi", "IN"), "languages/disCoverJ_hi.properties", "/images/flags/in.png"),
-    ;
+    HINDI(Locale.of("hi", "IN"), "languages/disCoverJ_hi.properties", "/images/flags/in.png");
 
     private final String imagePath;
     private final Locale locale;
@@ -30,9 +29,9 @@ public enum Language {
 
     public static Language fromLocale(Locale toFind) {
         return Arrays.stream(values())
-                .filter(language -> language.getLocale().equals(toFind))
-                .findFirst()
-                .orElse(Language.ENGLISH);
+            .filter(language -> language.getLocale().equals(toFind))
+            .findFirst()
+            .orElse(Language.ENGLISH);
     }
 
     public Locale getLocale() {

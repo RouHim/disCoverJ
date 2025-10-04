@@ -3,6 +3,7 @@ package de.itlobby.discoverj.ui.core;
 import java.util.HashMap;
 
 public class ServiceLocator {
+
     private static ServiceLocator instance;
     private final HashMap<Class, Object> services = new HashMap<>();
 
@@ -49,7 +50,7 @@ public class ServiceLocator {
         return obj;
     }
 
-    @SuppressWarnings({"squid:S00112", "squid:S1166"})
+    @SuppressWarnings({ "squid:S00112", "squid:S1166" })
     private <T> T createServiceInstance(Class<T> clazz) {
         T obj;
 

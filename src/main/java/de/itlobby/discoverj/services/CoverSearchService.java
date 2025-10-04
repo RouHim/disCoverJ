@@ -16,11 +16,6 @@ import de.itlobby.discoverj.util.LanguageUtil;
 import de.itlobby.discoverj.util.SearchEngineFuture;
 import de.itlobby.discoverj.util.SystemUtil;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jaudiotagger.audio.AudioFile;
-
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -35,8 +30,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
+import javax.imageio.ImageIO;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jaudiotagger.audio.AudioFile;
 
 public class CoverSearchService implements Service {
+
     private static final Logger log = LogManager.getLogger(CoverSearchService.class);
     private final CoverPersistentService coverPersistentService = ServiceLocator.get(CoverPersistentService.class);
     private ImageFile lastAudioCover = null;
@@ -60,40 +60,30 @@ public class CoverSearchService implements Service {
 
         // prepare ui
         getMainViewController().resetRightSide();
-        getMainViewController().activateSearchState(
-                event -> stopSearch(),
-                audioFilesCount
-        );
+        getMainViewController().activateSearchState(event -> stopSearch(), audioFilesCount);
 
         // Sort audio files by path
-        List<AudioWrapper> audioWrapperList = audioMap
-                .values().stream()
-                .flatMap(Collection::stream)
-                .sorted()
-                .toList();
+        List<AudioWrapper> audioWrapperList = audioMap.values().stream().flatMap(Collection::stream).sorted().toList();
 
         try {
             boolean selectCoverManually = Settings.getInstance().getConfig().isGeneralManualImageSelection();
             if (selectCoverManually) {
-                AsyncPipeline
-                        .run(() -> {
-                            getMainViewController().showBusyIndicator(
-                                    LanguageUtil.getString("CoverSearchService.loadingCovers"),
-                                    () -> ServiceLocator.get(CoverSearchService.class).interruptProgress = true
-                            );
-                        })
-                        .andThen(() -> collectAllCoverForAudioFiles(audioWrapperList))
-                        .andThen(() -> getMainViewController().hideBusyIndicator())
-                        .andThen(() -> audioWrapperList.forEach(this::letUserSelectCover))
-                        .andThen(this::finishTotal)
-                        .begin();
+                AsyncPipeline.run(() -> {
+                    getMainViewController().showBusyIndicator(
+                        LanguageUtil.getString("CoverSearchService.loadingCovers"),
+                        () -> ServiceLocator.get(CoverSearchService.class).interruptProgress = true
+                    );
+                })
+                    .andThen(() -> collectAllCoverForAudioFiles(audioWrapperList))
+                    .andThen(() -> getMainViewController().hideBusyIndicator())
+                    .andThen(() -> audioWrapperList.forEach(this::letUserSelectCover))
+                    .andThen(this::finishTotal)
+                    .begin();
             } else {
-                AsyncPipeline
-                        .run(() -> audioWrapperList.forEach(this::searchCover))
-                        .andThen(this::finishTotal)
-                        .begin();
+                AsyncPipeline.run(() -> audioWrapperList.forEach(this::searchCover))
+                    .andThen(this::finishTotal)
+                    .begin();
             }
-
         } catch (ProgressInterruptedException ignored) {
             // ignore
         }
@@ -113,16 +103,16 @@ public class CoverSearchService implements Service {
      */
     private void collectAllCoverForAudioFiles(List<AudioWrapper> audioWrapperList) {
         // Group and sort by parent directory, and sort by parent directory
-        Map<String, List<AudioWrapper>> audioMap = audioWrapperList.stream()
-                .collect(Collectors.groupingBy(AudioWrapper::getParentFilePath))
-                .entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, List<AudioWrapper>> audioMap = audioWrapperList
+            .stream()
+            .collect(Collectors.groupingBy(AudioWrapper::getParentFilePath))
+            .entrySet()
+            .stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         audioMap.forEach((parentPath, audioWrappers) -> {
-            boolean sameSearchQuery = audioWrappers.stream()
-                    .map(SearchQueryUtil::createSearchString)
-                    .distinct()
-                    .count() == 1;
+            boolean sameSearchQuery =
+                audioWrappers.stream().map(SearchQueryUtil::createSearchString).distinct().count() == 1;
 
             if (sameSearchQuery) {
                 AudioWrapper first = audioWrappers.getFirst();
@@ -130,13 +120,10 @@ public class CoverSearchService implements Service {
             }
         });
 
-
         getMainViewController().setTotalAudioCountToLoad(audioMap.size());
 
         // Load covers for audio files
-        audioMap.values().stream()
-                .flatMap(Collection::stream)
-                .forEach(this::collectAllCoverForAudioFile);
+        audioMap.values().stream().flatMap(Collection::stream).forEach(this::collectAllCoverForAudioFile);
     }
 
     /**
@@ -156,10 +143,11 @@ public class CoverSearchService implements Service {
 
             // Check if the first manual user image selection of this album folder was empty,
             // if so skip the manual folder selection for the rest of the folder
-            boolean lastManualSelectionWasEmpty = config.isGeneralAutoLastAudio() &&
-                    lastAudioFilePath != null &&
-                    AudioUtil.hasSameFolderAndAlbumAsLast(audioWrapper, lastAudioFilePath) &&
-                    lastAudioCover == null;
+            boolean lastManualSelectionWasEmpty =
+                config.isGeneralAutoLastAudio() &&
+                lastAudioFilePath != null &&
+                AudioUtil.hasSameFolderAndAlbumAsLast(audioWrapper, lastAudioFilePath) &&
+                lastAudioCover == null;
             if (lastManualSelectionWasEmpty) {
                 return;
             }
@@ -244,9 +232,10 @@ public class CoverSearchService implements Service {
         }
 
         AppConfig config = Settings.getInstance().getConfig();
-        if (config.isOverwriteOnlyHigher()
-                && audioWrapper.hasCover()
-                && !isNewResHigher(newCoverImage, resizedCover.get())
+        if (
+            config.isOverwriteOnlyHigher() &&
+            audioWrapper.hasCover() &&
+            !isNewResHigher(newCoverImage, resizedCover.get())
         ) {
             getMainViewController().setState(LanguageUtil.getString("SearchController.oldResHigher"));
         } else {
@@ -255,10 +244,12 @@ public class CoverSearchService implements Service {
     }
 
     private boolean canLoadCoverFromLastFile(AppConfig config, AudioWrapper audioWrapper) {
-        return config.isGeneralAutoLastAudio() &&
-                lastAudioFilePath != null &&
-                AudioUtil.hasSameFolderAndAlbumAsLast(audioWrapper, lastAudioFilePath) &&
-                lastAudioCover != null;
+        return (
+            config.isGeneralAutoLastAudio() &&
+            lastAudioFilePath != null &&
+            AudioUtil.hasSameFolderAndAlbumAsLast(audioWrapper, lastAudioFilePath) &&
+            lastAudioCover != null
+        );
     }
 
     private void searchCover(AudioWrapper audioWrapper) {
@@ -284,14 +275,13 @@ public class CoverSearchService implements Service {
                 return;
             }
 
-            searchCoverForAudioFile(audioWrapper)
-                    .ifPresentOrElse(
-                            newCover -> {
-                                saveCoverToFile(newCover, audioWrapper);
-                                lastAudioCover = newCover;
-                            },
-                            () -> lastAudioCover = null
-                    );
+            searchCoverForAudioFile(audioWrapper).ifPresentOrElse(
+                newCover -> {
+                    saveCoverToFile(newCover, audioWrapper);
+                    lastAudioCover = newCover;
+                },
+                () -> lastAudioCover = null
+            );
         } finally {
             finalizeProcessAudioWrapper(audioWrapper);
         }
@@ -314,7 +304,6 @@ public class CoverSearchService implements Service {
             }
 
             return Optional.ofNullable(ImageUtil.resize(cover, maxCoverSize, maxCoverSize));
-
         } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
@@ -325,17 +314,19 @@ public class CoverSearchService implements Service {
     private Optional<ImageFile> searchCoverForAudioFile(AudioWrapper audioWrapper) {
         AppConfig appConfig = Settings.getInstance().getConfig();
 
-        List<SearchEngine> activeSearchEngines = appConfig.getSearchEngineList().stream()
-                .filter(SearchEngine::isEnabled)
-                .toList();
+        List<SearchEngine> activeSearchEngines = appConfig
+            .getSearchEngineList()
+            .stream()
+            .filter(SearchEngine::isEnabled)
+            .toList();
 
         // Iterate over all active search engines and search for covers
         // Return the first cover image that has been found
         for (SearchEngine searchEngine : activeSearchEngines) {
             CoverSearchTask coverSearchTask = new CoverSearchTask(searchEngine, audioWrapper);
             Optional<ImageFile> response = CoverSearchTaskExecutor.run(coverSearchTask, appConfig.getSearchTimeout())
-                    .filter(x -> !x.isEmpty())
-                    .map(x -> x.get(0));
+                .filter(x -> !x.isEmpty())
+                .map(x -> x.get(0));
 
             if (response.isPresent()) {
                 return response;
@@ -350,24 +341,28 @@ public class CoverSearchService implements Service {
             throw new ProgressInterruptedException();
         }
 
-        List<SearchEngine> activeSearchEngines = Settings.getInstance().getConfig().getSearchEngineList()
-                .stream()
-                .filter(SearchEngine::isEnabled)
-                .toList();
+        List<SearchEngine> activeSearchEngines = Settings.getInstance()
+            .getConfig()
+            .getSearchEngineList()
+            .stream()
+            .filter(SearchEngine::isEnabled)
+            .toList();
 
         getMainViewController().setBusyIndicatorStatusText(
-                "Loading covers for: \n" + SearchQueryUtil.createSearchString(audioWrapper)
+            "Loading covers for: \n" + SearchQueryUtil.createSearchString(audioWrapper)
         );
 
         // Start cover search per active search engine
         try (ExecutorService executorService = Executors.newFixedThreadPool(activeSearchEngines.size())) {
-            List<SearchEngineFuture> searchEngineFutures = activeSearchEngines.stream()
-                    .map(searchEngine -> new SearchEngineFuture(
-                                    executorService.submit(new CoverSearchTask(searchEngine, audioWrapper)),
-                                    searchEngine.getType().getName()
-                            )
+            List<SearchEngineFuture> searchEngineFutures = activeSearchEngines
+                .stream()
+                .map(searchEngine ->
+                    new SearchEngineFuture(
+                        executorService.submit(new CoverSearchTask(searchEngine, audioWrapper)),
+                        searchEngine.getType().getName()
                     )
-                    .toList();
+                )
+                .toList();
 
             int searchTimeout = Settings.getInstance().getConfig().getSearchTimeout();
 
@@ -401,5 +396,4 @@ public class CoverSearchService implements Service {
         interruptProgress = true;
         getMainViewController().activateActionButton(event -> search(), FontAwesomeIcon.SEARCH);
     }
-
 }

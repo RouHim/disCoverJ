@@ -8,6 +8,8 @@ import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.LanguageUtil;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import java.awt.image.BufferedImage;
+import java.util.Objects;
 import javafx.animation.Animation;
 import javafx.animation.RotateTransition;
 import javafx.geometry.Insets;
@@ -21,10 +23,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.util.Duration;
 
-import java.awt.image.BufferedImage;
-import java.util.Objects;
-
 public class AudioListEntry extends HBox {
+
     private final AudioWrapper audioWrapper;
     private ImageView imageView;
     private FontAwesomeIconView iconView;
@@ -67,11 +67,13 @@ public class AudioListEntry extends HBox {
         setSpacing(5);
         getStyleClass().add("audio-line");
 
-        setOnMouseClicked(event ->
-        {
+        setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.PRIMARY) {
-                ServiceLocator.get(InitialService.class)
-                        .selectLine(AudioListEntry.this, event.isControlDown(), event.isShiftDown());
+                ServiceLocator.get(InitialService.class).selectLine(
+                    AudioListEntry.this,
+                    event.isControlDown(),
+                    event.isShiftDown()
+                );
             }
         });
 
@@ -164,15 +166,17 @@ public class AudioListEntry extends HBox {
         rotateTransition.setToAngle(360);
         rotateTransition.setCycleCount(Animation.INDEFINITE);
         rotateTransition.setAutoReverse(false);
-        rotateTransition.statusProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue == Animation.Status.STOPPED) {
-                RotateTransition transition = new RotateTransition(Duration.millis(100), iconView);
-                transition.setFromAngle(iconView.getRotate());
-                transition.setToAngle(0);
-                transition.setCycleCount(1);
-                transition.play();
-            }
-        });
+        rotateTransition
+            .statusProperty()
+            .addListener((observable, oldValue, newValue) -> {
+                if (newValue == Animation.Status.STOPPED) {
+                    RotateTransition transition = new RotateTransition(Duration.millis(100), iconView);
+                    transition.setFromAngle(iconView.getRotate());
+                    transition.setToAngle(0);
+                    transition.setCycleCount(1);
+                    transition.play();
+                }
+            });
     }
 
     private void startRotate() {

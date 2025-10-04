@@ -13,10 +13,15 @@ import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 public class AwesomeHelper {
-    private AwesomeHelper() {
-    }
 
-    public static void setIconButton(Button button, FontAwesomeIcon faicon, double iconSize, String... additionalStyleClasses) {
+    private AwesomeHelper() {}
+
+    public static void setIconButton(
+        Button button,
+        FontAwesomeIcon faicon,
+        double iconSize,
+        String... additionalStyleClasses
+    ) {
         FontAwesomeIconView iconView = new FontAwesomeIconView(faicon);
         for (String additionalStyleClas : additionalStyleClasses) {
             iconView.getStyleClass().add(additionalStyleClas);
@@ -26,7 +31,13 @@ public class AwesomeHelper {
         button.setGraphic(iconView);
     }
 
-    public static void createIconButton(Button btn, GlyphIcons icon, String iconStyle, String tooltipText, String iconSize) {
+    public static void createIconButton(
+        Button btn,
+        GlyphIcons icon,
+        String iconStyle,
+        String tooltipText,
+        String iconSize
+    ) {
         Text iconTxt = GlyphsDude.createIcon(icon, iconSize);
         iconTxt.getStyleClass().add(iconStyle);
         btn.setGraphic(iconTxt);
@@ -36,7 +47,13 @@ public class AwesomeHelper {
         btn.setTooltip(new Tooltip(tooltipText));
     }
 
-    public static void createTextIcon(Label label, FontAwesomeIcon icon, String iconStyle, String tooltipText, String iconSize) {
+    public static void createTextIcon(
+        Label label,
+        FontAwesomeIcon icon,
+        String iconStyle,
+        String tooltipText,
+        String iconSize
+    ) {
         Text iconTxt = GlyphsDude.createIcon(icon, iconSize);
         iconTxt.getStyleClass().add(iconStyle);
         label.setGraphic(iconTxt);
@@ -46,7 +63,14 @@ public class AwesomeHelper {
         label.setTooltip(new Tooltip(tooltipText));
     }
 
-    public static void createCircleAnimation(Button btnActionCircle, Button btnActionCircleIcon, int fromValue, int toValue, int byY, int toY) {
+    public static void createCircleAnimation(
+        Button btnActionCircle,
+        Button btnActionCircleIcon,
+        int fromValue,
+        int toValue,
+        int byY,
+        int toY
+    ) {
         Duration duration = Duration.millis(500);
 
         FadeTransition ft1 = new FadeTransition(duration, btnActionCircle);

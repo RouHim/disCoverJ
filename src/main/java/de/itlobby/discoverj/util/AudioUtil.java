@@ -1,10 +1,25 @@
 package de.itlobby.discoverj.util;
 
+import static de.itlobby.discoverj.searchengines.DiscogsCoverSearchEngine.DISCOGS_RELEASE_ID;
+import static de.itlobby.discoverj.util.StringUtil.ARTISTS_SEPARATOR_KEYWORDS;
+import static org.jaudiotagger.tag.FieldKey.MUSICBRAINZ_RELEASEID;
+
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ImageFile;
 import de.itlobby.discoverj.models.ImageSize;
 import de.itlobby.discoverj.services.LightBoxService;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import javafx.application.Platform;
 import javafx.scene.image.Image;
 import org.apache.commons.io.FileUtils;
@@ -25,33 +40,19 @@ import org.jaudiotagger.tag.id3.ID3v23Tag;
 import org.jaudiotagger.tag.images.StandardArtwork;
 import org.jaudiotagger.tag.reference.PictureTypes;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import static de.itlobby.discoverj.searchengines.DiscogsCoverSearchEngine.DISCOGS_RELEASE_ID;
-import static de.itlobby.discoverj.util.StringUtil.ARTISTS_SEPARATOR_KEYWORDS;
-import static org.jaudiotagger.tag.FieldKey.MUSICBRAINZ_RELEASEID;
-
 public class AudioUtil {
-    public static final String[] VALID_IMAGE_FILE_EXTENSION = {"jpg", "jpeg", "bmp", "png", "gif"};
+
+    public static final String[] VALID_IMAGE_FILE_EXTENSION = { "jpg", "jpeg", "bmp", "png", "gif" };
     public static final String[] VALID_AUDIO_FILE_EXTENSION = Arrays.stream(SupportedFileFormat.values())
-            .map(SupportedFileFormat::getFilesuffix)
-            .filter(suffix -> !suffix.isEmpty())
-            .toArray(String[]::new);
-    static final Set<String> VALID_AUDIO_FILE_EXTENSION_LIST = Arrays.stream(VALID_AUDIO_FILE_EXTENSION).collect(Collectors.toSet());
+        .map(SupportedFileFormat::getFilesuffix)
+        .filter(suffix -> !suffix.isEmpty())
+        .toArray(String[]::new);
+    static final Set<String> VALID_AUDIO_FILE_EXTENSION_LIST = Arrays.stream(VALID_AUDIO_FILE_EXTENSION).collect(
+        Collectors.toSet()
+    );
     private static final Logger log = LogManager.getLogger(AudioUtil.class);
 
-    private AudioUtil() {
-    }
+    private AudioUtil() {}
 
     public static boolean haveCover(AudioFile audioFile) {
         Tag tag = audioFile.getTag();
@@ -68,8 +69,8 @@ public class AudioUtil {
      */
     public static Optional<Image> getCover(String audioFilePath, int width, int height) {
         return readAudioFile(audioFilePath)
-                .flatMap(AudioUtil::getCoverData)
-                .flatMap(data -> ImageCache.getInstance().getImage(data, width, height));
+            .flatMap(AudioUtil::getCoverData)
+            .flatMap(data -> ImageCache.getInstance().getImage(data, width, height));
     }
 
     /**
@@ -80,8 +81,8 @@ public class AudioUtil {
      */
     public static Optional<Image> getCover(String audioFilePath) {
         return readAudioFile(audioFilePath)
-                .flatMap(AudioUtil::getCoverData)
-                .flatMap(data -> ImageCache.getInstance().getImage(data));
+            .flatMap(AudioUtil::getCoverData)
+            .flatMap(data -> ImageCache.getInstance().getImage(data));
     }
 
     /**
@@ -169,9 +170,7 @@ public class AudioUtil {
         }
 
         Tag tag = audioFile.getTag();
-        return tag != null && tag.hasField(fieldKey)
-                ? Optional.ofNullable(tag.getFirst(fieldKey))
-                : Optional.empty();
+        return tag != null && tag.hasField(fieldKey) ? Optional.ofNullable(tag.getFirst(fieldKey)) : Optional.empty();
     }
 
     /**
@@ -184,9 +183,7 @@ public class AudioUtil {
     private static String readFieldValue(AudioFile audioFile, FieldKey fieldKey) {
         Tag tag = audioFile.getTag();
 
-        return tag != null && tag.hasField(fieldKey)
-                ? tag.getFirst(fieldKey)
-                : "";
+        return tag != null && tag.hasField(fieldKey) ? tag.getFirst(fieldKey) : "";
     }
 
     public static String getTitle(AudioFile audioFile) {
@@ -211,13 +208,12 @@ public class AudioUtil {
 
     public static List<String> getArtists(AudioFile audioFile) {
         String artistSeparators = ARTISTS_SEPARATOR_KEYWORDS.stream()
-                .map(entry -> entry.replace("+", "\\+"))
-                .collect(Collectors.joining("|"));
+            .map(entry -> entry.replace("+", "\\+"))
+            .collect(Collectors.joining("|"));
 
-        return Arrays.stream(readFieldValue(audioFile, FieldKey.ARTIST)
-                        .split(artistSeparators))
-                .map(String::trim)
-                .toList();
+        return Arrays.stream(readFieldValue(audioFile, FieldKey.ARTIST).split(artistSeparators))
+            .map(String::trim)
+            .toList();
     }
 
     public static String getYear(AudioFile audioFile) {
@@ -246,17 +242,19 @@ public class AudioUtil {
     }
 
     public static Optional<Integer> getDiscogsReleaseId(AudioFile audioFile) {
-        return readCustomFieldValue(audioFile, DISCOGS_RELEASE_ID)
-                .map(Integer::valueOf);
+        return readCustomFieldValue(audioFile, DISCOGS_RELEASE_ID).map(Integer::valueOf);
     }
 
     private static Optional<String> readCustomFieldValue(AudioFile audioFile, String customField) {
-        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(audioFile.getTag().getFields(), Spliterator.ORDERED), false)
-                .filter(AbstractTagFrame.class::isInstance)
-                .map(field -> ((AbstractTagFrame) field).getBody())
-                .filter(body -> body.getBriefDescription().contains(customField))
-                .findFirst()
-                .map(AbstractTagFrameBody::getUserFriendlyValue);
+        return StreamSupport.stream(
+            Spliterators.spliteratorUnknownSize(audioFile.getTag().getFields(), Spliterator.ORDERED),
+            false
+        )
+            .filter(AbstractTagFrame.class::isInstance)
+            .map(field -> ((AbstractTagFrame) field).getBody())
+            .filter(body -> body.getBriefDescription().contains(customField))
+            .findFirst()
+            .map(AbstractTagFrameBody::getUserFriendlyValue);
     }
 
     public static void saveCoverToAudioFile(AudioFile audioFile, BufferedImage cover) {
@@ -355,8 +353,7 @@ public class AudioUtil {
     }
 
     public static boolean isAudioFile(File file) {
-        return VALID_AUDIO_FILE_EXTENSION_LIST
-                .contains(StringUtil.getFileExtension(file).toLowerCase());
+        return VALID_AUDIO_FILE_EXTENSION_LIST.contains(StringUtil.getFileExtension(file).toLowerCase());
     }
 
     public static AudioFile readAudioFileSafe(File file) {
@@ -383,14 +380,15 @@ public class AudioUtil {
     }
 
     public static void showCannotWriteError(String absolutePath) {
-        Platform.runLater(() -> ServiceLocator.get(LightBoxService.class)
-                .showTextDialog(
-                        LanguageUtil.getString("InitialController.warning"),
-                        MessageFormat.format(
-                                "{0}\n\n{1}",
-                                LanguageUtil.getString("SearchController.cannotWriteFile"),
-                                absolutePath)
+        Platform.runLater(() ->
+            ServiceLocator.get(LightBoxService.class).showTextDialog(
+                LanguageUtil.getString("InitialController.warning"),
+                MessageFormat.format(
+                    "{0}\n\n{1}",
+                    LanguageUtil.getString("SearchController.cannotWriteFile"),
+                    absolutePath
                 )
+            )
         );
     }
 

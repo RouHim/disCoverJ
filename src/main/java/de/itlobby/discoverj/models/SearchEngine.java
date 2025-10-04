@@ -3,11 +3,11 @@ package de.itlobby.discoverj.models;
 import java.io.Serializable;
 
 public class SearchEngine implements Serializable {
+
     private SearchEngineTypes type;
     private boolean isEnabled;
 
-    public SearchEngine() {
-    }
+    public SearchEngine() {}
 
     public SearchEngine(SearchEngineTypes type, boolean isEnabled) {
         this.type = type;

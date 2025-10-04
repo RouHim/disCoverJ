@@ -8,7 +8,6 @@ import de.itlobby.discoverj.searchengines.LocalCoverSearchEngine;
 import de.itlobby.discoverj.searchengines.MusicbrainzCoverSearchEngine;
 import de.itlobby.discoverj.searchengines.SearxCoverSearchEngine;
 import de.itlobby.discoverj.searchengines.SpotifyCoverSearchEngine;
-
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -26,7 +25,12 @@ public enum SearchEngineTypes implements Serializable {
     private final Class<? extends CoverSearchEngine> serviceClass;
     private final boolean returnsMultipleImages;
 
-    SearchEngineTypes(String name, String logoPath, Class<? extends CoverSearchEngine> serviceClass, boolean returnsMultipleImages) {
+    SearchEngineTypes(
+        String name,
+        String logoPath,
+        Class<? extends CoverSearchEngine> serviceClass,
+        boolean returnsMultipleImages
+    ) {
         this.name = name;
         this.logoPath = logoPath;
         this.serviceClass = serviceClass;
@@ -35,9 +39,9 @@ public enum SearchEngineTypes implements Serializable {
 
     public static SearchEngineTypes getByName(String name) {
         return Arrays.stream(values())
-                .filter(searchEngineTypes -> searchEngineTypes.getName().equals(name))
-                .findFirst()
-                .orElse(null);
+            .filter(searchEngineTypes -> searchEngineTypes.getName().equals(name))
+            .findFirst()
+            .orElse(null);
     }
 
     public String getName() {

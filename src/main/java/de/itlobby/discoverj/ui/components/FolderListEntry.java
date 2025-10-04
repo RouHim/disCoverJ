@@ -4,6 +4,8 @@ import de.itlobby.discoverj.services.InitialService;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import java.io.File;
+import java.util.Objects;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -12,10 +14,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-import java.io.File;
-import java.util.Objects;
-
 public class FolderListEntry extends HBox {
+
     private final String name;
     private final String path;
 
@@ -27,7 +27,6 @@ public class FolderListEntry extends HBox {
     }
 
     private void buildLayout() {
-
         FontAwesomeIconView iconView = new FontAwesomeIconView(FontAwesomeIcon.FOLDER);
         iconView.setStyle("-fx-font-family: FontAwesome; -fx-font-size: 2em; -fx-text-alignment: center;");
         iconView.setWrappingWidth(36);
@@ -50,11 +49,13 @@ public class FolderListEntry extends HBox {
         setSpacing(5);
         getStyleClass().add("folder-line");
 
-        setOnMouseClicked(event ->
-        {
+        setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.PRIMARY) {
-                ServiceLocator.get(InitialService.class)
-                        .selectLine(FolderListEntry.this, event.isControlDown(), event.isShiftDown());
+                ServiceLocator.get(InitialService.class).selectLine(
+                    FolderListEntry.this,
+                    event.isControlDown(),
+                    event.isShiftDown()
+                );
             }
         });
     }
@@ -69,7 +70,6 @@ public class FolderListEntry extends HBox {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(path);
     }
 

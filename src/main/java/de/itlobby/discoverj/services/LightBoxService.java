@@ -18,18 +18,39 @@ import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
 
 public class LightBoxService implements Service {
+
     private static final int DEFAULT_HEIGHT = 250;
     private static final int DEFAULT_WIDTH = 350;
 
-    public void showDialog(String title, Parent content, ActionListener cancelListener, ActionListener okListener, boolean isFullscreen, boolean hideButtons) {
+    public void showDialog(
+        String title,
+        Parent content,
+        ActionListener cancelListener,
+        ActionListener okListener,
+        boolean isFullscreen,
+        boolean hideButtons
+    ) {
         showInternal(title, content, cancelListener, okListener, isFullscreen, hideButtons);
     }
 
-    public void showDialog(String title, Parent content, ActionListener cancelListener, ActionListener okListener, boolean hideButtons) {
+    public void showDialog(
+        String title,
+        Parent content,
+        ActionListener cancelListener,
+        ActionListener okListener,
+        boolean hideButtons
+    ) {
         showInternal(title, content, cancelListener, okListener, false, hideButtons);
     }
 
-    private void showInternal(String title, Parent content, ActionListener cancelListener, ActionListener okListener, boolean isFullscreen, boolean hideButtons) {
+    private void showInternal(
+        String title,
+        Parent content,
+        ActionListener cancelListener,
+        ActionListener okListener,
+        boolean isFullscreen,
+        boolean hideButtons
+    ) {
         if (okListener == null && cancelListener == null) {
             cancelListener = this::hideDialog;
         }

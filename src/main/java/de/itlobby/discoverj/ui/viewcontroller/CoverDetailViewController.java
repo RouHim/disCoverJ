@@ -10,6 +10,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
 public class CoverDetailViewController implements ViewController {
+
     public TextFlow txtCoverInfo;
     public ImageView imgCover;
     public HBox layoutCoverImage;
@@ -18,9 +19,9 @@ public class CoverDetailViewController implements ViewController {
     public void initialize() {
         MainViewController viewController = ViewManager.getInstance().getViewController(Views.MAIN_VIEW);
 
-        viewController.lightBoxLayout.heightProperty().addListener((observable, oldValue, newValue) ->
-                onSizeChanged(viewController.lightBoxLayout)
-        );
+        viewController.lightBoxLayout
+            .heightProperty()
+            .addListener((observable, oldValue, newValue) -> onSizeChanged(viewController.lightBoxLayout));
     }
 
     private void onSizeChanged(HBox lightBoxLayout) {
@@ -46,10 +47,9 @@ public class CoverDetailViewController implements ViewController {
     }
 
     public void createCoverInfo(Image coverImage) {
-        txtCoverInfo.getChildren()
-                .add(
-                        new Text(ImageUtil.createImageResolutionString(coverImage.getWidth(), coverImage.getHeight()))
-                );
+        txtCoverInfo
+            .getChildren()
+            .add(new Text(ImageUtil.createImageResolutionString(coverImage.getWidth(), coverImage.getHeight())));
     }
 
     public void clearCoverInfo() {

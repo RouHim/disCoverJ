@@ -13,6 +13,14 @@ import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.LanguageUtil;
 import de.itlobby.discoverj.util.SystemUtil;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import javafx.animation.ScaleTransition;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -27,16 +35,8 @@ import org.apache.logging.log4j.Logger;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class DragDropService implements Service {
+
     private static final Logger LOG = LogManager.getLogger(DragDropService.class);
 
     private static void createScaleAnimation(Node circle) {
@@ -74,15 +74,15 @@ public class DragDropService implements Service {
         getMainViewController().showBusyIndicator(LanguageUtil.getString("add.images.to.audiofiles"), null);
 
         Runnable taskToExecute = () ->
-                addCoverToEntries(
-                        imgFile,
-                        selectedEntries,
-                        () -> getMainViewController().hideBusyIndicator()
-                );
+            addCoverToEntries(imgFile, selectedEntries, () -> getMainViewController().hideBusyIndicator());
         Thread.ofVirtual().start(taskToExecute);
     }
 
-    private void addCoverToEntries(File imgFile, List<AudioListEntry> selectedEntries, ActionListener threadFinishedListener) {
+    private void addCoverToEntries(
+        File imgFile,
+        List<AudioListEntry> selectedEntries,
+        ActionListener threadFinishedListener
+    ) {
         try {
             Optional<BufferedImage> img = ImageUtil.readRGBImage(imgFile);
 
@@ -99,16 +99,18 @@ public class DragDropService implements Service {
 
                 List<AudioWrapper> audioList = DataHolder.getInstance().getAudioList();
 
-                audioList.stream()
-                        .filter(x -> x.getId().equals(audioWrapper.getId()))
-                        .forEach(x -> AudioUtil.saveCoverToAudioFile(audioFile, img.get()));
+                audioList
+                    .stream()
+                    .filter(x -> x.getId().equals(audioWrapper.getId()))
+                    .forEach(x -> AudioUtil.saveCoverToAudioFile(audioFile, img.get()));
 
-                getMainViewController().lwAudioList.getChildren()
-                        .stream()
-                        .filter(AudioListEntry.class::isInstance)
-                        .map(AudioListEntry.class::cast)
-                        .filter(audioEntry -> audioEntry.getWrapper().getId().equals(audioWrapper.getId()))
-                        .forEach(wrapper -> wrapper.replaceCover(img.get()));
+                getMainViewController()
+                    .lwAudioList.getChildren()
+                    .stream()
+                    .filter(AudioListEntry.class::isInstance)
+                    .map(AudioListEntry.class::cast)
+                    .filter(audioEntry -> audioEntry.getWrapper().getId().equals(audioWrapper.getId()))
+                    .forEach(wrapper -> wrapper.replaceCover(img.get()));
             }
 
             getMainViewController().showAudioInfo(selectedEntries.get(0).getWrapper(), true);
@@ -121,48 +123,48 @@ public class DragDropService implements Service {
 
     void initDragAndDrop() {
         getMainViewController().rootLayout.setOnDragOver(event -> {
-                    Dragboard db = event.getDragboard();
-                    if (db.hasFiles() || db.hasUrl()) {
-                        event.acceptTransferModes(TransferMode.ANY);
-                    }
-                    event.consume();
-                }
-        );
+            Dragboard db = event.getDragboard();
+            if (db.hasFiles() || db.hasUrl()) {
+                event.acceptTransferModes(TransferMode.ANY);
+            }
+            event.consume();
+        });
 
         getMainViewController().rootLayout.setOnDragEntered(event -> {
-                    Dragboard db = event.getDragboard();
-                    List<File> files = db.getFiles();
+            Dragboard db = event.getDragboard();
+            List<File> files = db.getFiles();
 
-                    AtomicInteger audioCount = new AtomicInteger();
-                    AtomicInteger dirCount = new AtomicInteger();
-                    AtomicInteger imgCount = new AtomicInteger();
+            AtomicInteger audioCount = new AtomicInteger();
+            AtomicInteger dirCount = new AtomicInteger();
+            AtomicInteger imgCount = new AtomicInteger();
 
-                    files.parallelStream().forEach(file -> {
-                        if (AudioUtil.isAudioFile(file)) {
-                            audioCount.getAndIncrement();
-                        }
-                        if (file.isDirectory()) {
-                            dirCount.getAndIncrement();
-                        }
-                        if (SystemUtil.isImageFile(file)) {
-                            imgCount.getAndIncrement();
-                        }
-                    });
-
-                    boolean isImageLink = db.hasUrl()
-                            && db.getUrl().startsWith("http")
-                            && SystemUtil.isImage(db.getUrl());
-
-                    if (audioCount.get() > 0 || dirCount.get() > 0) {
-                        imgCount.set(0);
+            files
+                .parallelStream()
+                .forEach(file -> {
+                    if (AudioUtil.isAudioFile(file)) {
+                        audioCount.getAndIncrement();
                     }
+                    if (file.isDirectory()) {
+                        dirCount.getAndIncrement();
+                    }
+                    if (SystemUtil.isImageFile(file)) {
+                        imgCount.getAndIncrement();
+                    }
+                });
 
-                    createDragOverAnimation(audioCount.get(), imgCount.get(), dirCount.get(), isImageLink);
-                    event.consume();
-                }
+            boolean isImageLink = db.hasUrl() && db.getUrl().startsWith("http") && SystemUtil.isImage(db.getUrl());
+
+            if (audioCount.get() > 0 || dirCount.get() > 0) {
+                imgCount.set(0);
+            }
+
+            createDragOverAnimation(audioCount.get(), imgCount.get(), dirCount.get(), isImageLink);
+            event.consume();
+        });
+
+        getMainViewController().rootLayout.setOnDragExited(event ->
+            ServiceLocator.get(LightBoxService.class).hideDialog()
         );
-
-        getMainViewController().rootLayout.setOnDragExited(event -> ServiceLocator.get(LightBoxService.class).hideDialog());
         getMainViewController().rootLayout.setOnDragDropped(this::dragDropped);
     }
 
@@ -234,7 +236,13 @@ public class DragDropService implements Service {
         createScaleAnimation(icon);
         createScaleAnimation(vc.circleBorder);
 
-        ServiceLocator.get(LightBoxService.class).showDialog(LanguageUtil.getString("drag.drop.title"), root, null, null, false, true);
+        ServiceLocator.get(LightBoxService.class).showDialog(
+            LanguageUtil.getString("drag.drop.title"),
+            root,
+            null,
+            null,
+            false,
+            true
+        );
     }
-
 }

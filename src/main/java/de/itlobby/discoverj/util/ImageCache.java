@@ -1,8 +1,5 @@
 package de.itlobby.discoverj.util;
 
-import javafx.scene.image.Image;
-import net.coobird.thumbnailator.Thumbnails;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -11,17 +8,19 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import javafx.scene.image.Image;
+import net.coobird.thumbnailator.Thumbnails;
 
 public class ImageCache {
+
     private static final int MAX_CACHE_ENTRIES = Math.min(
-            (int) (Runtime.getRuntime().maxMemory() / (1024 * 1024) / (7 * 3)), // check how big the ram is
-            200 // max 200 entries
+        (int) (Runtime.getRuntime().maxMemory() / (1024 * 1024) / (7 * 3)), // check how big the ram is
+        200 // max 200 entries
     );
     private static final Map<Integer, Image> fxImageCache = new ConcurrentHashMap<>();
     private static ImageCache instance;
 
-    private ImageCache() {
-    }
+    private ImageCache() {}
 
     public static ImageCache getInstance() {
         if (instance == null) {
@@ -63,9 +62,9 @@ public class ImageCache {
             try {
                 ByteArrayOutputStream os = new ByteArrayOutputStream();
                 Thumbnails.of(new ByteArrayInputStream(data))
-                        .size(width, height)
-                        .determineOutputFormat()
-                        .toOutputStream(os);
+                    .size(width, height)
+                    .determineOutputFormat()
+                    .toOutputStream(os);
                 image = ImageUtil.getFxImageFromBytes(os.toByteArray());
             } catch (IOException e) {
                 image = ImageUtil.getFxImageFromBytes(data, width, height);

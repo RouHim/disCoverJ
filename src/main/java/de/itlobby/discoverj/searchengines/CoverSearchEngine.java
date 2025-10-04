@@ -3,7 +3,6 @@ package de.itlobby.discoverj.searchengines;
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ImageFile;
 import de.itlobby.discoverj.settings.Settings;
-
 import java.util.List;
 
 public interface CoverSearchEngine {

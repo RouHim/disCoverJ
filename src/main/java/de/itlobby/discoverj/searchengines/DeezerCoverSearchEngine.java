@@ -1,20 +1,20 @@
 package de.itlobby.discoverj.searchengines;
 
+import static de.itlobby.discoverj.util.WSUtil.getJsonFromUrl;
+
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ImageFile;
 import de.itlobby.discoverj.services.SearchQueryUtil;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.StringUtil;
-import org.json.JSONObject;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import static de.itlobby.discoverj.util.WSUtil.getJsonFromUrl;
+import org.json.JSONObject;
 
 public class DeezerCoverSearchEngine implements CoverSearchEngine {
+
     private static final String DEEZER_API_REQUEST = "https://api.deezer.com/search?limit=5&q=";
 
     @Override
@@ -26,16 +26,19 @@ public class DeezerCoverSearchEngine implements CoverSearchEngine {
             return Collections.emptyList();
         }
 
-        return jsonFromUrl.get()
-                .getJSONArray("data").toList().stream()
-                .map(result -> new JSONObject((Map) result))
-                .map(this::findCoverUrl)
-                .flatMap(Optional::stream)
-                .parallel()
-                .map(ImageUtil::downloadImageFromUrl)
-                .flatMap(Optional::stream)
-                .filter(CoverSearchEngine::reachesMinRequiredCoverSize)
-                .toList();
+        return jsonFromUrl
+            .get()
+            .getJSONArray("data")
+            .toList()
+            .stream()
+            .map(result -> new JSONObject((Map) result))
+            .map(this::findCoverUrl)
+            .flatMap(Optional::stream)
+            .parallel()
+            .map(ImageUtil::downloadImageFromUrl)
+            .flatMap(Optional::stream)
+            .filter(CoverSearchEngine::reachesMinRequiredCoverSize)
+            .toList();
     }
 
     private Optional<String> findCoverUrl(JSONObject jsonObject) {

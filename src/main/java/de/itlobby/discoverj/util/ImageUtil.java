@@ -4,6 +4,15 @@ import de.itlobby.discoverj.models.ImageFile;
 import de.itlobby.discoverj.models.ImageSize;
 import de.itlobby.discoverj.models.SearchEngine;
 import de.itlobby.discoverj.settings.Settings;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Optional;
 import javafx.animation.ScaleTransition;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.ColorAdjust;
@@ -17,28 +26,18 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.util.Duration;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Optional;
-
 public class ImageUtil {
+
     private static final Logger log = LogManager.getLogger(ImageUtil.class);
 
-    private ImageUtil() {
-    }
+    private ImageUtil() {}
 
     public static BufferedImage resize(BufferedImage inputImage, int scaledWidth, int scaledHeight) {
         BufferedImage outputImage = inputImage;
@@ -64,12 +63,11 @@ public class ImageUtil {
             // If our input image is no valid INT_RGB PNG, convert it
             if (inputImage.getType() != BufferedImage.TYPE_INT_RGB) {
                 imageToWrite = new BufferedImage(
-                        inputImage.getWidth(),
-                        inputImage.getHeight(),
-                        BufferedImage.TYPE_INT_RGB
+                    inputImage.getWidth(),
+                    inputImage.getHeight(),
+                    BufferedImage.TYPE_INT_RGB
                 );
-                imageToWrite.createGraphics()
-                        .drawImage(inputImage, 0, 0, java.awt.Color.WHITE, null);
+                imageToWrite.createGraphics().drawImage(inputImage, 0, 0, java.awt.Color.WHITE, null);
             }
 
             ImageIO.write(imageToWrite, "jpg", outputStream);
@@ -81,7 +79,12 @@ public class ImageUtil {
         return null;
     }
 
-    public static java.util.List<ImageView> createSearchEnginePictures(int fitSize, boolean initDragAndDrop, FlowPane parentHbox, boolean canEdit) {
+    public static java.util.List<ImageView> createSearchEnginePictures(
+        int fitSize,
+        boolean initDragAndDrop,
+        FlowPane parentHbox,
+        boolean canEdit
+    ) {
         java.util.List<ImageView> imageViews = new ArrayList<>();
 
         for (SearchEngine searchEngine : Settings.getInstance().getConfig().getSearchEngineList()) {
@@ -130,92 +133,72 @@ public class ImageUtil {
     }
 
     private static void initDragAndDrop(ImageView imageView, FlowPane flowPane) {
-        imageView.setOnDragDetected(
-                event ->
-                {
-                    Dragboard db = imageView.startDragAndDrop(TransferMode.ANY);
+        imageView.setOnDragDetected(event -> {
+            Dragboard db = imageView.startDragAndDrop(TransferMode.ANY);
 
-                    ClipboardContent content = new ClipboardContent();
-                    content.putString(imageView.getId());
-                    db.setContent(content);
+            ClipboardContent content = new ClipboardContent();
+            content.putString(imageView.getId());
+            db.setContent(content);
 
-                    event.consume();
-                }
-        );
+            event.consume();
+        });
 
-        imageView.setOnDragOver(
-                event ->
-                {
+        imageView.setOnDragOver(event -> {
+            if (event.getDragboard().hasString() && !imageView.getId().equals(event.getDragboard().getString())) {
+                event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+            }
 
-                    if (event.getDragboard().hasString() && !imageView.getId().equals(event.getDragboard().getString())) {
-                        event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-                    }
+            event.consume();
+        });
 
-                    event.consume();
-                }
-        );
+        imageView.setOnDragEntered(event -> {
+            if (event.getDragboard().hasString() && !imageView.getId().equals(event.getDragboard().getString())) {
+                ScaleTransition st = new ScaleTransition(Duration.millis(200), imageView);
+                st.setFromX(1);
+                st.setToX(1.2);
+                st.setFromY(1);
+                st.setToY(1.2);
+                st.setCycleCount(1);
+                st.setAutoReverse(false);
+                st.play();
+            }
 
-        imageView.setOnDragEntered(
-                event ->
-                {
+            event.consume();
+        });
 
-                    if (event.getDragboard().hasString() && !imageView.getId().equals(event.getDragboard().getString())) {
-                        ScaleTransition st = new ScaleTransition(Duration.millis(200), imageView);
-                        st.setFromX(1);
-                        st.setToX(1.2);
-                        st.setFromY(1);
-                        st.setToY(1.2);
-                        st.setCycleCount(1);
-                        st.setAutoReverse(false);
-                        st.play();
-                    }
+        imageView.setOnDragExited(event -> {
+            if (event.getDragboard().hasString() && !imageView.getId().equals(event.getDragboard().getString())) {
+                ScaleTransition st = new ScaleTransition(Duration.millis(200), imageView);
+                st.setFromX(1.2);
+                st.setToX(1);
+                st.setFromY(1.2);
+                st.setToY(1);
+                st.setCycleCount(1);
+                st.setAutoReverse(false);
+                st.play();
+            }
 
-                    event.consume();
-                }
-        );
+            event.consume();
+        });
 
-        imageView.setOnDragExited(
-                event ->
-                {
+        imageView.setOnDragDropped(event -> {
+            Dragboard db = event.getDragboard();
+            boolean success = false;
 
-                    if (event.getDragboard().hasString() && !imageView.getId().equals(event.getDragboard().getString())) {
-                        ScaleTransition st = new ScaleTransition(Duration.millis(200), imageView);
-                        st.setFromX(1.2);
-                        st.setToX(1);
-                        st.setFromY(1.2);
-                        st.setToY(1);
-                        st.setCycleCount(1);
-                        st.setAutoReverse(false);
-                        st.play();
-                    }
+            if (db.hasString()) {
+                ImageView src = (ImageView) SystemUtil.getChildrenById(flowPane, db.getString());
 
-                    event.consume();
-                }
-        );
+                flowPane.getChildren().remove(src);
+                flowPane.getChildren().add(flowPane.getChildren().indexOf(imageView), src);
 
-        imageView.setOnDragDropped(
-                event ->
-                {
-                    Dragboard db = event.getDragboard();
-                    boolean success = false;
+                success = true;
+            }
+            event.setDropCompleted(success);
 
-                    if (db.hasString()) {
-                        ImageView src = (ImageView) SystemUtil.getChildrenById(flowPane, db.getString());
+            event.consume();
+        });
 
-                        flowPane.getChildren().remove(src);
-                        flowPane.getChildren().add(flowPane.getChildren().indexOf(imageView), src);
-
-                        success = true;
-                    }
-                    event.setDropCompleted(success);
-
-                    event.consume();
-                }
-        );
-
-        imageView.setOnDragDone(
-                javafx.event.Event::consume
-        );
+        imageView.setOnDragDone(javafx.event.Event::consume);
     }
 
     public static String createImageResolutionString(double width, double height) {
@@ -397,7 +380,6 @@ public class ImageUtil {
             double sHeight = originalHeight / (double) targetHeight;
 
             for (int x = 0; x < targetWidth; x++) {
-
                 int xF = (int) (x * sWidth);
 
                 for (int y = 0; y < targetHeight; y++) {
@@ -421,7 +403,11 @@ public class ImageUtil {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
             BufferedImage bufferedImage = ImageIO.read(inputStream);
 
-            BufferedImage rgbImage = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+            BufferedImage rgbImage = new BufferedImage(
+                bufferedImage.getWidth(),
+                bufferedImage.getHeight(),
+                BufferedImage.TYPE_INT_RGB
+            );
             rgbImage.createGraphics().drawImage(bufferedImage, 0, 0, null);
 
             return Optional.ofNullable(toFXImage(rgbImage, width, height));
@@ -440,7 +426,11 @@ public class ImageUtil {
         try {
             BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(data));
 
-            BufferedImage rgbImage = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+            BufferedImage rgbImage = new BufferedImage(
+                bufferedImage.getWidth(),
+                bufferedImage.getHeight(),
+                BufferedImage.TYPE_INT_RGB
+            );
             rgbImage.createGraphics().drawImage(bufferedImage, 0, 0, null);
 
             return Optional.ofNullable(toFXImage(rgbImage, rgbImage.getWidth(), rgbImage.getHeight()));
