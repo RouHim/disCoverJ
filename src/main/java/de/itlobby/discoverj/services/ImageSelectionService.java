@@ -8,23 +8,23 @@ import de.itlobby.discoverj.ui.core.Views;
 import de.itlobby.discoverj.ui.viewcontroller.ImageSelectionViewController;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.SystemUtil;
-import javafx.application.Platform;
-import javafx.scene.Parent;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.VBox;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import javafx.application.Platform;
+import javafx.scene.Parent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
+import javax.imageio.ImageIO;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ImageSelectionService implements Service {
+
     private static final Logger log = LogManager.getLogger(ImageSelectionService.class);
     private LightBoxService lightBoxService;
     private List<ImageFile> imageFiles;
@@ -48,9 +48,7 @@ public class ImageSelectionService implements Service {
 
         reloadImagesToView();
 
-        Platform.runLater(() ->
-                lightBoxService.showContentAsDialog(title, parent, true, 0, 0)
-        );
+        Platform.runLater(() -> lightBoxService.showContentAsDialog(title, parent, true, 0, 0));
 
         while (selectionRunning) {
             SystemUtil.threadSleep(50);
@@ -64,26 +62,26 @@ public class ImageSelectionService implements Service {
     }
 
     private void sortAndDistinctImages() {
-        this.imageFiles = imageFiles.stream().distinct().sorted(
-                (o1, o2) ->
-                {
-                    int m1 = o1.height() * o1.width();
-                    int m2 = o2.height() * o2.width();
-                    return ObjectUtils.compare(m1, m2) * -1;
-                }
-        ).toList();
+        this.imageFiles = imageFiles
+            .stream()
+            .distinct()
+            .sorted((o1, o2) -> {
+                int m1 = o1.height() * o1.width();
+                int m2 = o2.height() * o2.width();
+                return ObjectUtils.compare(m1, m2) * -1;
+            })
+            .toList();
     }
 
     private void reloadImagesToView() {
         viewController.resetView();
 
-        ActionParamListener<List<VBox>> threadFinishedListener = elements -> Platform.runLater(() ->
-                viewController.setImagesToView(elements)
-        );
+        ActionParamListener<List<VBox>> threadFinishedListener = elements ->
+            Platform.runLater(() -> viewController.setImagesToView(elements));
 
         Thread.ofVirtual()
-                .uncaughtExceptionHandler(ServiceLocator.get(ExceptionService.class))
-                .start(() -> threadFinishedListener.onAction(postProcessImagesAndGetNodes()));
+            .uncaughtExceptionHandler(ServiceLocator.get(ExceptionService.class))
+            .start(() -> threadFinishedListener.onAction(postProcessImagesAndGetNodes()));
     }
 
     private List<VBox> postProcessImagesAndGetNodes() {
@@ -93,9 +91,7 @@ public class ImageSelectionService implements Service {
 
         for (int i = 0; i < imageFiles.size(); i++) {
             final int finalI = i;
-            Platform.runLater(() ->
-                    viewController.progressIndicator.setProgress((finalI + 1) / imgCount)
-            );
+            Platform.runLater(() -> viewController.progressIndicator.setProgress((finalI + 1) / imgCount));
 
             Optional<BufferedImage> image = readAndTransformImage(imageFiles.get(i));
             if (image.isEmpty()) {

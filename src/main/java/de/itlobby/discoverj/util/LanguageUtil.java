@@ -3,20 +3,19 @@ package de.itlobby.discoverj.util;
 import de.itlobby.discoverj.models.Language;
 import de.itlobby.discoverj.settings.AppConfig;
 import de.itlobby.discoverj.settings.Settings;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class LanguageUtil {
+
     private static final Logger log = LogManager.getLogger(LanguageUtil.class);
 
-    private LanguageUtil() {
-    }
+    private LanguageUtil() {}
 
     public static ResourceBundle getBundle() {
         AppConfig config = Settings.getInstance().getConfig();

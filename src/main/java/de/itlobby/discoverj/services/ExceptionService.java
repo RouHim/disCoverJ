@@ -11,8 +11,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class ExceptionService implements Service, Thread.UncaughtExceptionHandler {
-    private final Logger log = LogManager.getLogger(this.getClass());
 
+    private final Logger log = LogManager.getLogger(this.getClass());
 
     @Override
     public void uncaughtException(Thread t, Throwable throwable) {
@@ -30,8 +30,8 @@ public class ExceptionService implements Service, Thread.UncaughtExceptionHandle
                 showOutOfMemoryInfo(lightBoxService);
             } else {
                 lightBoxService.showTextDialog(
-                        LanguageUtil.getString("exceptionService.errorOccurredTitle"),
-                        LanguageUtil.getString("exceptionService.errorOccurredMsg") + "\n" + exception.getMessage()
+                    LanguageUtil.getString("exceptionService.errorOccurredTitle"),
+                    LanguageUtil.getString("exceptionService.errorOccurredMsg") + "\n" + exception.getMessage()
                 );
             }
         });
@@ -41,14 +41,14 @@ public class ExceptionService implements Service, Thread.UncaughtExceptionHandle
         String msg = LanguageUtil.getString("exceptionService.outOfMemoryMsg");
 
         lightBoxService.showDialog(
-                LanguageUtil.getString("exceptionService.outOfMemoryTitle"),
-                new TextFlow(new Text(msg)),
-                lightBoxService::hideDialog,
-                () -> {
-                    SystemUtil.browseUrl("https://stackoverflow.com/questions/2294268/how-can-i-increase-the-jvm-memory");
-                    lightBoxService.hideDialog();
-                },
-                false
+            LanguageUtil.getString("exceptionService.outOfMemoryTitle"),
+            new TextFlow(new Text(msg)),
+            lightBoxService::hideDialog,
+            () -> {
+                SystemUtil.browseUrl("https://stackoverflow.com/questions/2294268/how-can-i-increase-the-jvm-memory");
+                lightBoxService.hideDialog();
+            },
+            false
         );
     }
 }

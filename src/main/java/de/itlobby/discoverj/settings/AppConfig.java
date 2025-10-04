@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import de.itlobby.discoverj.models.Language;
 import de.itlobby.discoverj.models.SearchEngine;
 import de.itlobby.discoverj.util.ConfigUtil;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfig implements Serializable {
+
     private boolean overwriteCover = false;
     private int minCoverSize = 250;
     private int maxCoverSize = 2500;

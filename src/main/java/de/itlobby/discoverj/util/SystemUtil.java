@@ -1,15 +1,10 @@
 package de.itlobby.discoverj.util;
 
+import static de.itlobby.discoverj.util.AudioUtil.VALID_IMAGE_FILE_EXTENSION;
+
 import de.itlobby.discoverj.models.OperatingSystem;
 import de.itlobby.discoverj.settings.AppConfig;
 import de.itlobby.discoverj.settings.Settings;
-import javafx.scene.Node;
-import javafx.scene.layout.FlowPane;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -17,15 +12,19 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Arrays;
-
-import static de.itlobby.discoverj.util.AudioUtil.VALID_IMAGE_FILE_EXTENSION;
+import javafx.scene.Node;
+import javafx.scene.layout.FlowPane;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class SystemUtil {
+
     public static final File DISCOVERJ_TEMP_DIR = Paths.get(System.getProperty("java.io.tmpdir"), "discoverj").toFile();
     private static final Logger log = LogManager.getLogger(SystemUtil.class);
 
-    private SystemUtil() {
-    }
+    private SystemUtil() {}
 
     public static Node getChildrenById(FlowPane flowPane, String nodeName) {
         for (Node node : flowPane.getChildren()) {
@@ -111,7 +110,8 @@ public class SystemUtil {
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }
-            }).start();
+            })
+                .start();
         }
     }
 
@@ -141,19 +141,22 @@ public class SystemUtil {
                     log.debug(e.getMessage(), e);
                 }
             }
-        }).start();
+        })
+            .start();
     }
 
     public static File getImageFileFromFileChooser(String title) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle(title);
         fileChooser.setTitle(title);
-        fileChooser.getExtensionFilters().addAll(
+        fileChooser
+            .getExtensionFilters()
+            .addAll(
                 new FileChooser.ExtensionFilter("Jpg", "*.jpg"),
                 new FileChooser.ExtensionFilter("Png", "*.png"),
                 new FileChooser.ExtensionFilter("Gif", "*.gif"),
                 new FileChooser.ExtensionFilter("Bmp", "*.bmp")
-        );
+            );
         return fileChooser.showOpenDialog(null);
     }
 
@@ -162,8 +165,7 @@ public class SystemUtil {
     }
 
     public static boolean isImageFile(File file) {
-        return Arrays.asList(VALID_IMAGE_FILE_EXTENSION)
-                .contains(StringUtil.getFileExtension(file).toLowerCase());
+        return Arrays.asList(VALID_IMAGE_FILE_EXTENSION).contains(StringUtil.getFileExtension(file).toLowerCase());
     }
 
     public static boolean isImage(String sUrl) {

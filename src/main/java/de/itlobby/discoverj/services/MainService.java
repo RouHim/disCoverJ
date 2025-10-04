@@ -1,5 +1,7 @@
 package de.itlobby.discoverj.services;
 
+import static de.itlobby.discoverj.util.SystemUtil.DISCOVERJ_TEMP_DIR;
+
 import de.itlobby.discoverj.listeners.ActionListener;
 import de.itlobby.discoverj.listeners.ListenerStateProvider;
 import de.itlobby.discoverj.settings.Settings;
@@ -9,6 +11,12 @@ import de.itlobby.discoverj.ui.core.Views;
 import de.itlobby.discoverj.ui.viewcontroller.MainViewController;
 import de.itlobby.discoverj.util.LanguageUtil;
 import de.itlobby.discoverj.util.SystemUtil;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Timer;
+import java.util.TimerTask;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.layout.HBox;
@@ -21,16 +29,8 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.FileAppender;
 
-import java.awt.*;
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import static de.itlobby.discoverj.util.SystemUtil.DISCOVERJ_TEMP_DIR;
-
 public class MainService implements Service {
+
     private static final Logger log = LogManager.getLogger(MainService.class);
     private Timer memCheckTimer;
 
@@ -67,14 +67,20 @@ public class MainService implements Service {
         HBox contentLayout = new HBox(txtIntro);
         HBox.setMargin(txtIntro, new Insets(5));
 
-        ActionListener okListener = () ->
-        {
+        ActionListener okListener = () -> {
             SystemUtil.browseLocalPath(logFile);
             lightBoxService.hideDialog();
         };
         ActionListener cancelListener = lightBoxService::hideDialog;
 
-        lightBoxService.showDialog(LanguageUtil.getString("mainService.reportBugTitle"), contentLayout, cancelListener, okListener, false, false);
+        lightBoxService.showDialog(
+            LanguageUtil.getString("mainService.reportBugTitle"),
+            contentLayout,
+            cancelListener,
+            okListener,
+            false,
+            false
+        );
 
         SystemUtil.browseUrl("https://github.com/RouHim/disCoverJ/issues/new");
     }
@@ -82,12 +88,14 @@ public class MainService implements Service {
     public void startMemoryWatchDog() {
         memCheckTimer = new Timer();
         memCheckTimer.schedule(
-                new TimerTask() {
-                    @Override
-                    public void run() {
-                        memoryCheckTick();
-                    }
-                }, 0, 5000
+            new TimerTask() {
+                @Override
+                public void run() {
+                    memoryCheckTick();
+                }
+            },
+            0,
+            5000
         );
     }
 
@@ -137,10 +145,15 @@ public class MainService implements Service {
 
     private void openAbout() {
         String msg =
-                "disCoverJ\n" +
-                        "Version: " + Settings.getInstance().getVersion().toString() + "\n" +
-                        LanguageUtil.getString("key.mainwindow.about.developed");
+            "disCoverJ\n" +
+            "Version: " +
+            Settings.getInstance().getVersion().toString() +
+            "\n" +
+            LanguageUtil.getString("key.mainwindow.about.developed");
 
-        ServiceLocator.get(LightBoxService.class).showTextDialog(LanguageUtil.getString("key.mainview.menu.about"), msg);
+        ServiceLocator.get(LightBoxService.class).showTextDialog(
+            LanguageUtil.getString("key.mainview.menu.about"),
+            msg
+        );
     }
 }

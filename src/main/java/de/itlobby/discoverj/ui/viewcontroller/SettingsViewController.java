@@ -1,10 +1,14 @@
 package de.itlobby.discoverj.ui.viewcontroller;
 
+import static de.itlobby.discoverj.util.LanguageUtil.getString;
+import static java.text.MessageFormat.format;
+
 import de.itlobby.discoverj.models.Language;
 import de.itlobby.discoverj.searchengines.SearxCoverSearchEngine;
 import de.itlobby.discoverj.ui.core.ServiceLocator;
 import de.itlobby.discoverj.ui.utils.AwesomeHelper;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import java.util.Optional;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -22,12 +26,8 @@ import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
 
-import java.util.Optional;
-
-import static de.itlobby.discoverj.util.LanguageUtil.getString;
-import static java.text.MessageFormat.format;
-
 public class SettingsViewController implements ViewController {
+
     public CheckBox chkOverwriteCover;
     public Button btnSave;
     public Button btnCancel;
@@ -68,7 +68,13 @@ public class SettingsViewController implements ViewController {
         initBindings();
         initCellFactories();
 
-        AwesomeHelper.createIconButton(btnCheckHoster, FontAwesomeIcon.CHECK_SQUARE, "default-icon", getString("key.settingsview.settings.searx.checkHoster"), "24px");
+        AwesomeHelper.createIconButton(
+            btnCheckHoster,
+            FontAwesomeIcon.CHECK_SQUARE,
+            "default-icon",
+            getString("key.settingsview.settings.searx.checkHoster"),
+            "24px"
+        );
     }
 
     private void initCellFactories() {
@@ -109,10 +115,9 @@ public class SettingsViewController implements ViewController {
         txtProxyPassword.disableProperty().bind(chkProxyActive.selectedProperty().not());
 
         chkGeneralAutoLastAudio.disableProperty().bind(chkGeneralPrimarySingleCover.selectedProperty());
-        chkGeneralPrimarySingleCover.selectedProperty().addListener(
-                (observable, oldValue, newValue) ->
-                        chkGeneralAutoLastAudio.setSelected(!newValue)
-        );
+        chkGeneralPrimarySingleCover
+            .selectedProperty()
+            .addListener((observable, oldValue, newValue) -> chkGeneralAutoLastAudio.setSelected(!newValue));
 
         btnCheckHoster.setOnAction(event -> checkHoster());
 
@@ -126,28 +131,28 @@ public class SettingsViewController implements ViewController {
         layoutAudioFileMatch.disableProperty().bind(chkLocalScanAudiofiles.selectedProperty().not());
 
         chkOverwriteOnlyHigher.disableProperty().bind(chkOverwriteCover.selectedProperty().not());
-        chkOverwriteCover.selectedProperty().addListener((observable, oldValue, newValue) ->
-                {
-                    if (Boolean.FALSE.equals(newValue)) {
-                        chkOverwriteOnlyHigher.setSelected(false);
-                    }
+        chkOverwriteCover
+            .selectedProperty()
+            .addListener((observable, oldValue, newValue) -> {
+                if (Boolean.FALSE.equals(newValue)) {
+                    chkOverwriteOnlyHigher.setSelected(false);
                 }
-        );
+            });
     }
 
     private void checkHoster() {
-        Optional<String> errorMessage = ServiceLocator.get(SearxCoverSearchEngine.class).checkInstance(txtCustomSearxInstance.getText());
+        Optional<String> errorMessage = ServiceLocator.get(SearxCoverSearchEngine.class).checkInstance(
+            txtCustomSearxInstance.getText()
+        );
 
         if (errorMessage.isEmpty()) {
             txtSearxHosterValid.setText(getString("key.settingsview.settings.searx.validHoster"));
             txtSearxHosterValid.setFill(Paint.valueOf("#008a15"));
         } else {
-            txtSearxHosterValid.setText(format("{0}:\n{1}",
-                    getString("key.settingsview.settings.searx.invalidHoster"),
-                    errorMessage.get())
+            txtSearxHosterValid.setText(
+                format("{0}:\n{1}", getString("key.settingsview.settings.searx.invalidHoster"), errorMessage.get())
             );
             txtSearxHosterValid.setFill(Paint.valueOf("#c80000"));
         }
     }
-
 }

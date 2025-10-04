@@ -8,12 +8,12 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 public class ViewManager {
+
     private static ViewManager instance;
     private Stage primaryStage;
     private FXMLFactory fxmlFactory;
 
-    private ViewManager() {
-    }
+    private ViewManager() {}
 
     public static ViewManager getInstance() {
         if (instance == null) {

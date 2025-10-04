@@ -1,12 +1,12 @@
 package de.itlobby.discoverj.ui.viewtask;
 
 public abstract class ViewTask<T> implements Runnable {
+
     private T result;
     private FinishedListener<T> finishedListener;
     private volatile boolean cancelled;
 
-    protected ViewTask() {
-    }
+    protected ViewTask() {}
 
     @Override
     public void run() {

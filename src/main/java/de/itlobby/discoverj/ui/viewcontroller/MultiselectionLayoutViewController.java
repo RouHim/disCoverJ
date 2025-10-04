@@ -12,6 +12,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 
 public class MultiselectionLayoutViewController implements ViewController {
+
     public Button btnClearCover;
     public Label txtClearCoverText;
     public HBox rootLayout;
@@ -20,8 +21,7 @@ public class MultiselectionLayoutViewController implements ViewController {
     public void initialize() {
         AwesomeHelper.createIconButton(btnClearCover, FontAwesomeIcon.TRASH, "sidebar-icon", "", "24px");
 
-        EventHandler<MouseEvent> onClickEvent = event ->
-        {
+        EventHandler<MouseEvent> onClickEvent = event -> {
             ServiceLocator.get(InitialService.class).removeAllSelectedCover();
             event.consume();
         };
@@ -31,8 +31,6 @@ public class MultiselectionLayoutViewController implements ViewController {
     }
 
     public void setClearCoverText(String text) {
-        Platform.runLater(() ->
-                txtClearCoverText.setText(text)
-        );
+        Platform.runLater(() -> txtClearCoverText.setText(text));
     }
 }

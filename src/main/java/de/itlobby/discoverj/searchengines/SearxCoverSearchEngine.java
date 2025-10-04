@@ -1,5 +1,8 @@
 package de.itlobby.discoverj.searchengines;
 
+import static de.itlobby.discoverj.util.WSUtil.getJsonFromUrl;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ImageFile;
 import de.itlobby.discoverj.services.SearchQueryUtil;
@@ -8,23 +11,20 @@ import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.SearXUtil;
 import de.itlobby.discoverj.util.StringUtil;
-import org.apache.commons.io.IOUtils;
-import org.json.JSONObject;
-
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import static de.itlobby.discoverj.util.WSUtil.getJsonFromUrl;
-import static java.nio.charset.StandardCharsets.UTF_8;
-
+import org.apache.commons.io.IOUtils;
+import org.json.JSONObject;
 
 public class SearxCoverSearchEngine implements CoverSearchEngine {
+
     private static final int MAX_RESULTS = 10;
-    private static final String API_REQUEST = "search?categories=images&engines=bing%20images,duckduckgo%20images,google%20images,qwant%20images&format=json&q=";
+    private static final String API_REQUEST =
+        "search?categories=images&engines=bing%20images,duckduckgo%20images,google%20images,qwant%20images&format=json&q=";
     private List<String> instances = null;
 
     @Override
@@ -45,11 +45,12 @@ public class SearxCoverSearchEngine implements CoverSearchEngine {
             instances.addFirst(config.getSearxCustomInstance());
         }
 
-        return instances.parallelStream()
-                .map(instanceUrl -> startSearch(query, instanceUrl))
-                .filter(response -> !response.isEmpty())
-                .findFirst()
-                .orElse(Collections.emptyList());
+        return instances
+            .parallelStream()
+            .map(instanceUrl -> startSearch(query, instanceUrl))
+            .filter(response -> !response.isEmpty())
+            .findFirst()
+            .orElse(Collections.emptyList());
     }
 
     private static List<ImageFile> startSearch(String query, String searxInstance) {
@@ -58,29 +59,32 @@ public class SearxCoverSearchEngine implements CoverSearchEngine {
             return Collections.emptyList();
         }
 
-        List<String> searchResultData = jsonFromUrl.get()
-                .getJSONArray("results").toList().stream()
-                .map(result -> new JSONObject((Map) result))
-                .filter(result -> result.getString("category").equals("images"))
-                .filter(result -> result.has("img_src"))
-                .limit(MAX_RESULTS)
-                .map(result -> result.getString("img_src"))
-                .toList();
+        List<String> searchResultData = jsonFromUrl
+            .get()
+            .getJSONArray("results")
+            .toList()
+            .stream()
+            .map(result -> new JSONObject((Map) result))
+            .filter(result -> result.getString("category").equals("images"))
+            .filter(result -> result.has("img_src"))
+            .limit(MAX_RESULTS)
+            .map(result -> result.getString("img_src"))
+            .toList();
 
         Stream<ImageFile> httpStream = searchResultData
-                .parallelStream()
-                .filter(url -> url.startsWith("http"))
-                .map(ImageUtil::downloadImageFromUrl)
-                .flatMap(Optional::stream)
-                .filter(CoverSearchEngine::reachesMinRequiredCoverSize);
+            .parallelStream()
+            .filter(url -> url.startsWith("http"))
+            .map(ImageUtil::downloadImageFromUrl)
+            .flatMap(Optional::stream)
+            .filter(CoverSearchEngine::reachesMinRequiredCoverSize);
 
         Stream<ImageFile> base64Stream = searchResultData
-                .parallelStream()
-                .filter(dataString -> dataString.startsWith("data") && dataString.contains("base64"))
-                .map(dataString -> dataString.split("base64,")[1])
-                .map(ImageUtil::downloadImageFromUrl)
-                .flatMap(Optional::stream)
-                .filter(CoverSearchEngine::reachesMinRequiredCoverSize);
+            .parallelStream()
+            .filter(dataString -> dataString.startsWith("data") && dataString.contains("base64"))
+            .map(dataString -> dataString.split("base64,")[1])
+            .map(ImageUtil::downloadImageFromUrl)
+            .flatMap(Optional::stream)
+            .filter(CoverSearchEngine::reachesMinRequiredCoverSize);
 
         return Stream.concat(httpStream, base64Stream).toList();
     }
@@ -93,7 +97,9 @@ public class SearxCoverSearchEngine implements CoverSearchEngine {
      */
     public Optional<String> checkInstance(String searxInstanceUrl) {
         try {
-            JSONObject result = new JSONObject(IOUtils.toString(URI.create(searxInstanceUrl + API_REQUEST + "test"), UTF_8));
+            JSONObject result = new JSONObject(
+                IOUtils.toString(URI.create(searxInstanceUrl + API_REQUEST + "test"), UTF_8)
+            );
             return result.has("results") ? Optional.empty() : Optional.of("Api returned no results");
         } catch (Exception e) {
             return Optional.of(e.getMessage());

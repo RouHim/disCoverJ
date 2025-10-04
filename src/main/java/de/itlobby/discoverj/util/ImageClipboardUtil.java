@@ -1,10 +1,6 @@
 package de.itlobby.discoverj.util;
 
 import de.itlobby.discoverj.models.TransferableImage;
-import javafx.embed.swing.SwingFXUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
@@ -14,11 +10,15 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Optional;
+import javafx.embed.swing.SwingFXUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Created by Rouven Himmelstein on 27.01.2016.
  */
 public class ImageClipboardUtil implements ClipboardOwner {
+
     private static final Logger log = LogManager.getLogger(ImageClipboardUtil.class);
 
     public static Optional<BufferedImage> getImage() {
@@ -28,7 +28,6 @@ public class ImageClipboardUtil implements ClipboardOwner {
 
             // Check if the clipboard content is an image
             if (clipboard.isDataFlavorAvailable(DataFlavor.imageFlavor)) {
-
                 // Get the image data from the clipboard as a Transferable object
                 Transferable transferable = clipboard.getContents(null);
 

@@ -12,18 +12,19 @@ import de.itlobby.discoverj.util.ConfigUtil;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.itlobby.discoverj.util.LanguageUtil;
 import de.itlobby.discoverj.util.SystemUtil;
+import java.util.List;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 
-import java.util.List;
-
 public class SettingsService implements Service {
+
     public void initialize() {
         SettingsViewController viewController = getSettingsViewController();
         viewController.btnCancel.setOnAction(event -> close());
         viewController.btnSave.setOnAction(event -> save());
-        viewController.txtFindCustomSearxInstance.setOnMouseClicked(
-                event -> SystemUtil.browseUrl("https://searx.space"));
+        viewController.txtFindCustomSearxInstance.setOnMouseClicked(event ->
+            SystemUtil.browseUrl("https://searx.space")
+        );
 
         FlowPane searchEngineLayout = viewController.flowPaneSettingsSearchMachineOrder;
 
@@ -74,9 +75,13 @@ public class SettingsService implements Service {
         appConfig.setOverwriteOnlyHigher(viewController.chkOverwriteOnlyHigher.isSelected());
         appConfig.setMinCoverSize(Integer.parseInt(viewController.txtMinCoverSize.getText()));
         appConfig.setMaxCoverSize(Integer.parseInt(viewController.txtMaxCoverSize.getText()));
-        appConfig.setSearchEngineList(ConfigUtil.imageToSearchEngine(viewController.flowPaneSettingsSearchMachineOrder.getChildren()));
+        appConfig.setSearchEngineList(
+            ConfigUtil.imageToSearchEngine(viewController.flowPaneSettingsSearchMachineOrder.getChildren())
+        );
         int selectedIndex = viewController.cmbLanguage.getSelectionModel().getSelectedIndex();
-        appConfig.setLanguage(Language.values()[selectedIndex == -1 ? appConfig.getLanguage().ordinal() : selectedIndex]);
+        appConfig.setLanguage(
+            Language.values()[selectedIndex == -1 ? appConfig.getLanguage().ordinal() : selectedIndex]
+        );
         appConfig.setSearchTimeout(Integer.parseInt(viewController.txtSearchTimeout.getText()));
         appConfig.setGeneralManualImageSelection(viewController.chkGeneralManualImageSelection.isSelected());
         appConfig.setGeneralAutoLastAudio(viewController.chkGeneralAutoLastAudio.isSelected());
@@ -119,10 +124,11 @@ public class SettingsService implements Service {
         }
 
         if (!fromCombo.equals(fromConfig)) {
-            ServiceLocator.get(LightBoxService.class)
-                    .showTextDialog(LanguageUtil.getString("InitialController.warning"),
-                            LanguageUtil.getString("SettingsController.SettingsChangesNeedRestart"), false
-                    );
+            ServiceLocator.get(LightBoxService.class).showTextDialog(
+                LanguageUtil.getString("InitialController.warning"),
+                LanguageUtil.getString("SettingsController.SettingsChangesNeedRestart"),
+                false
+            );
         }
     }
 

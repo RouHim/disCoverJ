@@ -7,6 +7,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 
 public class OpenFileViewController implements ViewController {
+
     public Button btnExitDialog;
     public Circle circleBorder;
     public Label lblIntroduction;

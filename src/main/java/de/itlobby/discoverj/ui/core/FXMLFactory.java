@@ -1,20 +1,19 @@
 package de.itlobby.discoverj.ui.core;
 
-
 import de.itlobby.discoverj.ui.viewcontroller.ViewController;
 import de.itlobby.discoverj.util.LanguageUtil;
 import de.itlobby.discoverj.util.SystemUtil;
+import java.io.IOException;
+import java.net.URL;
+import java.util.EnumMap;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.EnumMap;
-
 public class FXMLFactory {
+
     private final EnumMap<Views, Scene> viewList;
     private final EnumMap<Views, ViewController> viewControllerList;
     private final Logger log = LogManager.getLogger(this.getClass());

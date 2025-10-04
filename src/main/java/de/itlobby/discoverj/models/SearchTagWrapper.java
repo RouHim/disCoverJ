@@ -3,6 +3,7 @@ package de.itlobby.discoverj.models;
 import de.itlobby.discoverj.util.StringUtil;
 
 public class SearchTagWrapper {
+
     private String album;
     private String title;
     private String artist;
@@ -39,9 +40,7 @@ public class SearchTagWrapper {
     }
 
     public boolean isEmpty() {
-        return StringUtil.isNullOrEmpty(album) &&
-                StringUtil.isNullOrEmpty(title) &&
-                StringUtil.isNullOrEmpty(artist);
+        return StringUtil.isNullOrEmpty(album) && StringUtil.isNullOrEmpty(title) && StringUtil.isNullOrEmpty(artist);
     }
 
     public String getFileName() {
@@ -96,23 +95,23 @@ public class SearchTagWrapper {
         }
 
         String temp = s
-                .replace(":", " ")
-                .replace("'", " ")
-                .replace(",", " ")
-                .replace("*", " ")
-                .replace("+", " ")
-                .replace("-", " ")
-                .replace("!", " ")
-                .replace("?", " ")
-                .replace("=", " ")
-                .replace("&", " ")
-                .replace("%", " ")
-                .replace("$", " ")
-                .replace("§", " ")
-                .replace("\"", " ")
-                .replace("`", " ")
-                .replace("´", " ")
-                .replace(".", " ");
+            .replace(":", " ")
+            .replace("'", " ")
+            .replace(",", " ")
+            .replace("*", " ")
+            .replace("+", " ")
+            .replace("-", " ")
+            .replace("!", " ")
+            .replace("?", " ")
+            .replace("=", " ")
+            .replace("&", " ")
+            .replace("%", " ")
+            .replace("$", " ")
+            .replace("§", " ")
+            .replace("\"", " ")
+            .replace("`", " ")
+            .replace("´", " ")
+            .replace(".", " ");
 
         while (temp.contains("  ")) {
             temp = temp.replace("  ", " ");

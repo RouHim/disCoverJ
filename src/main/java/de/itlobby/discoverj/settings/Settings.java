@@ -2,15 +2,15 @@ package de.itlobby.discoverj.settings;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.itlobby.discoverj.models.Version;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Settings {
+
     private static final Logger log = LogManager.getLogger(Settings.class);
     private static final String CONFIG_FILE_NAME = "disCoverJ.json";
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -20,8 +20,7 @@ public class Settings {
     private boolean coverLoadingDisabled;
     private AppConfig appConfig;
 
-    private Settings() {
-    }
+    private Settings() {}
 
     public static Settings getInstance() {
         if (instance.get() == null) {

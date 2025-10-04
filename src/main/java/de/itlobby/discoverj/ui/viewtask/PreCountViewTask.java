@@ -1,13 +1,13 @@
 package de.itlobby.discoverj.ui.viewtask;
 
 import de.itlobby.discoverj.util.AudioUtil;
-import org.apache.commons.io.FileUtils;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.io.FileUtils;
 
 public class PreCountViewTask extends ViewTask<List<String>> {
+
     private final File[] musicObjects;
     private List<String> audiosToLoad;
 
@@ -41,7 +41,6 @@ public class PreCountViewTask extends ViewTask<List<String>> {
             }
             return;
         }
-
 
         for (File fileObj : FileUtils.listFiles(rootFile, null, true)) {
             if (fileObj.isDirectory()) {

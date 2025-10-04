@@ -1,19 +1,28 @@
 package de.itlobby.discoverj.util;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.File;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class StringUtil {
-    protected static final List<String> ARTISTS_SEPARATOR_KEYWORDS = Stream.of("&amp;", "+", "&", "feat", "ft", "featuring", "vs", "versus")
-            .flatMap(entry -> mutate(entry).stream())
-            .toList();
+
+    protected static final List<String> ARTISTS_SEPARATOR_KEYWORDS = Stream.of(
+        "&amp;",
+        "+",
+        "&",
+        "feat",
+        "ft",
+        "featuring",
+        "vs",
+        "versus"
+    )
+        .flatMap(entry -> mutate(entry).stream())
+        .toList();
     private static final Logger log = LogManager.getLogger(StringUtil.class);
 
     private StringUtil() {
@@ -22,9 +31,9 @@ public class StringUtil {
 
     public static String encodeRfc3986(String input) {
         return URLEncoder.encode(input, StandardCharsets.UTF_8)
-                .replace("+", "%20")
-                .replace("*", "%2A")
-                .replace("%7E", "~");
+            .replace("+", "%20")
+            .replace("*", "%2A")
+            .replace("%7E", "~");
     }
 
     public static boolean isNullOrEmpty(String str) {

@@ -1,8 +1,7 @@
 package de.itlobby.discoverj.ui.utils;
 
-import javafx.css.Styleable;
-
 import java.util.Arrays;
+import javafx.css.Styleable;
 
 public class UIUtil {
 
@@ -11,7 +10,6 @@ public class UIUtil {
     }
 
     public static void addCSSClass(Styleable node, String... styleClasses) {
-        Arrays.stream(styleClasses)
-                .forEach(styleClass -> node.getStyleClass().add(styleClass));
+        Arrays.stream(styleClasses).forEach(styleClass -> node.getStyleClass().add(styleClass));
     }
 }

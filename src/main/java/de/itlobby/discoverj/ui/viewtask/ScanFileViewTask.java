@@ -7,11 +7,6 @@ import de.itlobby.discoverj.ui.components.AudioListEntry;
 import de.itlobby.discoverj.ui.viewcontroller.MainViewController;
 import de.itlobby.discoverj.util.AudioUtil;
 import de.itlobby.discoverj.util.SystemUtil;
-import javafx.scene.image.Image;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jaudiotagger.audio.AudioFile;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,8 +16,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javafx.scene.image.Image;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jaudiotagger.audio.AudioFile;
 
 public class ScanFileViewTask extends ViewTask<ScanResultData> {
+
     private static final Logger log = LogManager.getLogger(ScanFileViewTask.class);
     private final List<String> filesToLoad;
     private final MainViewController mainViewController;
@@ -63,27 +63,28 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
         int audioFilesCount = audioWrapperList.size();
 
         // Group audio list by parent file path and sort by folder name
-        Map<String, List<AudioWrapper>> audioData =
-                audioWrapperList.stream()
-                        .collect(Collectors.groupingBy(AudioWrapper::getParentFilePath))
-                        .entrySet().stream()
-                        .sorted(Map.Entry.comparingByKey())
-                        .collect(
-                                Collectors.toMap(
-                                        Map.Entry::getKey,
-                                        Map.Entry::getValue,
-                                        (oldValue, newValue) -> oldValue,
-                                        LinkedHashMap::new
-                                )
-                        );
+        Map<String, List<AudioWrapper>> audioData = audioWrapperList
+            .stream()
+            .collect(Collectors.groupingBy(AudioWrapper::getParentFilePath))
+            .entrySet()
+            .stream()
+            .sorted(Map.Entry.comparingByKey())
+            .collect(
+                Collectors.toMap(
+                    Map.Entry::getKey,
+                    Map.Entry::getValue,
+                    (oldValue, newValue) -> oldValue,
+                    LinkedHashMap::new
+                )
+            );
 
         // If there are less than 500 audio files, load cover images async
         if (totalAudioCountToLoad <= 500) {
             Settings.getInstance().setCoverLoadingDisabled(false);
             // Create map with id and file path and handover to the lazy load thread
-            var idPathMap = audioWrapperList.stream().collect(
-                    Collectors.toMap(AudioWrapper::getId, AudioWrapper::getFilePath)
-            );
+            var idPathMap = audioWrapperList
+                .stream()
+                .collect(Collectors.toMap(AudioWrapper::getId, AudioWrapper::getFilePath));
             Thread.ofVirtual().start(() -> lazyLoadCoverImages(idPathMap));
         } else {
             Settings.getInstance().setCoverLoadingDisabled(true);
@@ -112,14 +113,16 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
                 continue;
             }
 
-            mainViewController.lwAudioList.getChildren()
-                    .stream()
-                    .filter(AudioListEntry.class::isInstance)
-                    .map(AudioListEntry.class::cast)
-                    .filter(x -> x.getWrapper().getId().equals(audioEntry.getKey()))
-                    .findFirst()
-                    .ifPresent(audioListEntry ->
-                            mainViewController.createSingleLineAnimation(coverImage.get(), audioListEntry));
+            mainViewController.lwAudioList
+                .getChildren()
+                .stream()
+                .filter(AudioListEntry.class::isInstance)
+                .map(AudioListEntry.class::cast)
+                .filter(x -> x.getWrapper().getId().equals(audioEntry.getKey()))
+                .findFirst()
+                .ifPresent(audioListEntry ->
+                    mainViewController.createSingleLineAnimation(coverImage.get(), audioListEntry)
+                );
 
             SystemUtil.threadSleep(50);
         }
@@ -174,10 +177,7 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
         }
         AudioFile audioFile = maybeAudioFile.get();
 
-        AudioWrapper wrapper = new AudioWrapper(
-                idCount,
-                audioFile
-        );
+        AudioWrapper wrapper = new AudioWrapper(idCount, audioFile);
 
         audioWrapperList.add(wrapper);
 
@@ -189,5 +189,4 @@ public class ScanFileViewTask extends ViewTask<ScanResultData> {
 
         mainViewController.countIndicatorUp();
     }
-
 }

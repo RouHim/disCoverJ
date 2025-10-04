@@ -3,15 +3,15 @@ package de.itlobby.discoverj.services;
 import de.itlobby.discoverj.listeners.ListenerStateProvider;
 import de.itlobby.discoverj.ui.components.AudioListEntry;
 import de.itlobby.discoverj.ui.components.FolderListEntry;
-import javafx.collections.ObservableList;
-import javafx.scene.Node;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import javafx.collections.ObservableList;
+import javafx.scene.Node;
 
 public class SelectionService implements Service {
+
     private final AtomicReference<AudioListEntry> lastSelected = new AtomicReference<>();
     private List<AudioListEntry> selectedEntries = Collections.synchronizedList(new ArrayList<>());
     private volatile boolean multiSelectionMode;
@@ -42,12 +42,12 @@ public class SelectionService implements Service {
     }
 
     public void selectAll() {
-        List<AudioListEntry> allEntries = getMainViewController().lwAudioList
-                .getChildren()
-                .stream()
-                .filter(AudioListEntry.class::isInstance)
-                .map(AudioListEntry.class::cast)
-                .toList();
+        List<AudioListEntry> allEntries = getMainViewController()
+            .lwAudioList.getChildren()
+            .stream()
+            .filter(AudioListEntry.class::isInstance)
+            .map(AudioListEntry.class::cast)
+            .toList();
 
         selectedEntries.clear();
         selectedEntries.addAll(allEntries);
@@ -86,8 +86,7 @@ public class SelectionService implements Service {
     }
 
     private void addSelection(FolderListEntry entry) {
-        getEntriesForFolder(entry)
-                .forEach(this::addSelection);
+        getEntriesForFolder(entry).forEach(this::addSelection);
     }
 
     private void addSelection(AudioListEntry entry) {
@@ -208,11 +207,11 @@ public class SelectionService implements Service {
 
     private List<AudioListEntry> getEntriesForFolder(FolderListEntry folder) {
         return DataHolder.getInstance()
-                .getAudioMap()
-                .get(folder.getPath())
-                .stream()
-                .map(simpleAudioWrapper -> getMainViewController().getAudioListEntry(simpleAudioWrapper.getId()))
-                .toList();
+            .getAudioMap()
+            .get(folder.getPath())
+            .stream()
+            .map(simpleAudioWrapper -> getMainViewController().getAudioListEntry(simpleAudioWrapper.getId()))
+            .toList();
     }
 
     public void selectDown() {

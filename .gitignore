@@ -10,3 +10,12 @@ jdeploy*
 *.orig
 *.log
 *.iml
+
+# Claude Code
+CLAUDE.md
+.clinerules*
+AGENTS.md
+
+# Prettier
+node_modules/
+package-lock.json

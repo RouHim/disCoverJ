@@ -1,14 +1,14 @@
 package de.itlobby.discoverj.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import de.itlobby.discoverj.models.AudioWrapper;
+import java.util.Optional;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 class WSUtilTest {
+
     @Test
     void testJSONApi() {
         // GIVEN is a regular rest API url
@@ -20,6 +20,7 @@ class WSUtilTest {
         // THEN valid json should be present
         assertThat(jsonFromUrl).isNotEmpty();
     }
+
     @Test
     void testWebsite() {
         // GIVEN is a regular website

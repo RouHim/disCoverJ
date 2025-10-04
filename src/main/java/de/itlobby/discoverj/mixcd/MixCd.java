@@ -1,8 +1,8 @@
 package de.itlobby.discoverj.mixcd;
 
-import de.itlobby.discoverj.util.AudioUtil;
-import org.apache.commons.io.FileUtils;
+import static de.itlobby.discoverj.util.AudioUtil.VALID_AUDIO_FILE_EXTENSION;
 
+import de.itlobby.discoverj.util.AudioUtil;
 import java.io.File;
 import java.util.Collection;
 import java.util.Comparator;
@@ -10,8 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static de.itlobby.discoverj.util.AudioUtil.VALID_AUDIO_FILE_EXTENSION;
+import org.apache.commons.io.FileUtils;
 
 /**
  * This class is used to check if a folder is a mix cd.
@@ -26,6 +25,7 @@ import static de.itlobby.discoverj.util.AudioUtil.VALID_AUDIO_FILE_EXTENSION;
  * </ul>
  */
 public class MixCd {
+
     /**
      * Cache for mix cd detection.
      */
@@ -61,9 +61,9 @@ public class MixCd {
      */
     static boolean checkForMixCD(String parentFilePath) {
         Collection<File> audioFilesInFolder = FileUtils.listFiles(
-                new File(parentFilePath),
-                VALID_AUDIO_FILE_EXTENSION,
-                false
+            new File(parentFilePath),
+            VALID_AUDIO_FILE_EXTENSION,
+            false
         );
 
         int totalSize = audioFilesInFolder.size();
@@ -71,15 +71,16 @@ public class MixCd {
         if (totalSize < 3) return false;
 
         // Count entries by occurrence, and get the most frequent entry
-        int mostFrequentCount = audioFilesInFolder.parallelStream()
-                .map(AudioUtil::readAudioFileSafe)
-                .flatMap(audioFile -> AudioUtil.getArtists(audioFile).stream())
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
-                .values()
-                .stream()
-                .max(Comparator.naturalOrder())
-                .orElse(0L)
-                .intValue();
+        int mostFrequentCount = audioFilesInFolder
+            .parallelStream()
+            .map(AudioUtil::readAudioFileSafe)
+            .flatMap(audioFile -> AudioUtil.getArtists(audioFile).stream())
+            .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+            .values()
+            .stream()
+            .max(Comparator.naturalOrder())
+            .orElse(0L)
+            .intValue();
 
         // Calculate the percentage of the most frequent entry
         double artistToTotalPercentage = (double) mostFrequentCount / (double) totalSize;

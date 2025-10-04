@@ -1,16 +1,15 @@
 package de.itlobby.discoverj.searchengines;
 
+import static de.itlobby.discoverj.searchengines.DeezerServiceTest.getAudioFile;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ImageFile;
+import java.util.List;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
-
-import java.util.List;
-
-import static de.itlobby.discoverj.searchengines.DeezerServiceTest.getAudioFile;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @Disabled
 @Execution(ExecutionMode.CONCURRENT)

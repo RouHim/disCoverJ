@@ -5,5 +5,5 @@ public enum OperatingSystem {
     MAC,
     UNIX,
     SOLARIS,
-    OTHER
+    OTHER,
 }

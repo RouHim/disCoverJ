@@ -1,5 +1,7 @@
 package de.itlobby.discoverj.services;
 
+import static de.itlobby.discoverj.util.AudioUtil.removeCover;
+
 import de.itlobby.discoverj.mixcd.MixCd;
 import de.itlobby.discoverj.models.AudioWrapper;
 import de.itlobby.discoverj.models.ScanResultData;
@@ -23,6 +25,10 @@ import de.itlobby.discoverj.util.SearXUtil;
 import de.itlobby.discoverj.util.StringUtil;
 import de.itlobby.discoverj.util.SystemUtil;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import java.io.File;
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.Optional;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -32,21 +38,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jaudiotagger.audio.AudioFile;
 
-import java.io.File;
-import java.text.MessageFormat;
-import java.util.List;
-import java.util.Optional;
-
-import static de.itlobby.discoverj.util.AudioUtil.removeCover;
-
 public class InitialService implements Service {
+
     private static final Logger log = LogManager.getLogger(InitialService.class);
     private PreCountViewTask preCountTask;
     private ScanFileViewTask scanFileTask;
     private boolean interruptProgress = false;
 
     public void setInterruptProgress(boolean interruptProgress) {
-
         if (interruptProgress && preCountTask != null) {
             preCountTask.cancel();
         }
@@ -102,16 +101,16 @@ public class InitialService implements Service {
 
         if (!musicFolder.exists()) {
             ServiceLocator.get(LightBoxService.class).showTextDialog(
-                    LanguageUtil.getString("InitialController.warning"),
-                    LanguageUtil.getString("InitialController.folderDoesnotExists")
+                LanguageUtil.getString("InitialController.warning"),
+                LanguageUtil.getString("InitialController.folderDoesnotExists")
             );
             return;
         }
 
         if (!musicFolder.isDirectory()) {
             ServiceLocator.get(LightBoxService.class).showTextDialog(
-                    LanguageUtil.getString("InitialController.warning"),
-                    LanguageUtil.getString("InitialController.invalidFolder")
+                LanguageUtil.getString("InitialController.warning"),
+                LanguageUtil.getString("InitialController.invalidFolder")
             );
             return;
         }
@@ -134,9 +133,7 @@ public class InitialService implements Service {
             preCountTask = new PreCountViewTask(musicObjects);
             preCountTask.setFinishedListener(this::scanFiles);
 
-            Thread.ofVirtual()
-                    .uncaughtExceptionHandler(ServiceLocator.get(ExceptionService.class))
-                    .start(preCountTask);
+            Thread.ofVirtual().uncaughtExceptionHandler(ServiceLocator.get(ExceptionService.class)).start(preCountTask);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -155,9 +152,7 @@ public class InitialService implements Service {
             scanFileTask = new ScanFileViewTask(fileList, getMainViewController());
             scanFileTask.setFinishedListener(this::scanFinished);
 
-            Thread.ofVirtual()
-                    .uncaughtExceptionHandler(ServiceLocator.get(ExceptionService.class))
-                    .start(scanFileTask);
+            Thread.ofVirtual().uncaughtExceptionHandler(ServiceLocator.get(ExceptionService.class)).start(scanFileTask);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -167,9 +162,9 @@ public class InitialService implements Service {
         DataHolder.getInstance().setFromScanResult(scanResultData);
 
         getMainViewController().showScanResult(
-                scanResultData.getWithCoverCount(),
-                scanResultData.getAudioFilesCount(),
-                scanResultData.getAudioMap()
+            scanResultData.getWithCoverCount(),
+            scanResultData.getAudioFilesCount(),
+            scanResultData.getAudioMap()
         );
 
         ServiceLocator.get(SelectionService.class).clearAll();
@@ -185,22 +180,20 @@ public class InitialService implements Service {
         AudioWrapper audioWrapper = audioListEntry.getWrapper();
         String title = MessageFormat.format(LanguageUtil.getString("cover.von.0"), audioWrapper.getDisplayValue());
 
-        ServiceLocator.get(LightBoxService.class).showDialog(
-                title,
-                createDetailCoverLayout(),
-                null,
-                null,
-                true,
-                false
-        );
+        ServiceLocator.get(LightBoxService.class).showDialog(title, createDetailCoverLayout(), null, null, true, false);
 
         CoverDetailViewController vc = ViewManager.getInstance().getViewController(Views.COVER_DETAIL_VIEW);
 
-        audioWrapper.loadImage().ifPresentOrElse(coverImage -> {
-            vc.imgCover.setImage(coverImage);
-            vc.createCoverInfo(coverImage);
-            vc.fitImageSizeImage(getMainViewController().lightBoxLayout);
-        }, vc::clearCoverInfo);
+        audioWrapper
+            .loadImage()
+            .ifPresentOrElse(
+                coverImage -> {
+                    vc.imgCover.setImage(coverImage);
+                    vc.createCoverInfo(coverImage);
+                    vc.fitImageSizeImage(getMainViewController().lightBoxLayout);
+                },
+                vc::clearCoverInfo
+            );
     }
 
     private Parent createDetailCoverLayout() {
@@ -233,12 +226,13 @@ public class InitialService implements Service {
 
         DataHolder.getInstance().updateResultEntry(audioWrapper);
 
-        getMainViewController().lwAudioList.getChildren()
-                .stream()
-                .filter(AudioListEntry.class::isInstance)
-                .map(AudioListEntry.class::cast)
-                .filter(x -> x.getWrapper().getId().equals(audioWrapper.getId()))
-                .forEach(AudioListEntry::removeCover);
+        getMainViewController()
+            .lwAudioList.getChildren()
+            .stream()
+            .filter(AudioListEntry.class::isInstance)
+            .map(AudioListEntry.class::cast)
+            .filter(x -> x.getWrapper().getId().equals(audioWrapper.getId()))
+            .forEach(AudioListEntry::removeCover);
 
         selectLine(audioListEntry, false, false);
     }
@@ -248,37 +242,44 @@ public class InitialService implements Service {
         SelectionService selectionService = ServiceLocator.get(SelectionService.class);
         List<AudioListEntry> selectedEntries = selectionService.getSelectedEntries();
 
-        AsyncPipeline.run(
-                        () -> {
-                            getMainViewController().showBusyIndicator(LanguageUtil.getString("key.mainview.cm.remove.all.selected"), null);
-                            getMainViewController().setTotalAudioCountToLoad(selectedEntries.size());
-                        }
-                )
-                .andThen(
-                        () -> selectedEntries.stream()
-                                .map(AudioListEntry::getWrapper)
-                                .filter(AudioWrapper::hasCover)
-                                .forEach((audioEntry) -> {
-                                    getMainViewController().countIndicatorUp();
-                                    AudioUtil.removeCover(audioEntry);
-                                }))
-                .andThen(
-                        () -> selectedEntries.stream()
-                                .map(AudioListEntry::getWrapper)
-                                .forEach(dataHolder::updateResultEntry))
-                .andThen(
-                        () -> Platform.runLater(() -> {
-                            getMainViewController().lwAudioList.getChildren()
-                                    .stream()
-                                    .filter(AudioListEntry.class::isInstance)
-                                    .map(AudioListEntry.class::cast)
-                                    .filter(x -> selectedEntries.stream().anyMatch(y -> y.getWrapper().getId().equals(x.getWrapper().getId())))
-                                    .forEach(AudioListEntry::removeCover);
-                        })
-                )
-                // hide busy indicator
-                .andThen(() -> getMainViewController().hideBusyIndicator())
-                .begin();
+        AsyncPipeline.run(() -> {
+            getMainViewController().showBusyIndicator(
+                LanguageUtil.getString("key.mainview.cm.remove.all.selected"),
+                null
+            );
+            getMainViewController().setTotalAudioCountToLoad(selectedEntries.size());
+        })
+            .andThen(() ->
+                selectedEntries
+                    .stream()
+                    .map(AudioListEntry::getWrapper)
+                    .filter(AudioWrapper::hasCover)
+                    .forEach(audioEntry -> {
+                        getMainViewController().countIndicatorUp();
+                        AudioUtil.removeCover(audioEntry);
+                    })
+            )
+            .andThen(() ->
+                selectedEntries.stream().map(AudioListEntry::getWrapper).forEach(dataHolder::updateResultEntry)
+            )
+            .andThen(() ->
+                Platform.runLater(() -> {
+                    getMainViewController()
+                        .lwAudioList.getChildren()
+                        .stream()
+                        .filter(AudioListEntry.class::isInstance)
+                        .map(AudioListEntry.class::cast)
+                        .filter(x ->
+                            selectedEntries
+                                .stream()
+                                .anyMatch(y -> y.getWrapper().getId().equals(x.getWrapper().getId()))
+                        )
+                        .forEach(AudioListEntry::removeCover);
+                })
+            )
+            // hide busy indicator
+            .andThen(() -> getMainViewController().hideBusyIndicator())
+            .begin();
 
         selectionService.setSelectedEntries(selectedEntries);
     }
@@ -288,9 +289,9 @@ public class InitialService implements Service {
         AudioWrapper audioWrapper = audioListEntry.getWrapper();
 
         if (audioWrapper.hasCover()) {
-            audioWrapper.loadImage().ifPresent(image ->
-                    Thread.ofVirtual().start(() -> new ImageClipboardUtil().setImage(image))
-            );
+            audioWrapper
+                .loadImage()
+                .ifPresent(image -> Thread.ofVirtual().start(() -> new ImageClipboardUtil().setImage(image)));
         }
     }
 
@@ -318,10 +319,8 @@ public class InitialService implements Service {
 
         if (!selectedEntries.isEmpty()) {
             DataHolder.getInstance().removeResultEntries(
-                    selectedEntries
-                            .stream()
-                            .map(AudioListEntry::getWrapper)
-                            .toList());
+                selectedEntries.stream().map(AudioListEntry::getWrapper).toList()
+            );
 
             getMainViewController().lwAudioList.getChildren().removeAll(selectedEntries);
             ServiceLocator.get(SelectionService.class).clearAll();
@@ -339,27 +338,28 @@ public class InitialService implements Service {
         dataHolder.removeItemsWithCover();
 
         getMainViewController().showScanResult(
-                dataHolder.getWithCoverCount(),
-                dataHolder.getAudioFilesCount(),
-                dataHolder.getAudioMap()
+            dataHolder.getWithCoverCount(),
+            dataHolder.getAudioFilesCount(),
+            dataHolder.getAudioMap()
         );
 
         ServiceLocator.get(SelectionService.class).clearAll();
     }
 
     public void clearSelectedEntries() {
-        List<Integer> selectedIds = ServiceLocator.get(SelectionService.class).getSelectedEntries()
-                .stream()
-                .map(x -> x.getWrapper().getId())
-                .toList();
+        List<Integer> selectedIds = ServiceLocator.get(SelectionService.class)
+            .getSelectedEntries()
+            .stream()
+            .map(x -> x.getWrapper().getId())
+            .toList();
 
         DataHolder dataHolder = DataHolder.getInstance();
         dataHolder.removeItemsById(selectedIds);
 
         getMainViewController().showScanResult(
-                dataHolder.getWithCoverCount(),
-                dataHolder.getAudioFilesCount(),
-                dataHolder.getAudioMap()
+            dataHolder.getWithCoverCount(),
+            dataHolder.getAudioFilesCount(),
+            dataHolder.getAudioMap()
         );
 
         ServiceLocator.get(SelectionService.class).clearAll();
@@ -370,7 +370,10 @@ public class InitialService implements Service {
 
         if (lastSelected != null) {
             String googleSearchPattern = Settings.getInstance().getConfig().getGoogleSearchPattern();
-            String rawQuery = SearchQueryUtil.createSearchQueryFromPattern(lastSelected.getWrapper(), googleSearchPattern);
+            String rawQuery = SearchQueryUtil.createSearchQueryFromPattern(
+                lastSelected.getWrapper(),
+                googleSearchPattern
+            );
             String query = StringUtil.encodeRfc3986(rawQuery);
 
             Thread.ofPlatform().start(() -> {
@@ -386,7 +389,10 @@ public class InitialService implements Service {
 
         if (lastSelected != null) {
             String googleSearchPattern = Settings.getInstance().getConfig().getGoogleSearchPattern();
-            String rawQuery = SearchQueryUtil.createSearchQueryFromPattern(lastSelected.getWrapper(), googleSearchPattern);
+            String rawQuery = SearchQueryUtil.createSearchQueryFromPattern(
+                lastSelected.getWrapper(),
+                googleSearchPattern
+            );
             String query = StringUtil.encodeRfc3986(rawQuery);
 
             SystemUtil.browseUrl(String.format("https://www.google.com/search?q=%s&tbm=isch", query));

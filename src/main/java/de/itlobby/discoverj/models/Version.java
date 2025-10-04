@@ -1,20 +1,18 @@
 package de.itlobby.discoverj.models;
 
+import java.util.Objects;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Objects;
-
 public class Version implements Comparable<Version> {
+
     private static final Logger log = LogManager.getLogger(Version.class);
     private Integer major = 0;
     private Integer minor = 0;
     private Integer revision = 0;
 
     public Version(String version) {
-        String[] parts = version
-                .trim()
-                .split("\\.");
+        String[] parts = version.trim().split("\\.");
 
         if (parts.length == 1) {
             major = Integer.parseInt(parts[0]);
@@ -84,9 +82,11 @@ public class Version implements Comparable<Version> {
             return false;
         }
         Version version = (Version) o;
-        return Objects.equals(major, version.major) &&
-                Objects.equals(minor, version.minor) &&
-                Objects.equals(revision, version.revision);
+        return (
+            Objects.equals(major, version.major) &&
+            Objects.equals(minor, version.minor) &&
+            Objects.equals(revision, version.revision)
+        );
     }
 
     @Override

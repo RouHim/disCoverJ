@@ -3,6 +3,8 @@ package de.itlobby.discoverj.ui.viewcontroller;
 import de.itlobby.discoverj.ui.utils.GlyphsDude;
 import de.itlobby.discoverj.util.ImageUtil;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import java.awt.image.BufferedImage;
+import java.util.List;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -16,10 +18,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
-import java.awt.image.BufferedImage;
-import java.util.List;
-
 public class ImageSelectionViewController implements ViewController {
+
     public VBox baseLayout;
     public VBox imgPropLayout;
     public CheckBox chkSquareImages;

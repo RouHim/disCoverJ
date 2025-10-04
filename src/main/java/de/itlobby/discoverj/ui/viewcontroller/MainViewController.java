@@ -26,6 +26,15 @@ import de.itlobby.discoverj.util.StringUtil;
 import de.itlobby.discoverj.util.SystemUtil;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.materialicons.MaterialIcon;
+import java.awt.image.BufferedImage;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
@@ -66,17 +75,8 @@ import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.awt.image.BufferedImage;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class MainViewController implements ViewController, MultipleSelectionListener, ParentKeyDeletedListener {
+
     private static final Logger log = LogManager.getLogger(MainViewController.class);
     private static final String MENU_ICON = "menu-icon";
     private static final String DEFAULT_ICON = "default-icon";
@@ -166,17 +166,17 @@ public class MainViewController implements ViewController, MultipleSelectionList
         ListenerStateProvider.getInstance().setParentKeyDeletedListener(this);
     }
 
-    public void showScanResult(int withCoverCount, int audioFilesCount, Map<String, List<AudioWrapper>> audioDirectory) {
+    public void showScanResult(
+        int withCoverCount,
+        int audioFilesCount,
+        Map<String, List<AudioWrapper>> audioDirectory
+    ) {
         Platform.runLater(() -> {
-
             tryClearLeftSide();
 
             hideBusyIndicator();
 
-            setState(MessageFormat.format(
-                    LanguageUtil.getString("InitialController.thereAre0Files"),
-                    audioFilesCount
-            ));
+            setState(MessageFormat.format(LanguageUtil.getString("InitialController.thereAre0Files"), audioFilesCount));
 
             int withoutCoverCount = audioFilesCount - withCoverCount;
 
@@ -191,7 +191,8 @@ public class MainViewController implements ViewController, MultipleSelectionList
                 deactivateActionButton();
             } else {
                 activateActionButton(
-                        event -> ServiceLocator.get(CoverSearchService.class).search(), FontAwesomeIcon.SEARCH
+                    event -> ServiceLocator.get(CoverSearchService.class).search(),
+                    FontAwesomeIcon.SEARCH
                 );
             }
         });
@@ -219,7 +220,6 @@ public class MainViewController implements ViewController, MultipleSelectionList
             resetRightSide();
             return;
         }
-
 
         Platform.runLater(() -> {
             String fileSize = StringUtil.sizeToHumanReadable(audioWrapper.getFileLength());
@@ -276,19 +276,34 @@ public class MainViewController implements ViewController, MultipleSelectionList
         audioListContextMenu = new ContextMenu();
         InitialService initialService = ServiceLocator.get(InitialService.class);
 
-        MenuItem alCmItemSearchSearXImages = new MenuItem(LanguageUtil.getString("key.mainview.cm.searx.image.search"), GlyphsDude.createIcon(FontAwesomeIcon.SEARCH_PLUS));
+        MenuItem alCmItemSearchSearXImages = new MenuItem(
+            LanguageUtil.getString("key.mainview.cm.searx.image.search"),
+            GlyphsDude.createIcon(FontAwesomeIcon.SEARCH_PLUS)
+        );
         alCmItemSearchSearXImages.setOnAction(e -> initialService.searchOnSearXImages());
 
-        MenuItem alCmItemSearchGoogleImages = new MenuItem(LanguageUtil.getString("key.mainview.cm.google.image.search"), GlyphsDude.createIcon(FontAwesomeIcon.GOOGLE));
+        MenuItem alCmItemSearchGoogleImages = new MenuItem(
+            LanguageUtil.getString("key.mainview.cm.google.image.search"),
+            GlyphsDude.createIcon(FontAwesomeIcon.GOOGLE)
+        );
         alCmItemSearchGoogleImages.setOnAction(e -> initialService.searchOnGoogleImages());
 
-        MenuItem alCmItemRemoveWithCover = new MenuItem(LanguageUtil.getString("key.mainview.cm.remove.all.with.cover"), GlyphsDude.createIcon(FontAwesomeIcon.TIMES_CIRCLE));
+        MenuItem alCmItemRemoveWithCover = new MenuItem(
+            LanguageUtil.getString("key.mainview.cm.remove.all.with.cover"),
+            GlyphsDude.createIcon(FontAwesomeIcon.TIMES_CIRCLE)
+        );
         alCmItemRemoveWithCover.setOnAction(e -> initialService.clearWithCoverListEntries());
 
-        MenuItem alCmItemRemoveSelected = new MenuItem(LanguageUtil.getString("key.mainview.cm.remove.all.selected"), GlyphsDude.createIcon(FontAwesomeIcon.TIMES_CIRCLE));
+        MenuItem alCmItemRemoveSelected = new MenuItem(
+            LanguageUtil.getString("key.mainview.cm.remove.all.selected"),
+            GlyphsDude.createIcon(FontAwesomeIcon.TIMES_CIRCLE)
+        );
         alCmItemRemoveSelected.setOnAction(e -> initialService.clearSelectedEntries());
 
-        MenuItem alCmItemRemoveAll = new MenuItem(LanguageUtil.getString("key.mainview.cm.remove.all"), GlyphsDude.createIcon(FontAwesomeIcon.TIMES_CIRCLE));
+        MenuItem alCmItemRemoveAll = new MenuItem(
+            LanguageUtil.getString("key.mainview.cm.remove.all"),
+            GlyphsDude.createIcon(FontAwesomeIcon.TIMES_CIRCLE)
+        );
         alCmItemRemoveAll.setOnAction(e -> initialService.clearAllListEntries());
 
         audioListContextMenu.getItems().add(alCmItemSearchSearXImages);
@@ -298,53 +313,121 @@ public class MainViewController implements ViewController, MultipleSelectionList
         audioListContextMenu.getItems().add(alCmItemRemoveSelected);
         audioListContextMenu.getItems().add(alCmItemRemoveAll);
 
-        lwAudioList.addEventHandler(
-                MouseEvent.MOUSE_CLICKED,
-                e ->
-                {
-                    if (e.getButton() == MouseButton.SECONDARY && !lwAudioList.getChildren().isEmpty()) {
-                        audioListContextMenu.show(lwAudioList, e.getScreenX(), e.getScreenY());
-                    } else {
-                        audioListContextMenu.hide();
-                    }
-                }
-        );
+        lwAudioList.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+            if (e.getButton() == MouseButton.SECONDARY && !lwAudioList.getChildren().isEmpty()) {
+                audioListContextMenu.show(lwAudioList, e.getScreenX(), e.getScreenY());
+            } else {
+                audioListContextMenu.hide();
+            }
+        });
     }
 
     private void createIconButtons() {
-        AwesomeHelper.createIconButton(btnFindFolder, FontAwesomeIcon.FOLDER_OPEN, MENU_ICON, LanguageUtil.getString("key.mainview.open.folder"), "24px");
+        AwesomeHelper.createIconButton(
+            btnFindFolder,
+            FontAwesomeIcon.FOLDER_OPEN,
+            MENU_ICON,
+            LanguageUtil.getString("key.mainview.open.folder"),
+            "24px"
+        );
 
-        AwesomeHelper.createIconButton(btnOpenAbout, FontAwesomeIcon.INFO_CIRCLE, MENU_ICON, LanguageUtil.getString("key.mainview.menu.about"), "24px");
-        AwesomeHelper.createIconButton(btnReportBug, FontAwesomeIcon.BUG, MENU_ICON, LanguageUtil.getString("key.mainview.menu.reportbug"), "24px");
-        AwesomeHelper.createIconButton(btnDonate, FontAwesomeIcon.HEART, MENU_ICON, LanguageUtil.getString("key.mainview.menu.donate"), "24px");
-        AwesomeHelper.createIconButton(btnOpenSettings, FontAwesomeIcon.GEAR, MENU_ICON, LanguageUtil.getString("key.mainview.menu.program.settings"), "24px");
-        AwesomeHelper.createIconButton(btnExitApp, FontAwesomeIcon.TIMES, MENU_ICON, LanguageUtil.getString("key.mainview.menu.program.shutdown"), "24px");
+        AwesomeHelper.createIconButton(
+            btnOpenAbout,
+            FontAwesomeIcon.INFO_CIRCLE,
+            MENU_ICON,
+            LanguageUtil.getString("key.mainview.menu.about"),
+            "24px"
+        );
+        AwesomeHelper.createIconButton(
+            btnReportBug,
+            FontAwesomeIcon.BUG,
+            MENU_ICON,
+            LanguageUtil.getString("key.mainview.menu.reportbug"),
+            "24px"
+        );
+        AwesomeHelper.createIconButton(
+            btnDonate,
+            FontAwesomeIcon.HEART,
+            MENU_ICON,
+            LanguageUtil.getString("key.mainview.menu.donate"),
+            "24px"
+        );
+        AwesomeHelper.createIconButton(
+            btnOpenSettings,
+            FontAwesomeIcon.GEAR,
+            MENU_ICON,
+            LanguageUtil.getString("key.mainview.menu.program.settings"),
+            "24px"
+        );
+        AwesomeHelper.createIconButton(
+            btnExitApp,
+            FontAwesomeIcon.TIMES,
+            MENU_ICON,
+            LanguageUtil.getString("key.mainview.menu.program.shutdown"),
+            "24px"
+        );
 
-        AwesomeHelper.createIconButton(btnPasteCoverFromClipBrd, MaterialIcon.CONTENT_PASTE, DEFAULT_ICON, LanguageUtil.getString("key.mainview.paste.from.clipbrd.cover"), "20px");
-        AwesomeHelper.createIconButton(btnCopyCoverToClipBrd, MaterialIcon.CONTENT_COPY, DEFAULT_ICON, LanguageUtil.getString("key.mainview.copy.clipbrd.cover"), "20px");
-        AwesomeHelper.createIconButton(btnRemoveCover, FontAwesomeIcon.TRASH, DEFAULT_ICON, LanguageUtil.getString("key.mainview.remove.cover"), "24px");
-        AwesomeHelper.createIconButton(btnOpenGoogleImageSearch, FontAwesomeIcon.GOOGLE, DEFAULT_ICON, LanguageUtil.getString("key.mainview.cm.google.image.search"), "20px");
+        AwesomeHelper.createIconButton(
+            btnPasteCoverFromClipBrd,
+            MaterialIcon.CONTENT_PASTE,
+            DEFAULT_ICON,
+            LanguageUtil.getString("key.mainview.paste.from.clipbrd.cover"),
+            "20px"
+        );
+        AwesomeHelper.createIconButton(
+            btnCopyCoverToClipBrd,
+            MaterialIcon.CONTENT_COPY,
+            DEFAULT_ICON,
+            LanguageUtil.getString("key.mainview.copy.clipbrd.cover"),
+            "20px"
+        );
+        AwesomeHelper.createIconButton(
+            btnRemoveCover,
+            FontAwesomeIcon.TRASH,
+            DEFAULT_ICON,
+            LanguageUtil.getString("key.mainview.remove.cover"),
+            "24px"
+        );
+        AwesomeHelper.createIconButton(
+            btnOpenGoogleImageSearch,
+            FontAwesomeIcon.GOOGLE,
+            DEFAULT_ICON,
+            LanguageUtil.getString("key.mainview.cm.google.image.search"),
+            "20px"
+        );
 
-        AwesomeHelper.createTextIcon(txtIsMixCD, FontAwesomeIcon.RANDOM, DEFAULT_ICON_TEXT, LanguageUtil.getString("key.mainview.isMixCD"), "15px");
+        AwesomeHelper.createTextIcon(
+            txtIsMixCD,
+            FontAwesomeIcon.RANDOM,
+            DEFAULT_ICON_TEXT,
+            LanguageUtil.getString("key.mainview.isMixCD"),
+            "15px"
+        );
     }
 
     private void registerGeneralListener() {
-        lwAudioList.getChildren().addListener((ListChangeListener<Node>) c -> {
-            if (lwAudioList.getChildren().isEmpty()) {
-                deactivateActionButton();
-                return;
-            }
+        lwAudioList
+            .getChildren()
+            .addListener(
+                (ListChangeListener<Node>) c -> {
+                    if (lwAudioList.getChildren().isEmpty()) {
+                        deactivateActionButton();
+                        return;
+                    }
 
-            activateActionButton(event -> ServiceLocator.get(CoverSearchService.class).search(), FontAwesomeIcon.SEARCH);
-        });
+                    activateActionButton(
+                        event -> ServiceLocator.get(CoverSearchService.class).search(),
+                        FontAwesomeIcon.SEARCH
+                    );
+                }
+            );
     }
 
     private void registerKeyListener() {
         SelectionService selectionService = ServiceLocator.get(SelectionService.class);
         InitialService initialService = ServiceLocator.get(InitialService.class);
 
-        rootLayout.addEventHandler(KeyEvent.KEY_RELEASED, event ->
-        {
+        rootLayout.addEventHandler(KeyEvent.KEY_RELEASED, event -> {
             if ((System.currentTimeMillis() - lastEventExcecFireTime) <= 10) {
                 return;
             }
@@ -405,12 +488,13 @@ public class MainViewController implements ViewController, MultipleSelectionList
         btnCopyCoverToClipBrd.visibleProperty().bind(imgCurrentCover.imageProperty().isNotNull());
         btnOpenGoogleImageSearch.visibleProperty().bind(imgCurrentCover.imageProperty().isNotNull());
 
-        pbStatus.progressProperty().addListener((observable, oldValue, newValue) -> SystemUtil.setTaskbarProgress(newValue));
+        pbStatus
+            .progressProperty()
+            .addListener((observable, oldValue, newValue) -> SystemUtil.setTaskbarProgress(newValue));
     }
 
     public void activateActionButton(EventHandler<ActionEvent> action, FontAwesomeIcon icon) {
         Platform.runLater(() -> {
-
             btnActionCircle.setOnAction(action);
             btnActionCircleIcon.setOnAction(action);
 
@@ -423,7 +507,6 @@ public class MainViewController implements ViewController, MultipleSelectionList
 
     public void deactivateActionButton() {
         Platform.runLater(() -> {
-
             btnActionCircle.setOnAction(null);
             btnActionCircleIcon.setOnAction(null);
 
@@ -441,12 +524,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
                 VBox.setMargin(folderEntry, new Insets(10, 0, 0, 0));
             }
 
-            entry.getValue()
-                    .forEach(audioWrapper ->
-                            lwAudioList
-                                    .getChildren()
-                                    .add(new AudioListEntry(audioWrapper))
-                    );
+            entry.getValue().forEach(audioWrapper -> lwAudioList.getChildren().add(new AudioListEntry(audioWrapper)));
 
             parentIndex++;
         }
@@ -496,7 +574,14 @@ public class MainViewController implements ViewController, MultipleSelectionList
             layout.setAlignment(Pos.TOP_CENTER);
             layout.setPadding(new Insets(10, 0, 10, 0));
 
-            ServiceLocator.get(LightBoxService.class).showDialog(title, layout, cancelListener, null, false, cancelListener == null);
+            ServiceLocator.get(LightBoxService.class).showDialog(
+                title,
+                layout,
+                cancelListener,
+                null,
+                false,
+                cancelListener == null
+            );
         });
     }
 
@@ -561,10 +646,11 @@ public class MainViewController implements ViewController, MultipleSelectionList
 
             boolean isInRange = false;
             List<AudioListEntry> children = lwAudioList
-                    .getChildren()
-                    .stream().filter(AudioListEntry.class::isInstance)
-                    .map(AudioListEntry.class::cast)
-                    .toList();
+                .getChildren()
+                .stream()
+                .filter(AudioListEntry.class::isInstance)
+                .map(AudioListEntry.class::cast)
+                .toList();
 
             int fromIndex = children.indexOf(from);
             int toIndex = children.indexOf(to);
@@ -596,26 +682,34 @@ public class MainViewController implements ViewController, MultipleSelectionList
 
     public void unhighlightInList(Integer audioWrapperId) {
         Platform.runLater(() ->
-                lwAudioList.getChildren().stream()
-                        .filter(AudioListEntry.class::isInstance)
-                        .map(AudioListEntry.class::cast)
-                        .filter(entry -> entry.getWrapper().getId().equals(audioWrapperId))
-                        .forEach(entry -> entry.getStyleClass().removeAll(AUDIO_LINE_SELECTED)));
+            lwAudioList
+                .getChildren()
+                .stream()
+                .filter(AudioListEntry.class::isInstance)
+                .map(AudioListEntry.class::cast)
+                .filter(entry -> entry.getWrapper().getId().equals(audioWrapperId))
+                .forEach(entry -> entry.getStyleClass().removeAll(AUDIO_LINE_SELECTED))
+        );
     }
 
     public void unhighlightAll() {
         Platform.runLater(() ->
-                lwAudioList.getChildren().stream()
-                        .map(x -> ((HBox) x))
-                        .forEach(x -> x.getStyleClass().removeAll(AUDIO_LINE_SELECTED)));
+            lwAudioList
+                .getChildren()
+                .stream()
+                .map(x -> ((HBox) x))
+                .forEach(x -> x.getStyleClass().removeAll(AUDIO_LINE_SELECTED))
+        );
     }
 
     public void highlightAll() {
         Platform.runLater(() ->
-                lwAudioList.getChildren().stream()
-                        .filter(AudioListEntry.class::isInstance)
-                        .map(x -> ((AudioListEntry) x))
-                        .forEach(x -> x.getStyleClass().add(AUDIO_LINE_SELECTED))
+            lwAudioList
+                .getChildren()
+                .stream()
+                .filter(AudioListEntry.class::isInstance)
+                .map(x -> ((AudioListEntry) x))
+                .forEach(x -> x.getStyleClass().add(AUDIO_LINE_SELECTED))
         );
     }
 
@@ -628,13 +722,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
             }
 
             try {
-                Image previewImage = new Image(
-                        new FileInputStream(newCover.filePath()),
-                        36,
-                        36,
-                        true,
-                        false
-                );
+                Image previewImage = new Image(new FileInputStream(newCover.filePath()), 36, 36, true, false);
                 createSingleLineAnimation(previewImage, listEntry);
                 listEntry.getIconView().setIcon(FontAwesomeIcon.CHECK);
                 listEntry.getWrapper().setHasCover(true);
@@ -652,10 +740,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
                 return;
             }
 
-            Image previewImage = SwingFXUtils.toFXImage(
-                    ImageUtil.resize(newCover, 36, 36),
-                    null
-            );
+            Image previewImage = SwingFXUtils.toFXImage(ImageUtil.resize(newCover, 36, 36), null);
             createSingleLineAnimation(previewImage, listEntry);
             listEntry.getIconView().setIcon(FontAwesomeIcon.CHECK);
             listEntry.getWrapper().setHasCover(true);
@@ -674,13 +759,14 @@ public class MainViewController implements ViewController, MultipleSelectionList
     }
 
     public AudioListEntry getAudioListEntry(Integer audioWrapperId) {
-        return lwAudioList.getChildren()
-                .stream()
-                .filter(AudioListEntry.class::isInstance)
-                .map(x -> (AudioListEntry) x)
-                .filter(x -> x.getWrapper().getId().equals(audioWrapperId))
-                .findFirst()
-                .orElse(null);
+        return lwAudioList
+            .getChildren()
+            .stream()
+            .filter(AudioListEntry.class::isInstance)
+            .map(x -> (AudioListEntry) x)
+            .filter(x -> x.getWrapper().getId().equals(audioWrapperId))
+            .findFirst()
+            .orElse(null);
     }
 
     public void scrollToNodeInList(AudioWrapper currentAudio) {
@@ -691,9 +777,7 @@ public class MainViewController implements ViewController, MultipleSelectionList
     }
 
     public void scrollToNodeInList(AudioListEntry entry) {
-        Platform.runLater(() ->
-                scrollTo(entry)
-        );
+        Platform.runLater(() -> scrollTo(entry));
     }
 
     private void scrollTo(AudioListEntry entry) {
@@ -713,7 +797,9 @@ public class MainViewController implements ViewController, MultipleSelectionList
         Platform.runLater(() -> {
             ViewManager viewManager = ViewManager.getInstance();
             Parent layoutFromView = viewManager.createLayoutFromView(Views.MULTI_SELECTION_LAYOUT_VIEW);
-            MultiselectionLayoutViewController viewController = viewManager.getViewController(Views.MULTI_SELECTION_LAYOUT_VIEW);
+            MultiselectionLayoutViewController viewController = viewManager.getViewController(
+                Views.MULTI_SELECTION_LAYOUT_VIEW
+            );
             viewController.setClearCoverText(LanguageUtil.getString("remove.all.cover.from.selected.audio.files"));
 
             multiSelectionLayout.getChildren().clear();
@@ -733,12 +819,13 @@ public class MainViewController implements ViewController, MultipleSelectionList
 
     @Override
     public void onParentListEntryDeleted(String key) {
-        List<FolderListEntry> entriesToRemove = lwAudioList.getChildren()
-                .stream()
-                .filter(FolderListEntry.class::isInstance)
-                .map(x -> ((FolderListEntry) x))
-                .filter(x -> x.getPath().equalsIgnoreCase(key))
-                .toList();
+        List<FolderListEntry> entriesToRemove = lwAudioList
+            .getChildren()
+            .stream()
+            .filter(FolderListEntry.class::isInstance)
+            .map(x -> ((FolderListEntry) x))
+            .filter(x -> x.getPath().equalsIgnoreCase(key))
+            .toList();
 
         lwAudioList.getChildren().removeAll(entriesToRemove);
     }
@@ -769,5 +856,4 @@ public class MainViewController implements ViewController, MultipleSelectionList
             txtAudioToLoad.getChildren().add(new Text(text));
         });
     }
-
 }

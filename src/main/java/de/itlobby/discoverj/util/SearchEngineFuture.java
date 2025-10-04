@@ -1,11 +1,11 @@
 package de.itlobby.discoverj.util;
 
 import de.itlobby.discoverj.models.ImageFile;
-
 import java.util.List;
 import java.util.concurrent.Future;
 
 public class SearchEngineFuture {
+
     private Future<List<ImageFile>> future;
     private String name;
 

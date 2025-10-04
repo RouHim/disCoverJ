@@ -7,8 +7,8 @@ import de.itlobby.discoverj.settings.Settings;
 import de.itlobby.discoverj.util.StringUtil;
 
 public class SearchQueryUtil {
-    private SearchQueryUtil() {
-    }
+
+    private SearchQueryUtil() {}
 
     public static String createSearchString(AudioWrapper audioWrapper) {
         String album = audioWrapper.getAlbum();

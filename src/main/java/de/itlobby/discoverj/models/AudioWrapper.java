@@ -2,15 +2,15 @@ package de.itlobby.discoverj.models;
 
 import de.itlobby.discoverj.util.AudioUtil;
 import de.itlobby.discoverj.util.StringUtil;
+import java.io.File;
+import java.util.Objects;
+import java.util.Optional;
 import javafx.scene.image.Image;
 import org.apache.commons.lang3.ObjectUtils;
 import org.jaudiotagger.audio.AudioFile;
 
-import java.io.File;
-import java.util.Objects;
-import java.util.Optional;
-
 public class AudioWrapper implements Comparable<AudioWrapper> {
+
     private final Integer id;
     private final String filePath;
     private final String artist;
@@ -26,20 +26,22 @@ public class AudioWrapper implements Comparable<AudioWrapper> {
     private final String albumArtist;
     private boolean hasCover;
 
-    public AudioWrapper(Integer id,
-                        String filePath,
-                        boolean hasCover,
-                        String artist,
-                        String title,
-                        String album,
-                        String trackNumber,
-                        String parentFilePath,
-                        String fileName,
-                        long fileLength,
-                        boolean readOnly,
-                        String fileNameExtension,
-                        String year,
-                        String albumArtist) {
+    public AudioWrapper(
+        Integer id,
+        String filePath,
+        boolean hasCover,
+        String artist,
+        String title,
+        String album,
+        String trackNumber,
+        String parentFilePath,
+        String fileName,
+        long fileLength,
+        boolean readOnly,
+        String fileNameExtension,
+        String year,
+        String albumArtist
+    ) {
         this.id = id;
         this.filePath = filePath;
         this.hasCover = hasCover;
