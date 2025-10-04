@@ -1,3 +1,10 @@
+## [412.5.79](https://github.com/RouHim/disCoverJ/compare/412.5.78...412.5.79) (2025-10-04)
+
+
+### Bug Fixes
+
+* prevent LocalCoverSearchEngine from using empty custom folder path ([8f00d35](https://github.com/RouHim/disCoverJ/commit/8f00d35bc8bb4320aad8bf4af1cb30dbe95b04aa))
+
 ## [412.5.78](https://github.com/RouHim/disCoverJ/compare/412.5.77...412.5.78) (2025-10-02)
 
 ## [412.5.77](https://github.com/RouHim/disCoverJ/compare/412.5.76...412.5.77) (2025-10-02)
