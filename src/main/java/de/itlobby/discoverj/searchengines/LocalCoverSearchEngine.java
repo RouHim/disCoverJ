@@ -35,7 +35,8 @@ public class LocalCoverSearchEngine implements CoverSearchEngine {
 
         // check if we should use the cover from a custom audio folder
         // if so, we only this folder
-        if (new File(config.getLocalAdditionalFolderPath()).exists()) {
+        String customFolderPath = config.getLocalAdditionalFolderPath();
+        if (customFolderPath != null && !customFolderPath.isEmpty() && new File(customFolderPath).exists()) {
             return getCoverFromCustomFolder(audioWrapper);
         }
 
