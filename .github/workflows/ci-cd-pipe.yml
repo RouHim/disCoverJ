@@ -130,9 +130,37 @@ jobs:
           # Revert pom file changes to have a clean working copy
           git stash
 
+      - name: Check version compatibility
+        run: |
+          # Get the current npm version
+          NPM_VERSION=$(npm view discoverj version 2>/dev/null || echo "0.0.0")
+          echo "Current npm version: $NPM_VERSION"
+          echo "New version: ${{ env.VERSION }}"
+          
+          # Simple version comparison using sort -V
+          HIGHER_VERSION=$(printf "%s\n%s\n" "$NPM_VERSION" "${{ env.VERSION }}" | sort -V | tail -n1)
+          
+          if [ "$HIGHER_VERSION" = "${{ env.VERSION }}" ] && [ "${{ env.VERSION }}" != "$NPM_VERSION" ]; then
+            echo "SHOULD_PUBLISH=true" >> $GITHUB_ENV
+            echo "✓ Version ${{ env.VERSION }} is higher than npm version $NPM_VERSION"
+          else
+            echo "SHOULD_PUBLISH=false" >> $GITHUB_ENV
+            echo "✗ Version ${{ env.VERSION }} is not higher than npm version $NPM_VERSION"
+          fi
+
       - name: Publish with jDeploy
+        if: env.SHOULD_PUBLISH == 'true'
         run: |
           npm version ${{ env.VERSION }}
           npx jdeploy publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      - name: Skip publishing
+        if: env.SHOULD_PUBLISH != 'true'
+        run: |
+          echo "⚠️  Skipping publish: version ${{ env.VERSION }} is not higher than npm version"
+          echo "This can happen when semantic-release creates a version lower than what's already published."
+          echo "To fix this, either:"
+          echo "  1. Manually bump the version in semantic-release config, or"
+          echo "  2. Unpublish/deprecate the higher version from npm (not recommended)"
