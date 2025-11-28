@@ -1,3 +1,11 @@
+## [412.5.89](https://github.com/RouHim/disCoverJ/compare/412.5.88...412.5.89) (2025-11-28)
+
+
+### Bug Fixes
+
+* add security-events permission for SARIF upload ([b6d2d6e](https://github.com/RouHim/disCoverJ/commit/b6d2d6ee18828de84c2c7db54159813c5d2e1266))
+* update workflow permissions and semantic-release configuration ([ebc1fb2](https://github.com/RouHim/disCoverJ/commit/ebc1fb21f9f4d069b7b2ec185f47540cd91678b1))
+
 ## [412.5.88](https://github.com/RouHim/disCoverJ/compare/412.5.87...412.5.88) (2025-11-28)
 
 ## [412.5.87](https://github.com/RouHim/disCoverJ/compare/412.5.86...412.5.87) (2025-11-21)
