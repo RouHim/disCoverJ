@@ -11,58 +11,48 @@ import javafx.scene.text.TextFlow;
 
 public class CoverDetailViewController implements ViewController {
 
-  public TextFlow txtCoverInfo;
-  public ImageView imgCover;
-  public HBox layoutCoverImage;
+    public TextFlow txtCoverInfo;
+    public ImageView imgCover;
+    public HBox layoutCoverImage;
 
-  @Override
-  public void initialize() {
-    MainViewController viewController =
-      ViewManager.getInstance().getViewController(Views.MAIN_VIEW);
+    @Override
+    public void initialize() {
+        MainViewController viewController = ViewManager.getInstance().getViewController(Views.MAIN_VIEW);
 
-    viewController.lightBoxLayout
-      .heightProperty()
-      .addListener((observable, oldValue, newValue) ->
-        onSizeChanged(viewController.lightBoxLayout)
-      );
-  }
-
-  private void onSizeChanged(HBox lightBoxLayout) {
-    fitImageSizeImage(lightBoxLayout);
-  }
-
-  public void fitImageSizeImage(HBox lightBoxHbox) {
-    if (imgCover.getImage() != null) {
-      double maxHeight = lightBoxHbox.getHeight();
-      double maxWidth = lightBoxHbox.getWidth();
-
-      double imgHeight = imgCover.getImage().getHeight() + 150;
-      double imgWidth = imgCover.getImage().getWidth() - 50;
-
-      if (imgHeight > maxHeight || imgWidth > maxWidth) {
-        imgCover.setFitHeight(maxHeight - 150);
-        imgCover.setFitWidth(maxWidth - 50);
-      } else {
-        imgCover.setFitHeight(imgHeight);
-        imgCover.setFitWidth(imgWidth);
-      }
+        viewController.lightBoxLayout
+                .heightProperty()
+                .addListener((observable, oldValue, newValue) -> onSizeChanged(viewController.lightBoxLayout));
     }
-  }
 
-  public void createCoverInfo(Image coverImage) {
-    txtCoverInfo
-      .getChildren()
-      .add(
-        new Text(
-          ImageUtil.createImageResolutionString(
-            coverImage.getWidth(),
-            coverImage.getHeight()
-          )
-        )
-      );
-  }
+    private void onSizeChanged(HBox lightBoxLayout) {
+        fitImageSizeImage(lightBoxLayout);
+    }
 
-  public void clearCoverInfo() {
-    txtCoverInfo.getChildren().clear();
-  }
+    public void fitImageSizeImage(HBox lightBoxHbox) {
+        if (imgCover.getImage() != null) {
+            double maxHeight = lightBoxHbox.getHeight();
+            double maxWidth = lightBoxHbox.getWidth();
+
+            double imgHeight = imgCover.getImage().getHeight() + 150;
+            double imgWidth = imgCover.getImage().getWidth() - 50;
+
+            if (imgHeight > maxHeight || imgWidth > maxWidth) {
+                imgCover.setFitHeight(maxHeight - 150);
+                imgCover.setFitWidth(maxWidth - 50);
+            } else {
+                imgCover.setFitHeight(imgHeight);
+                imgCover.setFitWidth(imgWidth);
+            }
+        }
+    }
+
+    public void createCoverInfo(Image coverImage) {
+        txtCoverInfo
+                .getChildren()
+                .add(new Text(ImageUtil.createImageResolutionString(coverImage.getWidth(), coverImage.getHeight())));
+    }
+
+    public void clearCoverInfo() {
+        txtCoverInfo.getChildren().clear();
+    }
 }

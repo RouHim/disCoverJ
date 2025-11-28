@@ -2,41 +2,42 @@ package de.itlobby.discoverj.ui.viewtask;
 
 public abstract class ViewTask<T> implements Runnable {
 
-  private T result;
-  private FinishedListener<T> finishedListener;
-  private volatile boolean cancelled;
+    private T result;
+    private FinishedListener<T> finishedListener;
+    private volatile boolean cancelled;
 
-  protected ViewTask() {}
+    protected ViewTask() {
+    }
 
-  @Override
-  public void run() {
-    work();
-    finishedListener.onTaskFinished(result);
-  }
+    @Override
+    public void run() {
+        work();
+        finishedListener.onTaskFinished(result);
+    }
 
-  public abstract void work();
+    public abstract void work();
 
-  public T getResult() {
-    return result;
-  }
+    public T getResult() {
+        return result;
+    }
 
-  protected void setResult(T result) {
-    this.result = result;
-  }
+    protected void setResult(T result) {
+        this.result = result;
+    }
 
-  public void setFinishedListener(FinishedListener<T> finishedListener) {
-    this.finishedListener = finishedListener;
-  }
+    public void setFinishedListener(FinishedListener<T> finishedListener) {
+        this.finishedListener = finishedListener;
+    }
 
-  public boolean isCancelled() {
-    return cancelled;
-  }
+    public boolean isCancelled() {
+        return cancelled;
+    }
 
-  public void cancel() {
-    cancelled = true;
-  }
+    public void cancel() {
+        cancelled = true;
+    }
 
-  public interface FinishedListener<T> {
-    void onTaskFinished(T result);
-  }
+    public interface FinishedListener<T> {
+        void onTaskFinished(T result);
+    }
 }

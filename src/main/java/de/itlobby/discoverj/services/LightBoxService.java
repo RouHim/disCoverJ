@@ -19,207 +19,175 @@ import javafx.scene.text.TextFlow;
 
 public class LightBoxService implements Service {
 
-  private static final int DEFAULT_HEIGHT = 250;
-  private static final int DEFAULT_WIDTH = 350;
+    private static final int DEFAULT_HEIGHT = 250;
+    private static final int DEFAULT_WIDTH = 350;
 
-  public void showDialog(
-    String title,
-    Parent content,
-    ActionListener cancelListener,
-    ActionListener okListener,
-    boolean isFullscreen,
-    boolean hideButtons
-  ) {
-    showInternal(
-      title,
-      content,
-      cancelListener,
-      okListener,
-      isFullscreen,
-      hideButtons
-    );
-  }
-
-  public void showDialog(
-    String title,
-    Parent content,
-    ActionListener cancelListener,
-    ActionListener okListener,
-    boolean hideButtons
-  ) {
-    showInternal(
-      title,
-      content,
-      cancelListener,
-      okListener,
-      false,
-      hideButtons
-    );
-  }
-
-  private void showInternal(
-    String title,
-    Parent content,
-    ActionListener cancelListener,
-    ActionListener okListener,
-    boolean isFullscreen,
-    boolean hideButtons
-  ) {
-    if (okListener == null && cancelListener == null) {
-      cancelListener = this::hideDialog;
+    public void showDialog(
+            String title,
+            Parent content,
+            ActionListener cancelListener,
+            ActionListener okListener,
+            boolean isFullscreen,
+            boolean hideButtons
+    ) {
+        showInternal(title, content, cancelListener, okListener, isFullscreen, hideButtons);
     }
 
-    if (hideButtons) {
-      cancelListener = null;
-      okListener = null;
+    public void showDialog(
+            String title,
+            Parent content,
+            ActionListener cancelListener,
+            ActionListener okListener,
+            boolean hideButtons
+    ) {
+        showInternal(title, content, cancelListener, okListener, false, hideButtons);
     }
 
-    final ActionListener finalCancelListener = cancelListener;
-    final ActionListener finalOkListener = okListener;
+    private void showInternal(
+            String title,
+            Parent content,
+            ActionListener cancelListener,
+            ActionListener okListener,
+            boolean isFullscreen,
+            boolean hideButtons
+    ) {
+        if (okListener == null && cancelListener == null) {
+            cancelListener = this::hideDialog;
+        }
 
-    HBox buttonLayout = new HBox();
-    buttonLayout.setAlignment(Pos.BOTTOM_CENTER);
+        if (hideButtons) {
+            cancelListener = null;
+            okListener = null;
+        }
 
-    Button cancelButton = new Button();
-    cancelButton.setOnAction(event -> finalCancelListener.onAction());
-    cancelButton.setCancelButton(true);
-    cancelButton.setText(LanguageUtil.getString("Dialog.close"));
-    UIUtil.addCSSClass(cancelButton, "dialog-button");
+        final ActionListener finalCancelListener = cancelListener;
+        final ActionListener finalOkListener = okListener;
 
-    Button okButton = new Button();
-    okButton.setOnAction(event -> finalOkListener.onAction());
-    okButton.setDefaultButton(true);
-    okButton.setText(LanguageUtil.getString("Dialog.ok"));
-    UIUtil.addCSSClass(okButton, "dialog-button");
+        HBox buttonLayout = new HBox();
+        buttonLayout.setAlignment(Pos.BOTTOM_CENTER);
 
-    if (cancelListener != null) {
-      buttonLayout.getChildren().add(cancelButton);
-    }
-    if (okListener != null) {
-      buttonLayout.getChildren().add(okButton);
-    }
+        Button cancelButton = new Button();
+        cancelButton.setOnAction(event -> finalCancelListener.onAction());
+        cancelButton.setCancelButton(true);
+        cancelButton.setText(LanguageUtil.getString("Dialog.close"));
+        UIUtil.addCSSClass(cancelButton, "dialog-button");
 
-    HBox.setHgrow(okButton, Priority.ALWAYS);
-    HBox.setHgrow(cancelButton, Priority.ALWAYS);
+        Button okButton = new Button();
+        okButton.setOnAction(event -> finalOkListener.onAction());
+        okButton.setDefaultButton(true);
+        okButton.setText(LanguageUtil.getString("Dialog.ok"));
+        UIUtil.addCSSClass(okButton, "dialog-button");
 
-    int btnCount = buttonLayout.getChildren().size();
-    okButton
-      .prefWidthProperty()
-      .bind(buttonLayout.widthProperty().divide(btnCount));
-    cancelButton
-      .prefWidthProperty()
-      .bind(buttonLayout.widthProperty().divide(btnCount));
+        if (cancelListener != null) {
+            buttonLayout.getChildren().add(cancelButton);
+        }
+        if (okListener != null) {
+            buttonLayout.getChildren().add(okButton);
+        }
 
-    VBox contentRootBox = new VBox();
-    contentRootBox.setStyle("-fx-background-color: transparent");
-    contentRootBox.getChildren().add(content);
-    contentRootBox.getChildren().add(buttonLayout);
+        HBox.setHgrow(okButton, Priority.ALWAYS);
+        HBox.setHgrow(cancelButton, Priority.ALWAYS);
 
-    VBox.setVgrow(buttonLayout, Priority.NEVER);
-    VBox.setVgrow(content, Priority.ALWAYS);
+        int btnCount = buttonLayout.getChildren().size();
+        okButton.prefWidthProperty().bind(buttonLayout.widthProperty().divide(btnCount));
+        cancelButton.prefWidthProperty().bind(buttonLayout.widthProperty().divide(btnCount));
 
-    VBox layoutBox = new VBox();
-    UIUtil.addCSSClass(layoutBox, "light-box-bg");
-    Text titleText = new Text(title);
-    titleText.setFill(Color.WHITE);
+        VBox contentRootBox = new VBox();
+        contentRootBox.setStyle("-fx-background-color: transparent");
+        contentRootBox.getChildren().add(content);
+        contentRootBox.getChildren().add(buttonLayout);
 
-    TextFlow tfTitle = new TextFlow(titleText);
-    tfTitle.setMinHeight(40);
-    tfTitle.setTextAlignment(TextAlignment.CENTER);
-    tfTitle.setPadding(new Insets(10, 0, 0, 0));
+        VBox.setVgrow(buttonLayout, Priority.NEVER);
+        VBox.setVgrow(content, Priority.ALWAYS);
 
-    UIUtil.addCSSClass(tfTitle, "light-box-title");
-    layoutBox.getChildren().add(tfTitle);
-    layoutBox.getChildren().add(contentRootBox);
+        VBox layoutBox = new VBox();
+        UIUtil.addCSSClass(layoutBox, "light-box-bg");
+        Text titleText = new Text(title);
+        titleText.setFill(Color.WHITE);
 
-    VBox.setVgrow(tfTitle, Priority.NEVER);
-    VBox.setVgrow(contentRootBox, Priority.ALWAYS);
+        TextFlow tfTitle = new TextFlow(titleText);
+        tfTitle.setMinHeight(40);
+        tfTitle.setTextAlignment(TextAlignment.CENTER);
+        tfTitle.setPadding(new Insets(10, 0, 0, 0));
 
-    layoutBox.setVisible(true);
+        UIUtil.addCSSClass(tfTitle, "light-box-title");
+        layoutBox.getChildren().add(tfTitle);
+        layoutBox.getChildren().add(contentRootBox);
 
-    MainViewController viewController = getMainViewController();
+        VBox.setVgrow(tfTitle, Priority.NEVER);
+        VBox.setVgrow(contentRootBox, Priority.ALWAYS);
 
-    if (isFullscreen) {
-      layoutBox
-        .minHeightProperty()
-        .bind(viewController.lightBoxLayout.heightProperty());
-      layoutBox
-        .minWidthProperty()
-        .bind(viewController.lightBoxLayout.widthProperty());
-    } else {
-      layoutBox.setMaxHeight(DEFAULT_HEIGHT);
-      layoutBox.setMaxWidth(DEFAULT_WIDTH);
-    }
+        layoutBox.setVisible(true);
 
-    viewController.lightBoxLayout.setVisible(true);
-    viewController.lightBoxLayout.getChildren().clear();
-    viewController.lightBoxLayout.getChildren().add(layoutBox);
-  }
+        MainViewController viewController = getMainViewController();
 
-  public void hideDialog() {
-    MainViewController viewController = getMainViewController();
-    viewController.lightBoxLayout.setVisible(false);
-    viewController.lightBoxLayout.getChildren().clear();
-  }
+        if (isFullscreen) {
+            layoutBox.minHeightProperty().bind(viewController.lightBoxLayout.heightProperty());
+            layoutBox.minWidthProperty().bind(viewController.lightBoxLayout.widthProperty());
+        } else {
+            layoutBox.setMaxHeight(DEFAULT_HEIGHT);
+            layoutBox.setMaxWidth(DEFAULT_WIDTH);
+        }
 
-  public void showTextDialog(String title, String message) {
-    TextFlow textFlow = new TextFlow(new Text(message));
-    textFlow.setPadding(new Insets(5));
-    showDialog(title, textFlow, null, null, false);
-  }
-
-  public void showTextDialog(
-    String title,
-    String message,
-    boolean hideButtons
-  ) {
-    TextFlow textFlow = new TextFlow(new Text(message));
-    textFlow.setPadding(new Insets(5));
-    showDialog(title, textFlow, null, null, hideButtons);
-  }
-
-  public void showContentAsDialog(
-    String title,
-    Parent content,
-    boolean isFullscreen,
-    int height,
-    int width
-  ) {
-    VBox contentRootBox = new VBox(10);
-    contentRootBox.setStyle("-fx-background-color: transparent;");
-    contentRootBox.getChildren().add(content);
-
-    VBox.setVgrow(content, Priority.ALWAYS);
-
-    VBox layoutBox = new VBox(10);
-    UIUtil.addCSSClass(layoutBox, "light-box-bg");
-    Text titleText = new Text(title);
-    titleText.setFill(Color.WHITE);
-    TextFlow tfTitle = new TextFlow(titleText);
-    tfTitle.setPadding(new Insets(5, 0, 5, 0));
-
-    UIUtil.addCSSClass(tfTitle, "light-box-title");
-    layoutBox.getChildren().add(tfTitle);
-    layoutBox.getChildren().add(contentRootBox);
-
-    VBox.setVgrow(titleText, Priority.NEVER);
-    VBox.setVgrow(contentRootBox, Priority.ALWAYS);
-
-    layoutBox.setVisible(true);
-
-    if (!isFullscreen) {
-      layoutBox.setMaxHeight(height);
-      layoutBox.setMaxWidth(width);
+        viewController.lightBoxLayout.setVisible(true);
+        viewController.lightBoxLayout.getChildren().clear();
+        viewController.lightBoxLayout.getChildren().add(layoutBox);
     }
 
-    getMainViewController().lightBoxLayout.setVisible(true);
-    getMainViewController().lightBoxLayout.getChildren().clear();
-    getMainViewController().lightBoxLayout.getChildren().add(layoutBox);
-
-    BorderPane.setMargin(layoutBox, new Insets(5));
-
-    if (isFullscreen) {
-      HBox.setHgrow(layoutBox, Priority.ALWAYS);
+    public void hideDialog() {
+        MainViewController viewController = getMainViewController();
+        viewController.lightBoxLayout.setVisible(false);
+        viewController.lightBoxLayout.getChildren().clear();
     }
-  }
+
+    public void showTextDialog(String title, String message) {
+        TextFlow textFlow = new TextFlow(new Text(message));
+        textFlow.setPadding(new Insets(5));
+        showDialog(title, textFlow, null, null, false);
+    }
+
+    public void showTextDialog(String title, String message, boolean hideButtons) {
+        TextFlow textFlow = new TextFlow(new Text(message));
+        textFlow.setPadding(new Insets(5));
+        showDialog(title, textFlow, null, null, hideButtons);
+    }
+
+    public void showContentAsDialog(String title, Parent content, boolean isFullscreen, int height, int width) {
+        VBox contentRootBox = new VBox(10);
+        contentRootBox.setStyle("-fx-background-color: transparent;");
+        contentRootBox.getChildren().add(content);
+
+        VBox.setVgrow(content, Priority.ALWAYS);
+
+        VBox layoutBox = new VBox(10);
+        UIUtil.addCSSClass(layoutBox, "light-box-bg");
+        Text titleText = new Text(title);
+        titleText.setFill(Color.WHITE);
+        TextFlow tfTitle = new TextFlow(titleText);
+        tfTitle.setPadding(new Insets(5, 0, 5, 0));
+
+        UIUtil.addCSSClass(tfTitle, "light-box-title");
+        layoutBox.getChildren().add(tfTitle);
+        layoutBox.getChildren().add(contentRootBox);
+
+        VBox.setVgrow(titleText, Priority.NEVER);
+        VBox.setVgrow(contentRootBox, Priority.ALWAYS);
+
+        layoutBox.setVisible(true);
+
+        if (!isFullscreen) {
+            layoutBox.setMaxHeight(height);
+            layoutBox.setMaxWidth(width);
+        }
+
+        getMainViewController().lightBoxLayout.setVisible(true);
+        getMainViewController().lightBoxLayout.getChildren().clear();
+        getMainViewController().lightBoxLayout.getChildren().add(layoutBox);
+
+        BorderPane.setMargin(layoutBox, new Insets(5));
+
+        if (isFullscreen) {
+            HBox.setHgrow(layoutBox, Priority.ALWAYS);
+        }
+    }
 }

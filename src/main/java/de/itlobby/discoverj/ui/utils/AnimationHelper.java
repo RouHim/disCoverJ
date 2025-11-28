@@ -10,26 +10,21 @@ import javafx.util.Duration;
  */
 public class AnimationHelper {
 
-  private AnimationHelper() {}
+    private AnimationHelper() {
+    }
 
-  public static void slide(
-    Node node,
-    int fromValue,
-    int toValue,
-    int by,
-    int to
-  ) {
-    Duration duration = Duration.millis(500);
+    public static void slide(Node node, int fromValue, int toValue, int by, int to) {
+        Duration duration = Duration.millis(500);
 
-    FadeTransition ft1 = new FadeTransition(duration, node);
-    ft1.setFromValue(fromValue);
-    ft1.setToValue(toValue);
+        FadeTransition ft1 = new FadeTransition(duration, node);
+        ft1.setFromValue(fromValue);
+        ft1.setToValue(toValue);
 
-    TranslateTransition tt1 = new TranslateTransition(duration, node);
-    tt1.setByX(by);
-    tt1.setToX(to);
+        TranslateTransition tt1 = new TranslateTransition(duration, node);
+        tt1.setByX(by);
+        tt1.setToX(to);
 
-    ft1.play();
-    tt1.play();
-  }
+        ft1.play();
+        tt1.play();
+    }
 }
