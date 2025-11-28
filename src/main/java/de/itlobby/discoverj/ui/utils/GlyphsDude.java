@@ -29,30 +29,47 @@ import org.apache.logging.log4j.Logger;
  */
 public class GlyphsDude {
 
-    private static final Logger log = LogManager.getLogger(GlyphsDude.class);
+  private static final Logger log = LogManager.getLogger(GlyphsDude.class);
 
-    static {
-        try {
-            Font.loadFont(GlyphsDude.class.getResource(FontAwesomeIconView.TTF_PATH).openStream(), 10.0);
-            Font.loadFont(GlyphsDude.class.getResource(MaterialDesignIconView.TTF_PATH).openStream(), 10.0);
-            Font.loadFont(GlyphsDude.class.getResource(MaterialIconView.TTF_PATH).openStream(), 10.0);
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
+  static {
+    try {
+      Font.loadFont(
+        GlyphsDude.class.getResource(FontAwesomeIconView.TTF_PATH).openStream(),
+        10.0
+      );
+      Font.loadFont(
+        GlyphsDude.class.getResource(
+          MaterialDesignIconView.TTF_PATH
+        ).openStream(),
+        10.0
+      );
+      Font.loadFont(
+        GlyphsDude.class.getResource(MaterialIconView.TTF_PATH).openStream(),
+        10.0
+      );
+    } catch (IOException e) {
+      log.error(e.getMessage(), e);
     }
+  }
 
-    private GlyphsDude() {
-        // no instances
-    }
+  private GlyphsDude() {
+    // no instances
+  }
 
-    public static Text createIcon(GlyphIcons icon) {
-        return GlyphsDude.createIcon(icon, GlyphIcon.DEFAULT_FONT_SIZE);
-    }
+  public static Text createIcon(GlyphIcons icon) {
+    return GlyphsDude.createIcon(icon, GlyphIcon.DEFAULT_FONT_SIZE);
+  }
 
-    public static Text createIcon(GlyphIcons icon, String iconSize) {
-        Text text = new Text(icon.unicode());
-        text.getStyleClass().add("glyph-icon");
-        text.setStyle(String.format("-fx-font-family: %s; -fx-font-size: %s;", icon.fontFamily(), iconSize));
-        return text;
-    }
+  public static Text createIcon(GlyphIcons icon, String iconSize) {
+    Text text = new Text(icon.unicode());
+    text.getStyleClass().add("glyph-icon");
+    text.setStyle(
+      String.format(
+        "-fx-font-family: %s; -fx-font-size: %s;",
+        icon.fontFamily(),
+        iconSize
+      )
+    );
+    return text;
+  }
 }

@@ -25,89 +25,108 @@ import org.json.JSONObject;
 
 public class SpotifyCoverSearchEngine implements CoverSearchEngine {
 
-    private static final String CLIENT_ID = "ba25a9ff00bc4e19bf598dbe55c041ea";
-    private static final String CLIENT_SECRET = "0465053e651b4dfb87a0b60571c5aea1";
-    private static final Logger log = LogManager.getLogger(SpotifyCoverSearchEngine.class);
-    private String authToken;
+  private static final String CLIENT_ID = "ba25a9ff00bc4e19bf598dbe55c041ea";
+  private static final String CLIENT_SECRET =
+    "0465053e651b4dfb87a0b60571c5aea1";
+  private static final Logger log = LogManager.getLogger(
+    SpotifyCoverSearchEngine.class
+  );
+  private String authToken;
 
-    public SpotifyCoverSearchEngine() {
-        auth();
+  public SpotifyCoverSearchEngine() {
+    auth();
+  }
+
+  private static Optional<String> getCoverUrl(JSONObject ret) {
+    return Optional.ofNullable(ret.getJSONArray("images"))
+      .map(images -> images.getJSONObject(0))
+      .map(firstImage -> firstImage.getString("url"));
+  }
+
+  @Override
+  public List<ImageFile> search(AudioWrapper audioWrapper) {
+    if (StringUtil.isNullOrEmpty(authToken)) {
+      return Collections.emptyList();
     }
 
-    private static Optional<String> getCoverUrl(JSONObject ret) {
-        return Optional.ofNullable(ret.getJSONArray("images"))
-            .map(images -> images.getJSONObject(0))
-            .map(firstImage -> firstImage.getString("url"));
-    }
+    try {
+      String searchString = URLEncoder.encode(
+        SearchQueryUtil.createSearchString(audioWrapper),
+        UTF_8
+      );
+      String searchUrl =
+        "https://api.spotify.com/v1/search?q=%s&type=album".formatted(
+          searchString
+        );
 
-    @Override
-    public List<ImageFile> search(AudioWrapper audioWrapper) {
-        if (StringUtil.isNullOrEmpty(authToken)) {
-            return Collections.emptyList();
-        }
+      String searchResponse = getRequest(searchUrl);
 
-        try {
-            String searchString = URLEncoder.encode(SearchQueryUtil.createSearchString(audioWrapper), UTF_8);
-            String searchUrl = "https://api.spotify.com/v1/search?q=%s&type=album".formatted(searchString);
+      Optional<JSONArray> items = Optional.of(
+        new JSONObject(searchResponse).getJSONObject("albums")
+      ).map(albums -> albums.getJSONArray("items"));
 
-            String searchResponse = getRequest(searchUrl);
-
-            Optional<JSONArray> items = Optional.of(new JSONObject(searchResponse).getJSONObject("albums")).map(
-                albums -> albums.getJSONArray("items")
-            );
-
-            if (items.isEmpty()) {
-                return Collections.emptyList();
-            }
-
-            return items
-                .get()
-                .toList()
-                .stream()
-                .map(result -> new JSONObject((Map) result))
-                .map(SpotifyCoverSearchEngine::getCoverUrl)
-                .flatMap(Optional::stream)
-                .map(ImageUtil::downloadImageFromUrl)
-                .flatMap(Optional::stream)
-                .filter(CoverSearchEngine::reachesMinRequiredCoverSize)
-                .toList();
-        } catch (Exception e) {
-            log.debug(e.getMessage(), e);
-        }
-
+      if (items.isEmpty()) {
         return Collections.emptyList();
+      }
+
+      return items
+        .get()
+        .toList()
+        .stream()
+        .map(result -> new JSONObject((Map) result))
+        .map(SpotifyCoverSearchEngine::getCoverUrl)
+        .flatMap(Optional::stream)
+        .map(ImageUtil::downloadImageFromUrl)
+        .flatMap(Optional::stream)
+        .filter(CoverSearchEngine::reachesMinRequiredCoverSize)
+        .toList();
+    } catch (Exception e) {
+      log.debug(e.getMessage(), e);
     }
 
-    private String getRequest(String url) throws IOException, InterruptedException {
-        HttpClient httpClient = HttpClient.newHttpClient();
-        HttpRequest httpRequest = HttpRequest.newBuilder()
-            .uri(URI.create(url))
-            .header("Authorization", "Bearer " + authToken)
-            .build();
-        HttpResponse<String> httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-        return httpResponse.body();
-    }
+    return Collections.emptyList();
+  }
 
-    private void auth() {
-        try {
-            HttpClient httpClient = HttpClient.newHttpClient();
-            URI uri = URI.create("https://accounts.spotify.com/api/token");
-            String requestBody = "grant_type=client_credentials";
-            HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(uri)
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .header(
-                    "Authorization",
-                    "Basic " + Base64.getEncoder().encodeToString((CLIENT_ID + ":" + CLIENT_SECRET).getBytes())
-                )
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
+  private String getRequest(String url)
+    throws IOException, InterruptedException {
+    HttpClient httpClient = HttpClient.newHttpClient();
+    HttpRequest httpRequest = HttpRequest.newBuilder()
+      .uri(URI.create(url))
+      .header("Authorization", "Bearer " + authToken)
+      .build();
+    HttpResponse<String> httpResponse = httpClient.send(
+      httpRequest,
+      HttpResponse.BodyHandlers.ofString()
+    );
+    return httpResponse.body();
+  }
 
-            HttpResponse<String> httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-            JSONObject responseJson = new JSONObject(httpResponse.body());
-            this.authToken = responseJson.getString("access_token");
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
+  private void auth() {
+    try {
+      HttpClient httpClient = HttpClient.newHttpClient();
+      URI uri = URI.create("https://accounts.spotify.com/api/token");
+      String requestBody = "grant_type=client_credentials";
+      HttpRequest httpRequest = HttpRequest.newBuilder()
+        .uri(uri)
+        .header("Content-Type", "application/x-www-form-urlencoded")
+        .header(
+          "Authorization",
+          "Basic " +
+            Base64.getEncoder().encodeToString(
+              (CLIENT_ID + ":" + CLIENT_SECRET).getBytes()
+            )
+        )
+        .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+        .build();
+
+      HttpResponse<String> httpResponse = httpClient.send(
+        httpRequest,
+        HttpResponse.BodyHandlers.ofString()
+      );
+      JSONObject responseJson = new JSONObject(httpResponse.body());
+      this.authToken = responseJson.getString("access_token");
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
     }
+  }
 }

@@ -37,212 +37,261 @@ import org.jaudiotagger.audio.AudioFileIO;
 
 public class DragDropService implements Service {
 
-    private static final Logger LOG = LogManager.getLogger(DragDropService.class);
+  private static final Logger LOG = LogManager.getLogger(DragDropService.class);
 
-    private static void createScaleAnimation(Node circle) {
-        ScaleTransition st = new ScaleTransition(Duration.millis(500), circle);
-        st.setByX(0.1);
-        st.setByY(0.1);
-        st.setCycleCount(999);
-        st.setAutoReverse(true);
-        st.play();
+  private static void createScaleAnimation(Node circle) {
+    ScaleTransition st = new ScaleTransition(Duration.millis(500), circle);
+    st.setByX(0.1);
+    st.setByY(0.1);
+    st.setCycleCount(999);
+    st.setAutoReverse(true);
+    st.play();
+  }
+
+  static Text createIcon(FontAwesomeIcon music) {
+    Text iconTxt = GlyphsDude.createIcon(music, "82px");
+    iconTxt.getStyleClass().add("default-icon");
+    return iconTxt;
+  }
+
+  private void insertDroppedCover(String url) {
+    try {
+      URL imgUrl = URI.create(url).toURL();
+      File imgFile = SystemUtil.getTempFileFromUrl(imgUrl);
+      FileUtils.copyURLToFile(imgUrl, imgFile);
+      insertDroppedCover(imgFile);
+    } catch (IOException e) {
+      LOG.error(e.getMessage(), e);
+    }
+  }
+
+  void insertDroppedCover(File imgFile) {
+    List<AudioListEntry> selectedEntries = ServiceLocator.get(
+      SelectionService.class
+    ).getSelectedEntries();
+    if (selectedEntries.isEmpty()) {
+      return;
     }
 
-    static Text createIcon(FontAwesomeIcon music) {
-        Text iconTxt = GlyphsDude.createIcon(music, "82px");
-        iconTxt.getStyleClass().add("default-icon");
-        return iconTxt;
+    getMainViewController().showBusyIndicator(
+      LanguageUtil.getString("add.images.to.audiofiles"),
+      null
+    );
+
+    Runnable taskToExecute = () ->
+      addCoverToEntries(imgFile, selectedEntries, () ->
+        getMainViewController().hideBusyIndicator()
+      );
+    Thread.ofVirtual().start(taskToExecute);
+  }
+
+  private void addCoverToEntries(
+    File imgFile,
+    List<AudioListEntry> selectedEntries,
+    ActionListener threadFinishedListener
+  ) {
+    try {
+      Optional<BufferedImage> img = ImageUtil.readRGBImage(imgFile);
+
+      if (img.isEmpty()) {
+        return;
+      }
+
+      getMainViewController().setTotalAudioCountToLoad(selectedEntries.size());
+
+      for (AudioListEntry selectedEntry : selectedEntries) {
+        getMainViewController().countIndicatorUp();
+        AudioWrapper audioWrapper = selectedEntry.getWrapper();
+        AudioFile audioFile = AudioFileIO.read(
+          new File(audioWrapper.getFilePath())
+        );
+
+        List<AudioWrapper> audioList = DataHolder.getInstance().getAudioList();
+
+        audioList
+          .stream()
+          .filter(x -> x.getId().equals(audioWrapper.getId()))
+          .forEach(x -> AudioUtil.saveCoverToAudioFile(audioFile, img.get()));
+
+        getMainViewController()
+          .lwAudioList.getChildren()
+          .stream()
+          .filter(AudioListEntry.class::isInstance)
+          .map(AudioListEntry.class::cast)
+          .filter(audioEntry ->
+            audioEntry.getWrapper().getId().equals(audioWrapper.getId())
+          )
+          .forEach(wrapper -> wrapper.replaceCover(img.get()));
+      }
+
+      getMainViewController().showAudioInfo(
+        selectedEntries.get(0).getWrapper(),
+        true
+      );
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+    } finally {
+      threadFinishedListener.onAction();
     }
+  }
 
-    private void insertDroppedCover(String url) {
-        try {
-            URL imgUrl = URI.create(url).toURL();
-            File imgFile = SystemUtil.getTempFileFromUrl(imgUrl);
-            FileUtils.copyURLToFile(imgUrl, imgFile);
-            insertDroppedCover(imgFile);
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
+  void initDragAndDrop() {
+    getMainViewController().rootLayout.setOnDragOver(event -> {
+      Dragboard db = event.getDragboard();
+      if (db.hasFiles() || db.hasUrl()) {
+        event.acceptTransferModes(TransferMode.ANY);
+      }
+      event.consume();
+    });
 
-    void insertDroppedCover(File imgFile) {
-        List<AudioListEntry> selectedEntries = ServiceLocator.get(SelectionService.class).getSelectedEntries();
-        if (selectedEntries.isEmpty()) {
-            return;
-        }
+    getMainViewController().rootLayout.setOnDragEntered(event -> {
+      Dragboard db = event.getDragboard();
+      List<File> files = db.getFiles();
 
-        getMainViewController().showBusyIndicator(LanguageUtil.getString("add.images.to.audiofiles"), null);
+      AtomicInteger audioCount = new AtomicInteger();
+      AtomicInteger dirCount = new AtomicInteger();
+      AtomicInteger imgCount = new AtomicInteger();
 
-        Runnable taskToExecute = () ->
-            addCoverToEntries(imgFile, selectedEntries, () -> getMainViewController().hideBusyIndicator());
-        Thread.ofVirtual().start(taskToExecute);
-    }
-
-    private void addCoverToEntries(
-        File imgFile,
-        List<AudioListEntry> selectedEntries,
-        ActionListener threadFinishedListener
-    ) {
-        try {
-            Optional<BufferedImage> img = ImageUtil.readRGBImage(imgFile);
-
-            if (img.isEmpty()) {
-                return;
-            }
-
-            getMainViewController().setTotalAudioCountToLoad(selectedEntries.size());
-
-            for (AudioListEntry selectedEntry : selectedEntries) {
-                getMainViewController().countIndicatorUp();
-                AudioWrapper audioWrapper = selectedEntry.getWrapper();
-                AudioFile audioFile = AudioFileIO.read(new File(audioWrapper.getFilePath()));
-
-                List<AudioWrapper> audioList = DataHolder.getInstance().getAudioList();
-
-                audioList
-                    .stream()
-                    .filter(x -> x.getId().equals(audioWrapper.getId()))
-                    .forEach(x -> AudioUtil.saveCoverToAudioFile(audioFile, img.get()));
-
-                getMainViewController()
-                    .lwAudioList.getChildren()
-                    .stream()
-                    .filter(AudioListEntry.class::isInstance)
-                    .map(AudioListEntry.class::cast)
-                    .filter(audioEntry -> audioEntry.getWrapper().getId().equals(audioWrapper.getId()))
-                    .forEach(wrapper -> wrapper.replaceCover(img.get()));
-            }
-
-            getMainViewController().showAudioInfo(selectedEntries.get(0).getWrapper(), true);
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        } finally {
-            threadFinishedListener.onAction();
-        }
-    }
-
-    void initDragAndDrop() {
-        getMainViewController().rootLayout.setOnDragOver(event -> {
-            Dragboard db = event.getDragboard();
-            if (db.hasFiles() || db.hasUrl()) {
-                event.acceptTransferModes(TransferMode.ANY);
-            }
-            event.consume();
+      files
+        .parallelStream()
+        .forEach(file -> {
+          if (AudioUtil.isAudioFile(file)) {
+            audioCount.getAndIncrement();
+          }
+          if (file.isDirectory()) {
+            dirCount.getAndIncrement();
+          }
+          if (SystemUtil.isImageFile(file)) {
+            imgCount.getAndIncrement();
+          }
         });
 
-        getMainViewController().rootLayout.setOnDragEntered(event -> {
-            Dragboard db = event.getDragboard();
-            List<File> files = db.getFiles();
+      boolean isImageLink =
+        db.hasUrl() &&
+        db.getUrl().startsWith("http") &&
+        SystemUtil.isImage(db.getUrl());
 
-            AtomicInteger audioCount = new AtomicInteger();
-            AtomicInteger dirCount = new AtomicInteger();
-            AtomicInteger imgCount = new AtomicInteger();
+      if (audioCount.get() > 0 || dirCount.get() > 0) {
+        imgCount.set(0);
+      }
 
-            files
-                .parallelStream()
-                .forEach(file -> {
-                    if (AudioUtil.isAudioFile(file)) {
-                        audioCount.getAndIncrement();
-                    }
-                    if (file.isDirectory()) {
-                        dirCount.getAndIncrement();
-                    }
-                    if (SystemUtil.isImageFile(file)) {
-                        imgCount.getAndIncrement();
-                    }
-                });
+      createDragOverAnimation(
+        audioCount.get(),
+        imgCount.get(),
+        dirCount.get(),
+        isImageLink
+      );
+      event.consume();
+    });
 
-            boolean isImageLink = db.hasUrl() && db.getUrl().startsWith("http") && SystemUtil.isImage(db.getUrl());
+    getMainViewController().rootLayout.setOnDragExited(event ->
+      ServiceLocator.get(LightBoxService.class).hideDialog()
+    );
+    getMainViewController().rootLayout.setOnDragDropped(this::dragDropped);
+  }
 
-            if (audioCount.get() > 0 || dirCount.get() > 0) {
-                imgCount.set(0);
-            }
+  private void dragDropped(DragEvent event) {
+    Dragboard db = event.getDragboard();
+    boolean success = false;
 
-            createDragOverAnimation(audioCount.get(), imgCount.get(), dirCount.get(), isImageLink);
-            event.consume();
-        });
+    List<File> files = db.getFiles();
 
-        getMainViewController().rootLayout.setOnDragExited(event ->
-            ServiceLocator.get(LightBoxService.class).hideDialog()
-        );
-        getMainViewController().rootLayout.setOnDragDropped(this::dragDropped);
+    int audioCount = (int) files
+      .stream()
+      .filter(AudioUtil::isAudioFile)
+      .count();
+    int dirCount = (int) files.stream().filter(File::isDirectory).count();
+    int imgCount = (int) files.stream().filter(SystemUtil::isImageFile).count();
+    boolean isValidLink =
+      db.hasUrl() &&
+      db.getUrl().startsWith("http") &&
+      SystemUtil.isImage(db.getUrl());
+
+    if (db.hasFiles() && (dirCount > 0 || audioCount > 0)) {
+      File[] fileArray = new File[files.size()];
+      InitialService initialService = ServiceLocator.get(InitialService.class);
+      initialService.beginScanFiles(files.toArray(fileArray));
+      success = true;
+    } else if (isValidLink) {
+      insertDroppedCover(db.getUrl());
+      success = true;
+    } else if (db.hasFiles() && imgCount > 0) {
+      insertDroppedCover(files.get(0));
+      success = true;
     }
 
-    private void dragDropped(DragEvent event) {
-        Dragboard db = event.getDragboard();
-        boolean success = false;
+    ServiceLocator.get(LightBoxService.class).hideDialog();
+    event.setDropCompleted(success);
+    event.consume();
+  }
 
-        List<File> files = db.getFiles();
+  private void createDragOverAnimation(
+    int audioCount,
+    int imgCount,
+    int folderCount,
+    boolean isLink
+  ) {
+    Parent root = ViewManager.getInstance().createLayoutFromView(
+      Views.DROP_FILE_VIEW
+    );
+    OpenFileViewController vc = ViewManager.getInstance().getViewController(
+      Views.DROP_FILE_VIEW
+    );
 
-        int audioCount = (int) files.stream().filter(AudioUtil::isAudioFile).count();
-        int dirCount = (int) files.stream().filter(File::isDirectory).count();
-        int imgCount = (int) files.stream().filter(SystemUtil::isImageFile).count();
-        boolean isValidLink = db.hasUrl() && db.getUrl().startsWith("http") && SystemUtil.isImage(db.getUrl());
-
-        if (db.hasFiles() && (dirCount > 0 || audioCount > 0)) {
-            File[] fileArray = new File[files.size()];
-            InitialService initialService = ServiceLocator.get(InitialService.class);
-            initialService.beginScanFiles(files.toArray(fileArray));
-            success = true;
-        } else if (isValidLink) {
-            insertDroppedCover(db.getUrl());
-            success = true;
-        } else if (db.hasFiles() && imgCount > 0) {
-            insertDroppedCover(files.get(0));
-            success = true;
-        }
-
-        ServiceLocator.get(LightBoxService.class).hideDialog();
-        event.setDropCompleted(success);
-        event.consume();
+    if (audioCount == 1) {
+      vc.lblIntroduction.setText(
+        String.format(LanguageUtil.getString("drop.mp3s.here"), audioCount)
+      );
+    } else if (audioCount > 1) {
+      vc.lblIntroduction.setText(
+        String.format(LanguageUtil.getString("drop.s.mp3s.here"), audioCount)
+      );
+    } else if (folderCount > 0) {
+      vc.lblIntroduction.setText(
+        String.format(LanguageUtil.getString("drop.dirs.here"), audioCount)
+      );
+    } else if (imgCount > 0) {
+      vc.lblIntroduction.setText(
+        String.format(LanguageUtil.getString("drop.img.here"), audioCount)
+      );
+    } else if (isLink) {
+      vc.lblIntroduction.setText(
+        String.format(LanguageUtil.getString("drop.url.here"), audioCount)
+      );
+    } else {
+      vc.lblIntroduction.setText(
+        String.format(LanguageUtil.getString("drop.invalid.file"), audioCount)
+      );
     }
 
-    private void createDragOverAnimation(int audioCount, int imgCount, int folderCount, boolean isLink) {
-        Parent root = ViewManager.getInstance().createLayoutFromView(Views.DROP_FILE_VIEW);
-        OpenFileViewController vc = ViewManager.getInstance().getViewController(Views.DROP_FILE_VIEW);
+    vc.lblIntroduction.getStyleClass().add("drop-zone-text");
 
-        if (audioCount == 1) {
-            vc.lblIntroduction.setText(String.format(LanguageUtil.getString("drop.mp3s.here"), audioCount));
-        } else if (audioCount > 1) {
-            vc.lblIntroduction.setText(String.format(LanguageUtil.getString("drop.s.mp3s.here"), audioCount));
-        } else if (folderCount > 0) {
-            vc.lblIntroduction.setText(String.format(LanguageUtil.getString("drop.dirs.here"), audioCount));
-        } else if (imgCount > 0) {
-            vc.lblIntroduction.setText(String.format(LanguageUtil.getString("drop.img.here"), audioCount));
-        } else if (isLink) {
-            vc.lblIntroduction.setText(String.format(LanguageUtil.getString("drop.url.here"), audioCount));
-        } else {
-            vc.lblIntroduction.setText(String.format(LanguageUtil.getString("drop.invalid.file"), audioCount));
-        }
+    Text icon;
 
-        vc.lblIntroduction.getStyleClass().add("drop-zone-text");
-
-        Text icon;
-
-        if (imgCount > 0) {
-            icon = createIcon(FontAwesomeIcon.IMAGE);
-        } else if (folderCount > 0) {
-            icon = createIcon(FontAwesomeIcon.FOLDER_OPEN);
-        } else if (audioCount > 0) {
-            icon = createIcon(FontAwesomeIcon.MUSIC);
-        } else if (isLink) {
-            icon = createIcon(FontAwesomeIcon.LINK);
-        } else {
-            icon = createIcon(FontAwesomeIcon.BAN);
-        }
-
-        icon.getStyleClass().add("button-circle-icon");
-        vc.textLayout.getChildren().add(icon);
-        createScaleAnimation(icon);
-        createScaleAnimation(vc.circleBorder);
-
-        ServiceLocator.get(LightBoxService.class).showDialog(
-            LanguageUtil.getString("drag.drop.title"),
-            root,
-            null,
-            null,
-            false,
-            true
-        );
+    if (imgCount > 0) {
+      icon = createIcon(FontAwesomeIcon.IMAGE);
+    } else if (folderCount > 0) {
+      icon = createIcon(FontAwesomeIcon.FOLDER_OPEN);
+    } else if (audioCount > 0) {
+      icon = createIcon(FontAwesomeIcon.MUSIC);
+    } else if (isLink) {
+      icon = createIcon(FontAwesomeIcon.LINK);
+    } else {
+      icon = createIcon(FontAwesomeIcon.BAN);
     }
+
+    icon.getStyleClass().add("button-circle-icon");
+    vc.textLayout.getChildren().add(icon);
+    createScaleAnimation(icon);
+    createScaleAnimation(vc.circleBorder);
+
+    ServiceLocator.get(LightBoxService.class).showDialog(
+      LanguageUtil.getString("drag.drop.title"),
+      root,
+      null,
+      null,
+      false,
+      true
+    );
+  }
 }

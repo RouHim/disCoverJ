@@ -14,74 +14,77 @@ import org.apache.logging.log4j.Logger;
 
 public class FXMLFactory {
 
-    private final EnumMap<Views, Scene> viewList;
-    private final EnumMap<Views, ViewController> viewControllerList;
-    private final Logger log = LogManager.getLogger(this.getClass());
+  private final EnumMap<Views, Scene> viewList;
+  private final EnumMap<Views, ViewController> viewControllerList;
+  private final Logger log = LogManager.getLogger(this.getClass());
 
-    public FXMLFactory() {
-        viewList = new EnumMap<>(Views.class);
-        viewControllerList = new EnumMap<>(Views.class);
+  public FXMLFactory() {
+    viewList = new EnumMap<>(Views.class);
+    viewControllerList = new EnumMap<>(Views.class);
+  }
+
+  public Scene getView(Views viewToLoad) {
+    Scene scene = viewList.get(viewToLoad);
+
+    if (scene == null) {
+      scene = createView(viewToLoad);
     }
 
-    public Scene getView(Views viewToLoad) {
-        Scene scene = viewList.get(viewToLoad);
+    return scene;
+  }
 
-        if (scene == null) {
-            scene = createView(viewToLoad);
-        }
+  protected Parent createLayoutFromView(Views viewToLoad) {
+    URL url = SystemUtil.getResourceURL(viewToLoad.getPath());
 
-        return scene;
+    try {
+      FXMLLoader loader = new FXMLLoader();
+      loader.setLocation(url);
+      loader.setResources(LanguageUtil.getBundle());
+
+      Parent parent = loader.load();
+      ViewController controller = loader.getController();
+
+      viewControllerList.put(viewToLoad, controller);
+
+      return parent;
+    } catch (IOException e) {
+      log.error(e.getMessage(), e);
     }
 
-    protected Parent createLayoutFromView(Views viewToLoad) {
-        URL url = SystemUtil.getResourceURL(viewToLoad.getPath());
+    return null;
+  }
 
-        try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(url);
-            loader.setResources(LanguageUtil.getBundle());
+  private Scene createView(Views viewToLoad) {
+    URL url = SystemUtil.getResourceURL(viewToLoad.getPath());
 
-            Parent parent = loader.load();
-            ViewController controller = loader.getController();
+    try {
+      FXMLLoader loader = new FXMLLoader();
+      loader.setLocation(url);
+      loader.setResources(LanguageUtil.getBundle());
 
-            viewControllerList.put(viewToLoad, controller);
+      Parent parent = loader.load();
+      Scene scene = new Scene(parent);
+      ViewController controller = loader.getController();
 
-            return parent;
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
+      viewList.put(viewToLoad, scene);
+      viewControllerList.put(viewToLoad, controller);
 
-        return null;
+      return scene;
+    } catch (IOException e) {
+      log.error(e.getMessage(), e);
     }
 
-    private Scene createView(Views viewToLoad) {
-        URL url = SystemUtil.getResourceURL(viewToLoad.getPath());
+    return null;
+  }
 
-        try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(url);
-            loader.setResources(LanguageUtil.getBundle());
+  public <T extends ViewController> T getViewController(
+    Views view,
+    Class<T> clazz
+  ) {
+    return clazz.cast(viewControllerList.get(view));
+  }
 
-            Parent parent = loader.load();
-            Scene scene = new Scene(parent);
-            ViewController controller = loader.getController();
-
-            viewList.put(viewToLoad, scene);
-            viewControllerList.put(viewToLoad, controller);
-
-            return scene;
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-
-        return null;
-    }
-
-    public <T extends ViewController> T getViewController(Views view, Class<T> clazz) {
-        return clazz.cast(viewControllerList.get(view));
-    }
-
-    public void putViewController(Views key, ViewController value) {
-        viewControllerList.put(key, value);
-    }
+  public void putViewController(Views key, ViewController value) {
+    viewControllerList.put(key, value);
+  }
 }

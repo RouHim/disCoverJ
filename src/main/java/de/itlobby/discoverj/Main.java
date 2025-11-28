@@ -16,30 +16,30 @@ import org.apache.commons.io.FileUtils;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
-        if (DISCOVERJ_TEMP_DIR.exists()) {
-            FileUtils.deleteDirectory(DISCOVERJ_TEMP_DIR);
-        }
-
-        Platform.startup(() -> {
-            Settings.getInstance().getConfig();
-            SystemUtil.setProxy();
-
-            MainService mainService = ServiceLocator.get(MainService.class);
-
-            Stage primaryStage = new Stage();
-            primaryStage.setOnCloseRequest(event -> mainService.exitApplication());
-
-            ViewManager viewManager = ViewManager.getInstance();
-            viewManager.setPrimaryStage(primaryStage);
-            viewManager.initialize();
-
-            mainService.prepareUIBindings();
-            mainService.startMemoryWatchDog();
-
-            VersionDetector.determineCurrentVersion();
-
-            ServiceLocator.get(InitialService.class).openInitialOpenDialog();
-        });
+  static void main(String[] args) throws IOException {
+    if (DISCOVERJ_TEMP_DIR.exists()) {
+      FileUtils.deleteDirectory(DISCOVERJ_TEMP_DIR);
     }
+
+    Platform.startup(() -> {
+      Settings.getInstance().getConfig();
+      SystemUtil.setProxy();
+
+      MainService mainService = ServiceLocator.get(MainService.class);
+
+      Stage primaryStage = new Stage();
+      primaryStage.setOnCloseRequest(event -> mainService.exitApplication());
+
+      ViewManager viewManager = ViewManager.getInstance();
+      viewManager.setPrimaryStage(primaryStage);
+      viewManager.initialize();
+
+      mainService.prepareUIBindings();
+      mainService.startMemoryWatchDog();
+
+      VersionDetector.determineCurrentVersion();
+
+      ServiceLocator.get(InitialService.class).openInitialOpenDialog();
+    });
+  }
 }

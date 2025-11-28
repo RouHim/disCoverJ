@@ -13,49 +13,57 @@ import org.apache.logging.log4j.Logger;
 
 public class CoverSearchTask implements Callable<List<ImageFile>> {
 
-    private static final Logger log = LogManager.getLogger(CoverSearchTask.class);
+  private static final Logger log = LogManager.getLogger(CoverSearchTask.class);
 
-    private final CoverSearchEngine coverSearchEngine;
-    private final String searchEngineName;
-    private final AudioWrapper audioWrapper;
+  private final CoverSearchEngine coverSearchEngine;
+  private final String searchEngineName;
+  private final AudioWrapper audioWrapper;
 
-    public CoverSearchTask(SearchEngine coverSearchEngine, AudioWrapper audioWrapper) {
-        this.searchEngineName = coverSearchEngine.getType().getName();
-        this.coverSearchEngine = createSearchEngineFromType(coverSearchEngine.getType());
-        this.audioWrapper = audioWrapper;
+  public CoverSearchTask(
+    SearchEngine coverSearchEngine,
+    AudioWrapper audioWrapper
+  ) {
+    this.searchEngineName = coverSearchEngine.getType().getName();
+    this.coverSearchEngine = createSearchEngineFromType(
+      coverSearchEngine.getType()
+    );
+    this.audioWrapper = audioWrapper;
+  }
+
+  @Override
+  public List<ImageFile> call() {
+    try {
+      return coverSearchEngine.search(audioWrapper);
+    } catch (OutOfMemoryError e) {
+      throw new OutOfMemoryError(e.getMessage());
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
     }
 
-    @Override
-    public List<ImageFile> call() {
-        try {
-            return coverSearchEngine.search(audioWrapper);
-        } catch (OutOfMemoryError e) {
-            throw new OutOfMemoryError(e.getMessage());
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
+    return Collections.emptyList();
+  }
 
-        return Collections.emptyList();
+  private CoverSearchEngine createSearchEngineFromType(
+    SearchEngineTypes searchEngineTypes
+  ) {
+    CoverSearchEngine coverSearchService = null;
+
+    try {
+      Class<? extends CoverSearchEngine> clazz =
+        searchEngineTypes.getServiceClass();
+      coverSearchService = clazz.getDeclaredConstructor().newInstance();
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
     }
 
-    private CoverSearchEngine createSearchEngineFromType(SearchEngineTypes searchEngineTypes) {
-        CoverSearchEngine coverSearchService = null;
+    return coverSearchService;
+  }
 
-        try {
-            Class<? extends CoverSearchEngine> clazz = searchEngineTypes.getServiceClass();
-            coverSearchService = clazz.getDeclaredConstructor().newInstance();
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
+  public String getAudioFileName() {
+    return audioWrapper.getFileName();
+  }
 
-        return coverSearchService;
-    }
-
-    public String getAudioFileName() {
-        return audioWrapper.getFileName();
-    }
-
-    public String getSearchEngineName() {
-        return searchEngineName;
-    }
+  public String getSearchEngineName() {
+    return searchEngineName;
+  }
 }

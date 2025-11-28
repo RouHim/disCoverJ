@@ -17,31 +17,37 @@ import org.json.JSONObject;
 
 public class ItunesCoverSearchEngine implements CoverSearchEngine {
 
-    private static final String ITUNES_SEARCH_QUERY = "https://itunes.apple.com/search?limit=5&term={0}";
+  private static final String ITUNES_SEARCH_QUERY =
+    "https://itunes.apple.com/search?limit=5&term={0}";
 
-    @Override
-    public List<ImageFile> search(AudioWrapper audioWrapper) {
-        String searchString = URLEncoder.encode(SearchQueryUtil.createSearchString(audioWrapper), UTF_8);
+  @Override
+  public List<ImageFile> search(AudioWrapper audioWrapper) {
+    String searchString = URLEncoder.encode(
+      SearchQueryUtil.createSearchString(audioWrapper),
+      UTF_8
+    );
 
-        Optional<JSONObject> jsonFromUrl = getJsonFromUrl(format(ITUNES_SEARCH_QUERY, searchString));
+    Optional<JSONObject> jsonFromUrl = getJsonFromUrl(
+      format(ITUNES_SEARCH_QUERY, searchString)
+    );
 
-        if (jsonFromUrl.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return jsonFromUrl
-            .get()
-            .getJSONArray("results")
-            .toList()
-            .stream()
-            .map(result -> new JSONObject((Map) result))
-            .map(result -> result.getString("artworkUrl100"))
-            .filter(imgUrl -> !imgUrl.contains("mza_"))
-            .map(imgUrl -> imgUrl.replace("100x100", "1200x1200"))
-            .parallel()
-            .map(ImageUtil::downloadImageFromUrl)
-            .flatMap(Optional::stream)
-            .filter(CoverSearchEngine::reachesMinRequiredCoverSize)
-            .toList();
+    if (jsonFromUrl.isEmpty()) {
+      return Collections.emptyList();
     }
+
+    return jsonFromUrl
+      .get()
+      .getJSONArray("results")
+      .toList()
+      .stream()
+      .map(result -> new JSONObject((Map) result))
+      .map(result -> result.getString("artworkUrl100"))
+      .filter(imgUrl -> !imgUrl.contains("mza_"))
+      .map(imgUrl -> imgUrl.replace("100x100", "1200x1200"))
+      .parallel()
+      .map(ImageUtil::downloadImageFromUrl)
+      .flatMap(Optional::stream)
+      .filter(CoverSearchEngine::reachesMinRequiredCoverSize)
+      .toList();
+  }
 }

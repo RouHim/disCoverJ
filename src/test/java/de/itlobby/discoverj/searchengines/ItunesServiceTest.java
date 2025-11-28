@@ -13,15 +13,20 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 @Execution(ExecutionMode.CONCURRENT)
 class ItunesServiceTest {
 
-    @Test
-    void searchCover() {
-        // GIVEN is an audio wrapper
-        AudioWrapper audioWrapper = new AudioWrapper(1, getAudioFile("test-files/test.mp3"));
+  @Test
+  void searchCover() {
+    // GIVEN is an audio wrapper
+    AudioWrapper audioWrapper = new AudioWrapper(
+      1,
+      getAudioFile("test-files/test.mp3")
+    );
 
-        // WHEN I search for a cover
-        List<ImageFile> coverImages = new ItunesCoverSearchEngine().search(audioWrapper);
+    // WHEN I search for a cover
+    List<ImageFile> coverImages = new ItunesCoverSearchEngine().search(
+      audioWrapper
+    );
 
-        // THEN
-        assertThat(coverImages).hasSizeGreaterThan(1);
-    }
+    // THEN
+    assertThat(coverImages).hasSizeGreaterThan(1);
+  }
 }

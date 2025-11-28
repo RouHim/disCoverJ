@@ -8,17 +8,18 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CoverPersistentService implements Service {
 
-    private final Map<AudioWrapper, List<ImageFile>> imageStore = new ConcurrentHashMap<>();
+  private final Map<AudioWrapper, List<ImageFile>> imageStore =
+    new ConcurrentHashMap<>();
 
-    public void persistImages(AudioWrapper audioWrapper, List<ImageFile> images) {
-        imageStore.put(audioWrapper, images);
-    }
+  public void persistImages(AudioWrapper audioWrapper, List<ImageFile> images) {
+    imageStore.put(audioWrapper, images);
+  }
 
-    public List<ImageFile> getCoversForAudioFile(AudioWrapper audioWrapper) {
-        return imageStore.get(audioWrapper);
-    }
+  public List<ImageFile> getCoversForAudioFile(AudioWrapper audioWrapper) {
+    return imageStore.get(audioWrapper);
+  }
 
-    public void cleanup() {
-        imageStore.clear();
-    }
+  public void cleanup() {
+    imageStore.clear();
+  }
 }

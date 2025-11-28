@@ -30,6 +30,22 @@
 
 **Search engines:** iTunes, Deezer, searX, Discogs, Spotify, Musicbrainz, Local search
 
-**Powered by:** [IntelliJ IDEA](https://www.jetbrains.com/idea), [jaudiotagger](https://github.com/RouHim/jaudiotagger), [jDeploy](https://www.jdeploy.com)
+**Powered by:
+** [IntelliJ IDEA](https://www.jetbrains.com/idea), [jaudiotagger](https://github.com/RouHim/jaudiotagger), [jDeploy](https://www.jdeploy.com)
 
 <sub><sub><sub>(20e4da7da541dfc4fb79764b6818baaf6301bfde88e914f03126655484b768ed)</sub></sub></sub>
+
+## Formatting Java
+
+Prettier loads the Java plugin through `./prettier-plugin-java-loader.mjs`, which derives the global install location
+from `$HOME`. That keeps `.prettierrc.yaml` free of machine-specific paths.
+
+Once you have `prettier` + `prettier-plugin-java` installed (the loader defaults to
+`$HOME/.npm-global/lib/node_modules`),
+run Prettier from the repo root like this:
+
+```
+prettier --write "**/*.java"
+```
+
+If your global prefix differs, edit `prettier-plugin-java-loader.mjs` so `pluginPath` points at the actual location.

@@ -8,14 +8,14 @@ import javafx.scene.shape.Circle;
 
 public class OpenFileViewController implements ViewController {
 
-    public Button btnExitDialog;
-    public Circle circleBorder;
-    public Label lblIntroduction;
-    public VBox textLayout;
-    public AnchorPane rootLayout;
+  public Button btnExitDialog;
+  public Circle circleBorder;
+  public Label lblIntroduction;
+  public VBox textLayout;
+  public AnchorPane rootLayout;
 
-    @Override
-    public void initialize() {
-        btnExitDialog.setCancelButton(true);
-    }
+  @Override
+  public void initialize() {
+    btnExitDialog.setCancelButton(true);
+  }
 }

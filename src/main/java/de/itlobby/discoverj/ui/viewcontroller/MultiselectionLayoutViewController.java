@@ -13,24 +13,30 @@ import javafx.scene.layout.HBox;
 
 public class MultiselectionLayoutViewController implements ViewController {
 
-    public Button btnClearCover;
-    public Label txtClearCoverText;
-    public HBox rootLayout;
+  public Button btnClearCover;
+  public Label txtClearCoverText;
+  public HBox rootLayout;
 
-    @Override
-    public void initialize() {
-        AwesomeHelper.createIconButton(btnClearCover, FontAwesomeIcon.TRASH, "sidebar-icon", "", "24px");
+  @Override
+  public void initialize() {
+    AwesomeHelper.createIconButton(
+      btnClearCover,
+      FontAwesomeIcon.TRASH,
+      "sidebar-icon",
+      "",
+      "24px"
+    );
 
-        EventHandler<MouseEvent> onClickEvent = event -> {
-            ServiceLocator.get(InitialService.class).removeAllSelectedCover();
-            event.consume();
-        };
+    EventHandler<MouseEvent> onClickEvent = event -> {
+      ServiceLocator.get(InitialService.class).removeAllSelectedCover();
+      event.consume();
+    };
 
-        rootLayout.addEventHandler(MouseEvent.MOUSE_CLICKED, onClickEvent);
-        btnClearCover.addEventHandler(MouseEvent.MOUSE_CLICKED, onClickEvent);
-    }
+    rootLayout.addEventHandler(MouseEvent.MOUSE_CLICKED, onClickEvent);
+    btnClearCover.addEventHandler(MouseEvent.MOUSE_CLICKED, onClickEvent);
+  }
 
-    public void setClearCoverText(String text) {
-        Platform.runLater(() -> txtClearCoverText.setText(text));
-    }
+  public void setClearCoverText(String text) {
+    Platform.runLater(() -> txtClearCoverText.setText(text));
+  }
 }

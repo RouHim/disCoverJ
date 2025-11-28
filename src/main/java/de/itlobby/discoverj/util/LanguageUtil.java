@@ -13,38 +13,43 @@ import org.apache.logging.log4j.Logger;
 
 public class LanguageUtil {
 
-    private static final Logger log = LogManager.getLogger(LanguageUtil.class);
+  private static final Logger log = LogManager.getLogger(LanguageUtil.class);
 
-    private LanguageUtil() {}
+  private LanguageUtil() {}
 
-    public static ResourceBundle getBundle() {
-        AppConfig config = Settings.getInstance().getConfig();
+  public static ResourceBundle getBundle() {
+    AppConfig config = Settings.getInstance().getConfig();
 
-        if (config == null || config.getLanguage() == null) {
-            Settings.getInstance().saveConfig(new AppConfig());
-            config = Settings.getInstance().getConfig();
-        }
-
-        Language language = config.getLanguage();
-        return readBundleForLanguage(language);
+    if (config == null || config.getLanguage() == null) {
+      Settings.getInstance().saveConfig(new AppConfig());
+      config = Settings.getInstance().getConfig();
     }
 
-    private static PropertyResourceBundle readBundleForLanguage(Language language) {
-        try {
-            URL url = SystemUtil.getResourceURL(language.getBundlePath());
-            InputStreamReader inputStream = new InputStreamReader(url.openStream(), StandardCharsets.UTF_8);
-            return new PropertyResourceBundle(inputStream);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            throw new IllegalStateException(e.getMessage(), e);
-        }
-    }
+    Language language = config.getLanguage();
+    return readBundleForLanguage(language);
+  }
 
-    public static String getString(String bundleKey) {
-        if (getBundle().containsKey(bundleKey)) {
-            return getBundle().getString(bundleKey);
-        } else {
-            return readBundleForLanguage(Language.ENGLISH).getString(bundleKey);
-        }
+  private static PropertyResourceBundle readBundleForLanguage(
+    Language language
+  ) {
+    try {
+      URL url = SystemUtil.getResourceURL(language.getBundlePath());
+      InputStreamReader inputStream = new InputStreamReader(
+        url.openStream(),
+        StandardCharsets.UTF_8
+      );
+      return new PropertyResourceBundle(inputStream);
+    } catch (Exception e) {
+      log.error(e.getMessage(), e);
+      throw new IllegalStateException(e.getMessage(), e);
     }
+  }
+
+  public static String getString(String bundleKey) {
+    if (getBundle().containsKey(bundleKey)) {
+      return getBundle().getString(bundleKey);
+    } else {
+      return readBundleForLanguage(Language.ENGLISH).getString(bundleKey);
+    }
+  }
 }

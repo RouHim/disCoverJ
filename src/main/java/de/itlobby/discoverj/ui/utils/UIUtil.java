@@ -5,11 +5,13 @@ import javafx.css.Styleable;
 
 public class UIUtil {
 
-    private UIUtil() {
-        // static class
-    }
+  private UIUtil() {
+    // static class
+  }
 
-    public static void addCSSClass(Styleable node, String... styleClasses) {
-        Arrays.stream(styleClasses).forEach(styleClass -> node.getStyleClass().add(styleClass));
-    }
+  public static void addCSSClass(Styleable node, String... styleClasses) {
+    Arrays.stream(styleClasses).forEach(styleClass ->
+      node.getStyleClass().add(styleClass)
+    );
+  }
 }

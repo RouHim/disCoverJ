@@ -12,232 +12,263 @@ import javafx.scene.Node;
 
 public class SelectionService implements Service {
 
-    private final AtomicReference<AudioListEntry> lastSelected = new AtomicReference<>();
-    private List<AudioListEntry> selectedEntries = Collections.synchronizedList(new ArrayList<>());
-    private volatile boolean multiSelectionMode;
+  private final AtomicReference<AudioListEntry> lastSelected =
+    new AtomicReference<>();
+  private List<AudioListEntry> selectedEntries = Collections.synchronizedList(
+    new ArrayList<>()
+  );
+  private volatile boolean multiSelectionMode;
 
-    public void rangeSelection(Node lastEntry) {
-        if (lastSelected.get() == null) {
-            addSelection(lastEntry);
-        } else {
-            AudioListEntry lastAudioListEntry;
+  public void rangeSelection(Node lastEntry) {
+    if (lastSelected.get() == null) {
+      addSelection(lastEntry);
+    } else {
+      AudioListEntry lastAudioListEntry;
 
-            if (lastEntry instanceof AudioListEntry typedLastAudioListEntry) {
-                lastAudioListEntry = typedLastAudioListEntry;
-            } else {
-                lastAudioListEntry = getLastFromFolder((FolderListEntry) lastEntry);
-            }
+      if (lastEntry instanceof AudioListEntry typedLastAudioListEntry) {
+        lastAudioListEntry = typedLastAudioListEntry;
+      } else {
+        lastAudioListEntry = getLastFromFolder((FolderListEntry) lastEntry);
+      }
 
-            getMainViewController().highlightRangeInList(lastSelected.get(), lastAudioListEntry);
-            lastSelected.set(lastAudioListEntry);
-        }
-
-        showInfo();
-        checkMultiSelectionMode();
+      getMainViewController().highlightRangeInList(
+        lastSelected.get(),
+        lastAudioListEntry
+      );
+      lastSelected.set(lastAudioListEntry);
     }
 
-    private AudioListEntry getLastFromFolder(FolderListEntry lastEntry) {
-        List<AudioListEntry> entriesForFolder = getEntriesForFolder(lastEntry);
-        return entriesForFolder.get(entriesForFolder.size() - 1);
+    showInfo();
+    checkMultiSelectionMode();
+  }
+
+  private AudioListEntry getLastFromFolder(FolderListEntry lastEntry) {
+    List<AudioListEntry> entriesForFolder = getEntriesForFolder(lastEntry);
+    return entriesForFolder.get(entriesForFolder.size() - 1);
+  }
+
+  public void selectAll() {
+    List<AudioListEntry> allEntries = getMainViewController()
+      .lwAudioList.getChildren()
+      .stream()
+      .filter(AudioListEntry.class::isInstance)
+      .map(AudioListEntry.class::cast)
+      .toList();
+
+    selectedEntries.clear();
+    selectedEntries.addAll(allEntries);
+
+    if (!selectedEntries.isEmpty()) {
+      lastSelected.set(allEntries.get(allEntries.size() - 1));
+    } else {
+      lastSelected.set(null);
     }
 
-    public void selectAll() {
-        List<AudioListEntry> allEntries = getMainViewController()
-            .lwAudioList.getChildren()
-            .stream()
-            .filter(AudioListEntry.class::isInstance)
-            .map(AudioListEntry.class::cast)
-            .toList();
+    getMainViewController().highlightAll();
+    showInfo();
+    checkMultiSelectionMode();
+  }
 
-        selectedEntries.clear();
-        selectedEntries.addAll(allEntries);
+  private void checkMultiSelectionMode() {
+    if (selectedEntries.size() > 1 && !multiSelectionMode) {
+      ListenerStateProvider.getInstance()
+        .getMultipleSelectionListnener()
+        .onMultipleSelectionStared();
+      multiSelectionMode = true;
+    }
+    if (selectedEntries.size() <= 1 && multiSelectionMode) {
+      ListenerStateProvider.getInstance()
+        .getMultipleSelectionListnener()
+        .onMultipleSelectionEnded();
+      multiSelectionMode = false;
+    }
+  }
 
-        if (!selectedEntries.isEmpty()) {
-            lastSelected.set(allEntries.get(allEntries.size() - 1));
-        } else {
-            lastSelected.set(null);
-        }
-
-        getMainViewController().highlightAll();
-        showInfo();
-        checkMultiSelectionMode();
+  public void addSelection(Node entry) {
+    if (entry instanceof AudioListEntry audioListEntry) {
+      addSelection(audioListEntry);
+    } else if (entry instanceof FolderListEntry folderListEntry) {
+      addSelection(folderListEntry);
     }
 
-    private void checkMultiSelectionMode() {
-        if (selectedEntries.size() > 1 && !multiSelectionMode) {
-            ListenerStateProvider.getInstance().getMultipleSelectionListnener().onMultipleSelectionStared();
-            multiSelectionMode = true;
-        }
-        if (selectedEntries.size() <= 1 && multiSelectionMode) {
-            ListenerStateProvider.getInstance().getMultipleSelectionListnener().onMultipleSelectionEnded();
-            multiSelectionMode = false;
-        }
+    showInfo();
+    checkMultiSelectionMode();
+  }
+
+  private void addSelection(FolderListEntry entry) {
+    getEntriesForFolder(entry).forEach(this::addSelection);
+  }
+
+  private void addSelection(AudioListEntry entry) {
+    if (selectedEntries.contains(entry)) {
+      removeSelection(entry);
+      return;
+    } else {
+      selectedEntries.add(entry);
+      getMainViewController().highlightInList(entry);
     }
 
-    public void addSelection(Node entry) {
-        if (entry instanceof AudioListEntry audioListEntry) {
-            addSelection(audioListEntry);
-        } else if (entry instanceof FolderListEntry folderListEntry) {
-            addSelection(folderListEntry);
-        }
+    lastSelected.set(entry);
+  }
 
-        showInfo();
-        checkMultiSelectionMode();
+  private void showInfo() {
+    if (lastSelected.get() == null) {
+      return;
     }
 
-    private void addSelection(FolderListEntry entry) {
-        getEntriesForFolder(entry).forEach(this::addSelection);
+    getMainViewController().showAudioInfo(
+      lastSelected.get().getWrapper(),
+      true
+    );
+  }
+
+  public void removeSelection(AudioListEntry entry) {
+    selectedEntries.remove(entry);
+    getMainViewController().unhighlightInList(entry.getWrapper().getId());
+    getMainViewController().resetCurrentAudioInformation();
+
+    if (lastSelected.get().equals(entry)) {
+      lastSelected.set(null);
+
+      if (!selectedEntries.isEmpty()) {
+        lastSelected.set(selectedEntries.get(selectedEntries.size() - 1));
+      }
     }
 
-    private void addSelection(AudioListEntry entry) {
-        if (selectedEntries.contains(entry)) {
-            removeSelection(entry);
-            return;
-        } else {
-            selectedEntries.add(entry);
-            getMainViewController().highlightInList(entry);
-        }
+    checkMultiSelectionMode();
+  }
 
-        lastSelected.set(entry);
+  private void selectAudio(AudioListEntry audioListEntry) {
+    clearAll();
+    addSelection(audioListEntry);
+    checkMultiSelectionMode();
+  }
+
+  public void clearAll() {
+    if (multiSelectionMode) {
+      ListenerStateProvider.getInstance()
+        .getMultipleSelectionListnener()
+        .onMultipleSelectionEnded();
     }
 
-    private void showInfo() {
-        if (lastSelected.get() == null) {
-            return;
-        }
+    selectedEntries.clear();
+    lastSelected.set(null);
+    getMainViewController().unhighlightAll();
+    getMainViewController().resetRightSide();
 
-        getMainViewController().showAudioInfo(lastSelected.get().getWrapper(), true);
+    checkMultiSelectionMode();
+  }
+
+  public void selectFirst() {
+    ObservableList<Node> children =
+      getMainViewController().lwAudioList.getChildren();
+    if (!children.isEmpty()) {
+      Node first = children
+        .stream()
+        .filter(AudioListEntry.class::isInstance)
+        .findFirst()
+        .orElse(null);
+      selectNode(first);
+    }
+  }
+
+  public void selectLast() {
+    ObservableList<Node> children =
+      getMainViewController().lwAudioList.getChildren();
+    if (!children.isEmpty()) {
+      selectNode(children.get(children.size() - 1));
+    }
+  }
+
+  public void selectRangeToHome() {
+    ObservableList<Node> children =
+      getMainViewController().lwAudioList.getChildren();
+    if (!children.isEmpty() && lastSelected.get() != null) {
+      Node first = children
+        .stream()
+        .filter(AudioListEntry.class::isInstance)
+        .findFirst()
+        .orElse(null);
+      rangeSelection(first);
+    }
+  }
+
+  public void selectRangeToEnd() {
+    ObservableList<Node> children =
+      getMainViewController().lwAudioList.getChildren();
+    if (!children.isEmpty() && lastSelected.get() != null) {
+      rangeSelection(children.get(children.size() - 1));
+    }
+  }
+
+  public void selectUp() {
+    ObservableList<Node> children =
+      getMainViewController().lwAudioList.getChildren();
+    if (!children.isEmpty() && lastSelected.get() != null) {
+      int i = children.indexOf(lastSelected.get());
+      i--;
+
+      if (i >= 0 && i < children.size()) {
+        selectNode(children.get(i));
+      }
+    }
+  }
+
+  public void selectNode(Node node) {
+    if (node instanceof AudioListEntry audioListEntry) {
+      selectAudio(audioListEntry);
+    } else if (node instanceof FolderListEntry folderListEntry) {
+      selectFolder(folderListEntry);
     }
 
-    public void removeSelection(AudioListEntry entry) {
-        selectedEntries.remove(entry);
-        getMainViewController().unhighlightInList(entry.getWrapper().getId());
-        getMainViewController().resetCurrentAudioInformation();
+    showInfo();
+  }
 
-        if (lastSelected.get().equals(entry)) {
-            lastSelected.set(null);
+  private void selectFolder(FolderListEntry folder) {
+    clearAll();
+    List<AudioListEntry> entriesForFolder = getEntriesForFolder(folder);
+    for (AudioListEntry audioListEntry : entriesForFolder) {
+      addSelection(audioListEntry);
+    }
+    checkMultiSelectionMode();
+  }
 
-            if (!selectedEntries.isEmpty()) {
-                lastSelected.set(selectedEntries.get(selectedEntries.size() - 1));
-            }
-        }
+  private List<AudioListEntry> getEntriesForFolder(FolderListEntry folder) {
+    return DataHolder.getInstance()
+      .getAudioMap()
+      .get(folder.getPath())
+      .stream()
+      .map(simpleAudioWrapper ->
+        getMainViewController().getAudioListEntry(simpleAudioWrapper.getId())
+      )
+      .toList();
+  }
 
-        checkMultiSelectionMode();
+  public void selectDown() {
+    ObservableList<Node> children =
+      getMainViewController().lwAudioList.getChildren();
+    if (children.isEmpty() || lastSelected.get() == null) {
+      return;
     }
 
-    private void selectAudio(AudioListEntry audioListEntry) {
-        clearAll();
-        addSelection(audioListEntry);
-        checkMultiSelectionMode();
+    int i = children.indexOf(lastSelected.get());
+    i++;
+
+    if (i < children.size()) {
+      selectNode(children.get(i));
     }
+  }
 
-    public void clearAll() {
-        if (multiSelectionMode) {
-            ListenerStateProvider.getInstance().getMultipleSelectionListnener().onMultipleSelectionEnded();
-        }
+  public AudioListEntry getLastSelected() {
+    return lastSelected.get();
+  }
 
-        selectedEntries.clear();
-        lastSelected.set(null);
-        getMainViewController().unhighlightAll();
-        getMainViewController().resetRightSide();
+  public List<AudioListEntry> getSelectedEntries() {
+    return selectedEntries;
+  }
 
-        checkMultiSelectionMode();
-    }
-
-    public void selectFirst() {
-        ObservableList<Node> children = getMainViewController().lwAudioList.getChildren();
-        if (!children.isEmpty()) {
-            Node first = children.stream().filter(AudioListEntry.class::isInstance).findFirst().orElse(null);
-            selectNode(first);
-        }
-    }
-
-    public void selectLast() {
-        ObservableList<Node> children = getMainViewController().lwAudioList.getChildren();
-        if (!children.isEmpty()) {
-            selectNode(children.get(children.size() - 1));
-        }
-    }
-
-    public void selectRangeToHome() {
-        ObservableList<Node> children = getMainViewController().lwAudioList.getChildren();
-        if (!children.isEmpty() && lastSelected.get() != null) {
-            Node first = children.stream().filter(AudioListEntry.class::isInstance).findFirst().orElse(null);
-            rangeSelection(first);
-        }
-    }
-
-    public void selectRangeToEnd() {
-        ObservableList<Node> children = getMainViewController().lwAudioList.getChildren();
-        if (!children.isEmpty() && lastSelected.get() != null) {
-            rangeSelection(children.get(children.size() - 1));
-        }
-    }
-
-    public void selectUp() {
-        ObservableList<Node> children = getMainViewController().lwAudioList.getChildren();
-        if (!children.isEmpty() && lastSelected.get() != null) {
-            int i = children.indexOf(lastSelected.get());
-            i--;
-
-            if (i >= 0 && i < children.size()) {
-                selectNode(children.get(i));
-            }
-        }
-    }
-
-    public void selectNode(Node node) {
-        if (node instanceof AudioListEntry audioListEntry) {
-            selectAudio(audioListEntry);
-        } else if (node instanceof FolderListEntry folderListEntry) {
-            selectFolder(folderListEntry);
-        }
-
-        showInfo();
-    }
-
-    private void selectFolder(FolderListEntry folder) {
-        clearAll();
-        List<AudioListEntry> entriesForFolder = getEntriesForFolder(folder);
-        for (AudioListEntry audioListEntry : entriesForFolder) {
-            addSelection(audioListEntry);
-        }
-        checkMultiSelectionMode();
-    }
-
-    private List<AudioListEntry> getEntriesForFolder(FolderListEntry folder) {
-        return DataHolder.getInstance()
-            .getAudioMap()
-            .get(folder.getPath())
-            .stream()
-            .map(simpleAudioWrapper -> getMainViewController().getAudioListEntry(simpleAudioWrapper.getId()))
-            .toList();
-    }
-
-    public void selectDown() {
-        ObservableList<Node> children = getMainViewController().lwAudioList.getChildren();
-        if (children.isEmpty() || lastSelected.get() == null) {
-            return;
-        }
-
-        int i = children.indexOf(lastSelected.get());
-        i++;
-
-        if (i < children.size()) {
-            selectNode(children.get(i));
-        }
-    }
-
-    public AudioListEntry getLastSelected() {
-        return lastSelected.get();
-    }
-
-    public List<AudioListEntry> getSelectedEntries() {
-        return selectedEntries;
-    }
-
-    public void setSelectedEntries(List<AudioListEntry> selectedEntries) {
-        this.selectedEntries = selectedEntries;
-        checkMultiSelectionMode();
-    }
+  public void setSelectedEntries(List<AudioListEntry> selectedEntries) {
+    this.selectedEntries = selectedEntries;
+    checkMultiSelectionMode();
+  }
 }

@@ -13,15 +13,20 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 @Execution(ExecutionMode.CONCURRENT)
 class SpotifyServiceTest {
 
-    @Test
-    void searchCover() {
-        // GIVEN is an audio wrapper
-        AudioWrapper audioWrapper = new AudioWrapper(1, getAudioFile("test-files/test.mp3"));
+  @Test
+  void searchCover() {
+    // GIVEN is an audio wrapper
+    AudioWrapper audioWrapper = new AudioWrapper(
+      1,
+      getAudioFile("test-files/test.mp3")
+    );
 
-        // WHEN I search for a cover
-        List<ImageFile> coverImages = new SpotifyCoverSearchEngine().search(audioWrapper);
+    // WHEN I search for a cover
+    List<ImageFile> coverImages = new SpotifyCoverSearchEngine().search(
+      audioWrapper
+    );
 
-        // THEN I get a list of buffered images
-        assertThat(coverImages).hasSizeGreaterThan(0);
-    }
+    // THEN I get a list of buffered images
+    assertThat(coverImages).hasSizeGreaterThan(0);
+  }
 }

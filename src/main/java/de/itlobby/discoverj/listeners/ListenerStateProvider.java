@@ -2,42 +2,48 @@ package de.itlobby.discoverj.listeners;
 
 public class ListenerStateProvider {
 
-    private static ListenerStateProvider instance;
-    private SettingsSavedListener settingsSavedListener;
-    private MultipleSelectionListener multipleSelectionListener;
-    private ParentKeyDeletedListener parentKeyDeletedListener;
+  private static ListenerStateProvider instance;
+  private SettingsSavedListener settingsSavedListener;
+  private MultipleSelectionListener multipleSelectionListener;
+  private ParentKeyDeletedListener parentKeyDeletedListener;
 
-    private ListenerStateProvider() {}
+  private ListenerStateProvider() {}
 
-    public static ListenerStateProvider getInstance() {
-        if (instance == null) {
-            instance = new ListenerStateProvider();
-        }
-
-        return instance;
+  public static ListenerStateProvider getInstance() {
+    if (instance == null) {
+      instance = new ListenerStateProvider();
     }
 
-    public SettingsSavedListener getSettingsSavedListener() {
-        return settingsSavedListener;
-    }
+    return instance;
+  }
 
-    public void setSettingsSavedListener(SettingsSavedListener settingsSavedListener) {
-        this.settingsSavedListener = settingsSavedListener;
-    }
+  public SettingsSavedListener getSettingsSavedListener() {
+    return settingsSavedListener;
+  }
 
-    public MultipleSelectionListener getMultipleSelectionListnener() {
-        return multipleSelectionListener;
-    }
+  public void setSettingsSavedListener(
+    SettingsSavedListener settingsSavedListener
+  ) {
+    this.settingsSavedListener = settingsSavedListener;
+  }
 
-    public void setMultipleSelectionListnener(MultipleSelectionListener multipleSelectionListener) {
-        this.multipleSelectionListener = multipleSelectionListener;
-    }
+  public MultipleSelectionListener getMultipleSelectionListnener() {
+    return multipleSelectionListener;
+  }
 
-    public ParentKeyDeletedListener getParentKeyDeletedListener() {
-        return parentKeyDeletedListener;
-    }
+  public void setMultipleSelectionListnener(
+    MultipleSelectionListener multipleSelectionListener
+  ) {
+    this.multipleSelectionListener = multipleSelectionListener;
+  }
 
-    public void setParentKeyDeletedListener(ParentKeyDeletedListener parentKeyDeletedListener) {
-        this.parentKeyDeletedListener = parentKeyDeletedListener;
-    }
+  public ParentKeyDeletedListener getParentKeyDeletedListener() {
+    return parentKeyDeletedListener;
+  }
+
+  public void setParentKeyDeletedListener(
+    ParentKeyDeletedListener parentKeyDeletedListener
+  ) {
+    this.parentKeyDeletedListener = parentKeyDeletedListener;
+  }
 }

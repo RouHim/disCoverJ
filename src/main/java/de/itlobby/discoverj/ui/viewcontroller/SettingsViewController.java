@@ -28,131 +28,162 @@ import javafx.util.Callback;
 
 public class SettingsViewController implements ViewController {
 
-    public CheckBox chkOverwriteCover;
-    public Button btnSave;
-    public Button btnCancel;
-    public TextField txtMinCoverSize;
-    public FlowPane flowPaneSettingsSearchMachineOrder;
-    public ComboBox<Language> cmbLanguage;
-    public TextField txtProxyUrl;
-    public TextField txtProxyPort;
-    public TextField txtProxyUser;
-    public PasswordField txtProxyPassword;
-    public CheckBox chkProxyActive;
-    public TextField txtSearchTimeout;
-    public TextField txtMaxCoverSize;
-    public CheckBox chkOverwriteOnlyHigher;
-    public TextField txtLocalAdditionalFolderPath;
-    public TextField txtLocalNamePattern;
-    public CheckBox chkGeneralManualImageSelection;
-    public CheckBox chkGeneralAutoLastAudio;
-    public CheckBox chkDiscogsUseYear;
-    public CheckBox chkDiscogsUseCountry;
-    public TextField txtDiscogsCountry;
-    public CheckBox chkGeneralPrimarySingleCover;
-    public TextField txtGoogleSearchPattern;
-    public HBox buttonLayout;
-    public CheckBox chkLocalScanAudiofiles;
-    public CheckBox chkLocalMatchAlbum;
-    public CheckBox chkLocalMatchAlbumArtist;
-    public CheckBox chkLocalMatchYear;
-    public VBox layoutAudioFileMatch;
-    public TextField txtCustomSearxInstance;
-    public CheckBox chkUseCustomSearxInstance;
-    public Label txtFindCustomSearxInstance;
-    public Button btnCheckHoster;
-    public Text txtSearxHosterValid;
+  public CheckBox chkOverwriteCover;
+  public Button btnSave;
+  public Button btnCancel;
+  public TextField txtMinCoverSize;
+  public FlowPane flowPaneSettingsSearchMachineOrder;
+  public ComboBox<Language> cmbLanguage;
+  public TextField txtProxyUrl;
+  public TextField txtProxyPort;
+  public TextField txtProxyUser;
+  public PasswordField txtProxyPassword;
+  public CheckBox chkProxyActive;
+  public TextField txtSearchTimeout;
+  public TextField txtMaxCoverSize;
+  public CheckBox chkOverwriteOnlyHigher;
+  public TextField txtLocalAdditionalFolderPath;
+  public TextField txtLocalNamePattern;
+  public CheckBox chkGeneralManualImageSelection;
+  public CheckBox chkGeneralAutoLastAudio;
+  public CheckBox chkDiscogsUseYear;
+  public CheckBox chkDiscogsUseCountry;
+  public TextField txtDiscogsCountry;
+  public CheckBox chkGeneralPrimarySingleCover;
+  public TextField txtGoogleSearchPattern;
+  public HBox buttonLayout;
+  public CheckBox chkLocalScanAudiofiles;
+  public CheckBox chkLocalMatchAlbum;
+  public CheckBox chkLocalMatchAlbumArtist;
+  public CheckBox chkLocalMatchYear;
+  public VBox layoutAudioFileMatch;
+  public TextField txtCustomSearxInstance;
+  public CheckBox chkUseCustomSearxInstance;
+  public Label txtFindCustomSearxInstance;
+  public Button btnCheckHoster;
+  public Text txtSearxHosterValid;
 
-    @Override
-    public void initialize() {
-        initBindings();
-        initCellFactories();
+  @Override
+  public void initialize() {
+    initBindings();
+    initCellFactories();
 
-        AwesomeHelper.createIconButton(
-            btnCheckHoster,
-            FontAwesomeIcon.CHECK_SQUARE,
-            "default-icon",
-            getString("key.settingsview.settings.searx.checkHoster"),
-            "24px"
-        );
-    }
+    AwesomeHelper.createIconButton(
+      btnCheckHoster,
+      FontAwesomeIcon.CHECK_SQUARE,
+      "default-icon",
+      getString("key.settingsview.settings.searx.checkHoster"),
+      "24px"
+    );
+  }
 
-    private void initCellFactories() {
-        cmbLanguage.setCellFactory(createLanguageCellFactory());
-    }
+  private void initCellFactories() {
+    cmbLanguage.setCellFactory(createLanguageCellFactory());
+  }
 
-    private Callback<ListView<Language>, ListCell<Language>> createLanguageCellFactory() {
-        return new Callback<>() {
-            @Override
-            public ListCell<Language> call(ListView<Language> param) {
-                return new ListCell<>() {
-                    {
-                        super.setPrefWidth(100);
-                    }
+  private Callback<
+    ListView<Language>,
+    ListCell<Language>
+  > createLanguageCellFactory() {
+    return new Callback<>() {
+      @Override
+      public ListCell<Language> call(ListView<Language> param) {
+        return new ListCell<>() {
+          {
+            super.setPrefWidth(100);
+          }
 
-                    @Override
-                    public void updateItem(Language item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (item != null) {
-                            setGraphic(new ImageView(new Image(item.getImagePath())));
-                            setText(item.getDisplayValue());
-                        } else {
-                            setText(null);
-                        }
-                    }
-                };
+          @Override
+          public void updateItem(Language item, boolean empty) {
+            super.updateItem(item, empty);
+            if (item != null) {
+              setGraphic(new ImageView(new Image(item.getImagePath())));
+              setText(item.getDisplayValue());
+            } else {
+              setText(null);
             }
+          }
         };
-    }
+      }
+    };
+  }
 
-    private void initBindings() {
-        btnSave.prefWidthProperty().bind(buttonLayout.widthProperty().divide(2));
-        btnCancel.prefWidthProperty().bind(buttonLayout.widthProperty().divide(2));
+  private void initBindings() {
+    btnSave.prefWidthProperty().bind(buttonLayout.widthProperty().divide(2));
+    btnCancel.prefWidthProperty().bind(buttonLayout.widthProperty().divide(2));
 
-        txtProxyUrl.disableProperty().bind(chkProxyActive.selectedProperty().not());
-        txtProxyPort.disableProperty().bind(chkProxyActive.selectedProperty().not());
-        txtProxyUser.disableProperty().bind(chkProxyActive.selectedProperty().not());
-        txtProxyPassword.disableProperty().bind(chkProxyActive.selectedProperty().not());
+    txtProxyUrl.disableProperty().bind(chkProxyActive.selectedProperty().not());
+    txtProxyPort
+      .disableProperty()
+      .bind(chkProxyActive.selectedProperty().not());
+    txtProxyUser
+      .disableProperty()
+      .bind(chkProxyActive.selectedProperty().not());
+    txtProxyPassword
+      .disableProperty()
+      .bind(chkProxyActive.selectedProperty().not());
 
-        chkGeneralAutoLastAudio.disableProperty().bind(chkGeneralPrimarySingleCover.selectedProperty());
-        chkGeneralPrimarySingleCover
-            .selectedProperty()
-            .addListener((observable, oldValue, newValue) -> chkGeneralAutoLastAudio.setSelected(!newValue));
+    chkGeneralAutoLastAudio
+      .disableProperty()
+      .bind(chkGeneralPrimarySingleCover.selectedProperty());
+    chkGeneralPrimarySingleCover
+      .selectedProperty()
+      .addListener((observable, oldValue, newValue) ->
+        chkGeneralAutoLastAudio.setSelected(!newValue)
+      );
 
-        btnCheckHoster.setOnAction(event -> checkHoster());
+    btnCheckHoster.setOnAction(event -> checkHoster());
 
-        txtLocalNamePattern.disableProperty().bind(txtLocalAdditionalFolderPath.textProperty().isEmpty());
+    txtLocalNamePattern
+      .disableProperty()
+      .bind(txtLocalAdditionalFolderPath.textProperty().isEmpty());
 
-        txtDiscogsCountry.disableProperty().bind(chkDiscogsUseCountry.selectedProperty().not());
+    txtDiscogsCountry
+      .disableProperty()
+      .bind(chkDiscogsUseCountry.selectedProperty().not());
 
-        txtCustomSearxInstance.disableProperty().bind(chkUseCustomSearxInstance.selectedProperty().not());
-        btnCheckHoster.disableProperty().bind(chkUseCustomSearxInstance.selectedProperty().not());
+    txtCustomSearxInstance
+      .disableProperty()
+      .bind(chkUseCustomSearxInstance.selectedProperty().not());
+    btnCheckHoster
+      .disableProperty()
+      .bind(chkUseCustomSearxInstance.selectedProperty().not());
 
-        layoutAudioFileMatch.disableProperty().bind(chkLocalScanAudiofiles.selectedProperty().not());
+    layoutAudioFileMatch
+      .disableProperty()
+      .bind(chkLocalScanAudiofiles.selectedProperty().not());
 
-        chkOverwriteOnlyHigher.disableProperty().bind(chkOverwriteCover.selectedProperty().not());
-        chkOverwriteCover
-            .selectedProperty()
-            .addListener((observable, oldValue, newValue) -> {
-                if (Boolean.FALSE.equals(newValue)) {
-                    chkOverwriteOnlyHigher.setSelected(false);
-                }
-            });
-    }
-
-    private void checkHoster() {
-        Optional<String> errorMessage = ServiceLocator.get(SearxCoverSearchEngine.class).checkInstance(
-            txtCustomSearxInstance.getText()
-        );
-
-        if (errorMessage.isEmpty()) {
-            txtSearxHosterValid.setText(getString("key.settingsview.settings.searx.validHoster"));
-            txtSearxHosterValid.setFill(Paint.valueOf("#008a15"));
-        } else {
-            txtSearxHosterValid.setText(
-                format("{0}:\n{1}", getString("key.settingsview.settings.searx.invalidHoster"), errorMessage.get())
-            );
-            txtSearxHosterValid.setFill(Paint.valueOf("#c80000"));
+    chkOverwriteOnlyHigher
+      .disableProperty()
+      .bind(chkOverwriteCover.selectedProperty().not());
+    chkOverwriteCover
+      .selectedProperty()
+      .addListener((observable, oldValue, newValue) -> {
+        if (Boolean.FALSE.equals(newValue)) {
+          chkOverwriteOnlyHigher.setSelected(false);
         }
+      });
+  }
+
+  private void checkHoster() {
+    Optional<String> errorMessage = ServiceLocator.get(
+      SearxCoverSearchEngine.class
+    ).checkInstance(txtCustomSearxInstance.getText());
+
+    if (errorMessage.isEmpty()) {
+      txtSearxHosterValid.setText(
+        getString("key.settingsview.settings.searx.validHoster")
+      );
+      txtSearxHosterValid.setFill(Paint.valueOf("#008a15"));
+    } else {
+      txtSearxHosterValid.setText(
+        format(
+          "{0}:\n{1}",
+          getString("key.settingsview.settings.searx.invalidHoster"),
+          errorMessage.get()
+        )
+      );
+      txtSearxHosterValid.setFill(Paint.valueOf("#c80000"));
     }
+  }
 }
