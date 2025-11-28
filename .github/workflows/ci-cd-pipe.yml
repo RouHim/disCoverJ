@@ -5,8 +5,11 @@ on:
   pull_request:
   workflow_dispatch:
 
-jobs:
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
 
+jobs:
 
   analyse:
     runs-on: ubuntu-latest
@@ -134,5 +137,3 @@ jobs:
         run: |
           npm version ${{ env.VERSION }}
           npx jdeploy publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
