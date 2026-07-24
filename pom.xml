@@ -21,7 +21,7 @@
 
         <main.class>de.itlobby.discoverj.Main</main.class>
 
-        <twelvemonkeys.version>3.13.1</twelvemonkeys.version>
+        <twelvemonkeys.version>3.14.0</twelvemonkeys.version>
         <junit-jupiter-version>6.1.0</junit-jupiter-version>
         <javafx.version>27-ea+17</javafx.version>
     </properties>
