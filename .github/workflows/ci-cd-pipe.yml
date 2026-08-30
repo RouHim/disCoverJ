@@ -148,4 +148,8 @@ jobs:
       - name: Publish with jDeploy
         run: |
           npm version ${{ env.VERSION }}
-          npx jdeploy publish
+          if npm view discoverj@${{ env.VERSION }} version >/dev/null 2>&1; then
+            echo "Version ${{ env.VERSION }} already published to npm, skipping jdeploy publish"
+          else
+            npx jdeploy publish
+          fi
